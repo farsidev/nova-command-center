@@ -27,10 +27,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pest architecture tests enforcing structural invariants: strict types across the
   source, no debug statements, final immutable DTOs, interface-only contracts, and
   a guard proving the command builder never calls a shell function.
-- Polished UI: command search/filter, an optional inline custom-command bar,
-  a terminal-style output console (traffic lights, live elapsed timer, blinking
+- Polished UI: a sticky category rail (with per-group counts) that filters the
+  sectioned command list, command search/filter, an optional inline custom-command
+  bar, a terminal-style output console (traffic lights, live elapsed timer, blinking
   cursor, auto-scroll, copy), rerun-from-history, relative timestamps and skeleton
-  loading.
+  loading. Layout is driven by the package's own stylesheet so it does not depend
+  on utility classes that Nova's Tailwind build may purge.
+- A richer set of example commands in the default config, spanning several groups
+  (Cache, Optimization, Database, Queue, Maintenance).
 - In-repo documentation under `docs/` (configuration, command sources, security,
   authorization, queued execution, and frontend/theming guides).
 

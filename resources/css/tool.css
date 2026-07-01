@@ -38,6 +38,32 @@
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
 }
 
+/* -------------------------------------------------------- Command card ---- */
+/* Robust flex layout independent of Nova's purged Tailwind (min-w-0/truncate). */
+.ncr-cmd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ncr-cmd-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ncr-cmd-run {
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.ncr-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
 /* -------------------------------------------------------------- Icon badge -- */
 .ncr-icon-badge {
   display: inline-flex;
@@ -363,6 +389,124 @@
 .ncr-iconbtn:hover { background-color: rgba(100, 116, 139, 0.14); color: #334155; }
 .dark .ncr-iconbtn { color: #94a3b8; }
 .dark .ncr-iconbtn:hover { background-color: rgba(148, 163, 184, 0.16); color: #e2e8f0; }
+
+/* ------------------------------------------------------------- Layout ---- */
+/* Layout lives here (not Tailwind utilities) because Nova's purged Tailwind
+   build does not ship every responsive flex/width class we would need. */
+.ncr-columns {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.ncr-col-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.ncr-rail-desktop { display: none; }
+.ncr-rail-mobile { display: block; }
+
+@media (min-width: 1024px) {
+  .ncr-columns {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .ncr-col-rail {
+    width: 13.5rem;
+    flex-shrink: 0;
+    position: sticky;
+    top: 1rem;
+  }
+
+  .ncr-col-history {
+    width: 20rem;
+    flex-shrink: 0;
+    position: sticky;
+    top: 1rem;
+  }
+
+  .ncr-rail-desktop { display: block; }
+  .ncr-rail-mobile { display: none; }
+}
+
+/* --------------------------------------------------------- Category rail -- */
+.ncr-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.ncr-rail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.55rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.ncr-rail-item:hover { background-color: rgba(100, 116, 139, 0.1); }
+.dark .ncr-rail-item { color: #cbd5e1; }
+.dark .ncr-rail-item:hover { background-color: rgba(148, 163, 184, 0.12); }
+
+.ncr-rail-item.is-active {
+  color: var(--primary, #4099de);
+  background-color: rgba(64, 153, 222, 0.12);
+  font-weight: 700;
+}
+
+.ncr-rail-item .label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ncr-rail-count {
+  flex-shrink: 0;
+  min-width: 1.4rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-align: center;
+  color: #64748b;
+  background-color: rgba(100, 116, 139, 0.14);
+}
+
+.ncr-rail-item.is-active .ncr-rail-count {
+  color: var(--primary, #4099de);
+  background-color: rgba(64, 153, 222, 0.2);
+}
+
+.ncr-rail-dot {
+  flex-shrink: 0;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 9999px;
+  background-color: currentColor;
+  opacity: 0.55;
+}
+
+/* Horizontal scroll variant used on narrow screens. */
+.ncr-rail-scroll {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.ncr-rail-scroll .ncr-rail-item { width: auto; flex-shrink: 0; }
 
 /* -------------------------------------------------------- Terminal window -- */
 .ncr-traffic {

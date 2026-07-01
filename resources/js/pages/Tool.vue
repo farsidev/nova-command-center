@@ -31,65 +31,79 @@
       </div>
     </div>
 
-    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-      <div class="lg:col-span-2 space-y-6">
-        <transition name="ncr-slide">
-          <output-console v-if="current" :execution="current" :progress="progress" />
-        </transition>
+    <div v-else class="space-y-6">
+      <transition name="ncr-slide">
+        <output-console v-if="current" :execution="current" :progress="progress" />
+      </transition>
 
-        <!-- Search + custom command bar -->
-        <div v-if="commands.length" class="space-y-3">
-          <div class="ncr-search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input v-model="search" type="text" :placeholder="__('Search commands…')" />
-          </div>
-
-          <div v-if="customTypes.length" class="ncr-card ncr-custombar">
-            <select v-model="customType">
-              <option v-for="type in customTypes" :key="type" :value="type">{{ type }}</option>
-            </select>
-            <input
-              v-model="customRun"
-              type="text"
-              :placeholder="customType === 'bash' ? 'ls -la' : 'queue:work --once'"
-              @keyup.enter="runCustom"
-            />
-            <button type="button" class="ncr-btn" :disabled="!customRun.trim() || runningId === 'custom'" @click="runCustom">
-              <svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M8 5v14l11-7z" /></svg>
-              {{ __('Run') }}
-            </button>
-          </div>
-        </div>
-
-        <div v-if="commandGroups.length === 0" class="ncr-card ncr-empty">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-10 h-10">
-            <rect x="3" y="4" width="18" height="16" rx="2" />
-            <path d="M7 9l3 3-3 3M13 15h4" />
+      <!-- Search + custom command bar -->
+      <div v-if="commands.length" class="space-y-3">
+        <div class="ncr-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
-          <p class="text-sm font-medium">{{ commands.length ? __('No commands match your search.') : __('No commands have been configured.') }}</p>
-          <p v-if="!commands.length" class="text-xs">{{ __('Add commands to the config file or database source to get started.') }}</p>
+          <input v-model="search" type="text" :placeholder="__('Search commands…')" />
         </div>
 
-        <div v-for="group in commandGroups" :key="group.name" class="space-y-2">
-          <div class="flex items-center gap-2 px-1">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-gray-400">{{ group.name }}</h2>
-            <span class="text-xs font-medium text-gray-300 dark:text-gray-600">{{ group.commands.length }}</span>
-          </div>
-          <command-card
-            v-for="command in group.commands"
-            :key="command.id"
-            :command="command"
-            :running="runningId === command.id"
-            @trigger="trigger"
+        <div v-if="customTypes.length" class="ncr-card ncr-custombar">
+          <select v-model="customType">
+            <option v-for="type in customTypes" :key="type" :value="type">{{ type }}</option>
+          </select>
+          <input
+            v-model="customRun"
+            type="text"
+            :placeholder="customType === 'bash' ? 'ls -la' : 'queue:work --once'"
+            @keyup.enter="runCustom"
           />
+          <button type="button" class="ncr-btn" :disabled="!customRun.trim() || runningId === 'custom'" @click="runCustom">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M8 5v14l11-7z" /></svg>
+            {{ __('Run') }}
+          </button>
+        </div>
+
+        <!-- Category rail on narrow screens (horizontal) -->
+        <div v-if="categories.length" class="ncr-rail-mobile">
+          <category-nav :categories="categories" :active="activeCategory" :total="total" scroll @select="activeCategory = $event" />
         </div>
       </div>
 
-      <div class="lg:sticky lg:top-4">
-        <history-list :history="history" @select="selectHistory" @clear="clearHistory" @rerun="rerun" />
+      <div class="ncr-columns">
+        <!-- Category rail on wide screens (vertical, sticky) -->
+        <aside v-if="categories.length" class="ncr-col-rail ncr-rail-desktop">
+          <div class="ncr-card p-2">
+            <category-nav :categories="categories" :active="activeCategory" :total="total" @select="activeCategory = $event" />
+          </div>
+        </aside>
+
+        <div class="ncr-col-main space-y-6">
+          <div v-if="visibleGroups.length === 0" class="ncr-card ncr-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-10 h-10">
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <path d="M7 9l3 3-3 3M13 15h4" />
+            </svg>
+            <p class="text-sm font-medium">{{ commands.length ? __('No commands match your search.') : __('No commands have been configured.') }}</p>
+            <p v-if="!commands.length" class="text-xs">{{ __('Add commands to the config file or database source to get started.') }}</p>
+          </div>
+
+          <div v-for="group in visibleGroups" :key="group.name" class="space-y-2">
+            <div class="flex items-center gap-2 px-1">
+              <h2 class="text-xs font-bold uppercase tracking-wider text-gray-400">{{ group.name }}</h2>
+              <span class="text-xs font-medium text-gray-300 dark:text-gray-600">{{ group.commands.length }}</span>
+            </div>
+            <command-card
+              v-for="command in group.commands"
+              :key="command.id"
+              :command="command"
+              :running="runningId === command.id"
+              @trigger="trigger"
+            />
+          </div>
+        </div>
+
+        <aside class="ncr-col-history">
+          <history-list :history="history" @select="selectHistory" @clear="clearHistory" @rerun="rerun" />
+        </aside>
       </div>
     </div>
 
@@ -98,7 +112,8 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import CategoryNav from '../components/CategoryNav'
 import CommandCard from '../components/CommandCard'
 import HistoryList from '../components/HistoryList'
 import OutputConsole from '../components/OutputConsole'
@@ -118,6 +133,7 @@ const runningId = ref(null)
 const modalCommand = shallowRef(null)
 
 const search = ref('')
+const activeCategory = ref(null)
 const customType = ref('artisan')
 const customRun = ref('')
 
@@ -128,23 +144,48 @@ const heading = computed(() => config.value.navigation_label || __('Command Cent
 
 const customTypes = computed(() => config.value.custom_commands || [])
 
-const commandGroups = computed(() => {
+// Commands matching the search box (across name, run string and group).
+const filteredCommands = computed(() => {
   const term = search.value.trim().toLowerCase()
-
-  const matches = commands.value.filter((command) => {
-    if (!term) return true
-    return [command.name, command.run, command.group]
+  if (!term) return commands.value
+  return commands.value.filter((command) =>
+    [command.name, command.run, command.group]
       .filter(Boolean)
-      .some((field) => field.toLowerCase().includes(term))
-  })
+      .some((field) => field.toLowerCase().includes(term)),
+  )
+})
 
-  const groups = {}
-  matches.forEach((command) => {
+// The category list (with live counts) derived from the search-filtered set.
+const categories = computed(() => {
+  const counts = {}
+  filteredCommands.value.forEach((command) => {
     const name = command.group || 'General'
+    counts[name] = (counts[name] || 0) + 1
+  })
+  return Object.keys(counts)
+    .sort((a, b) => a.localeCompare(b))
+    .map((name) => ({ name, count: counts[name] }))
+})
+
+const total = computed(() => filteredCommands.value.length)
+
+// If a search hides the active category, fall back to showing everything.
+watch(categories, (list) => {
+  if (activeCategory.value !== null && !list.some((c) => c.name === activeCategory.value)) {
+    activeCategory.value = null
+  }
+})
+
+// Grouped commands shown in the main pane, narrowed to the active category.
+const visibleGroups = computed(() => {
+  const groups = {}
+  filteredCommands.value.forEach((command) => {
+    const name = command.group || 'General'
+    if (activeCategory.value !== null && name !== activeCategory.value) return
     groups[name] = groups[name] || { name, commands: [] }
     groups[name].commands.push(command)
   })
-  return Object.values(groups)
+  return Object.values(groups).sort((a, b) => a.name.localeCompare(b.name))
 })
 
 onMounted(() => {

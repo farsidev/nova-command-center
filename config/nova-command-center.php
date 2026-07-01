@@ -195,6 +195,7 @@ return [
 
     'commands' => [
 
+        // ---- Cache ---------------------------------------------------------
         'Clear Application Cache' => [
             'run' => 'cache:clear',
             'group' => 'Cache',
@@ -206,19 +207,6 @@ return [
             'run' => 'config:cache',
             'group' => 'Cache',
             'type' => 'primary',
-        ],
-
-        'Run Migrations' => [
-            'run' => 'migrate',
-            'group' => 'Database',
-            'type' => 'danger',
-            'flags' => [
-                [
-                    'label' => 'Force in production',
-                    'flag' => '--force',
-                    'default' => true,
-                ],
-            ],
         ],
 
         'Forget Cache Key' => [
@@ -234,6 +222,76 @@ return [
                     'rules' => ['string', 'max:255'],
                 ],
             ],
+        ],
+
+        // ---- Optimization --------------------------------------------------
+        'Optimize' => [
+            'run' => 'optimize',
+            'group' => 'Optimization',
+            'type' => 'primary',
+            'help' => 'Cache config, routes, events and views.',
+        ],
+
+        'Clear Optimizations' => [
+            'run' => 'optimize:clear',
+            'group' => 'Optimization',
+            'type' => 'warning',
+        ],
+
+        // ---- Database ------------------------------------------------------
+        'Run Migrations' => [
+            'run' => 'migrate',
+            'group' => 'Database',
+            'type' => 'danger',
+            'flags' => [
+                [
+                    'label' => 'Force in production',
+                    'flag' => '--force',
+                    'default' => true,
+                ],
+            ],
+        ],
+
+        'Migration Status' => [
+            'run' => 'migrate:status',
+            'group' => 'Database',
+            'type' => 'primary',
+        ],
+
+        // ---- Queue ---------------------------------------------------------
+        'Restart Queue Workers' => [
+            'run' => 'queue:restart',
+            'group' => 'Queue',
+            'type' => 'warning',
+            'help' => 'Gracefully restart queue workers after a deploy.',
+        ],
+
+        'Retry Failed Jobs' => [
+            'run' => 'queue:retry {id}',
+            'group' => 'Queue',
+            'type' => 'primary',
+            'help' => 'Retry a failed job by id, or use "all".',
+            'variables' => [
+                'id' => [
+                    'label' => 'Job id',
+                    'type' => 'text',
+                    'default' => 'all',
+                    'required' => true,
+                ],
+            ],
+        ],
+
+        // ---- Maintenance ---------------------------------------------------
+        'Maintenance Mode' => [
+            'run' => 'down',
+            'group' => 'Maintenance',
+            'type' => 'danger',
+        ],
+
+        'Bring Application Up' => [
+            'run' => 'up',
+            'group' => 'Maintenance',
+            'type' => 'success',
         ],
 
     ],
