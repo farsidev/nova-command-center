@@ -35,6 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   on utility classes that Nova's Tailwind build may purge.
 - A richer set of example commands in the default config, spanning several groups
   (Cache, Optimization, Database, Queue, Maintenance).
+- Visual polish: type-coloured accent stripes on command cards, per-category
+  colours shared between the rail and section headers, a header stat line, a
+  gradient tool icon and softer shadows.
 - In-repo documentation under `docs/` (configuration, command sources, security,
   authorization, queued execution, and frontend/theming guides).
 

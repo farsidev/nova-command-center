@@ -19,7 +19,7 @@
       :class="{ 'is-active': active === category.name }"
       @click="$emit('select', category.name)"
     >
-      <span class="ncr-rail-dot"></span>
+      <span class="ncr-rail-dot" :style="{ backgroundColor: categoryColor(category.name) }"></span>
       <span class="label">{{ category.name }}</span>
       <span class="ncr-rail-count">{{ category.count }}</span>
     </button>
@@ -27,6 +27,7 @@
 </template>
 
 <script setup>
+import { categoryColor } from '../util/colors'
 import { __ } from '../util/translate'
 
 defineProps({

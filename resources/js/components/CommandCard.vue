@@ -1,5 +1,5 @@
 <template>
-  <div class="ncr-card ncr-card--interactive ncr-cmd px-4 py-3">
+  <div class="ncr-card ncr-card--interactive ncr-cmd" :class="`ncr-accent-${command.type}`">
     <div class="ncr-cmd-body">
       <div class="flex items-center gap-2">
         <span class="ncr-badge shrink-0" :class="command.command_type === 'bash' ? 'ncr-badge-bash' : 'ncr-badge-artisan'">

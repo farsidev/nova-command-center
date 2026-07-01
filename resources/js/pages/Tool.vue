@@ -10,6 +10,10 @@
       <div class="flex-1 min-w-0">
         <h1 class="text-2xl font-normal text-gray-900 dark:text-white leading-tight">{{ heading }}</h1>
         <p v-if="config.help" class="text-sm text-gray-500 dark:text-gray-400">{{ config.help }}</p>
+        <div v-if="!loading && commands.length" class="flex items-center mt-1">
+          <span class="ncr-stat">{{ commands.length }} {{ commands.length === 1 ? __('command') : __('commands') }}</span>
+          <span v-if="categories.length" class="ncr-stat">{{ categories.length }} {{ categories.length === 1 ? __('category') : __('categories') }}</span>
+        </div>
       </div>
     </div>
 
@@ -87,9 +91,10 @@
           </div>
 
           <div v-for="group in visibleGroups" :key="group.name" class="space-y-2">
-            <div class="flex items-center gap-2 px-1">
-              <h2 class="text-xs font-bold uppercase tracking-wider text-gray-400">{{ group.name }}</h2>
-              <span class="text-xs font-medium text-gray-300 dark:text-gray-600">{{ group.commands.length }}</span>
+            <div class="ncr-section">
+              <span class="ncr-section-dot" :style="{ backgroundColor: categoryColor(group.name) }"></span>
+              <h2 class="ncr-section-title">{{ group.name }}</h2>
+              <span class="ncr-section-count">{{ group.commands.length }}</span>
             </div>
             <command-card
               v-for="command in group.commands"
@@ -119,6 +124,7 @@ import HistoryList from '../components/HistoryList'
 import OutputConsole from '../components/OutputConsole'
 import RunModal from '../components/RunModal'
 import api from '../util/api'
+import { categoryColor } from '../util/colors'
 import { __ } from '../util/translate'
 
 // Collections and payloads are replaced wholesale from the API, so shallowRef
