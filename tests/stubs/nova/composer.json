@@ -1,0 +1,7 @@
+{
+    "name": "laravel/nova",
+    "description": "Local stub of laravel/nova. Nova is a paid, private package; this package's security-critical core and its whole test suite are deliberately Nova-independent (the service provider guards every Nova touch-point with class_exists, and PHPStan resolves Nova via phpstan-stubs/nova.stub). This stub lets CI install and run the suite without Nova credentials. Real Nova v4/v5 compatibility is validated manually against live panels.",
+    "version": "5.0.0",
+    "type": "library",
+    "license": "proprietary"
+}

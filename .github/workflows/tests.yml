@@ -2,9 +2,9 @@ name: tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
   tests:
@@ -13,14 +13,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.1', '8.2', '8.3']
-        nova: ['^4.0', '^5.0']
-        exclude:
-          # Nova 5 pulls Laravel 11+, which requires PHP 8.2+.
+        include:
+          # Laravel 10 / 11 / 12 across supported PHP versions. Testbench pins
+          # the Laravel version; PHP 8.1 only pairs with Laravel 10 (Testbench 8).
           - php: '8.1'
-            nova: '^5.0'
+            testbench: '^8.0'
+          - php: '8.2'
+            testbench: '^9.0'
+          - php: '8.3'
+            testbench: '^10.0'
 
-    name: PHP ${{ matrix.php }} · Nova ${{ matrix.nova }}
+    name: PHP ${{ matrix.php }} · Testbench ${{ matrix.testbench }}
 
     steps:
       - name: Checkout
@@ -33,13 +36,14 @@ jobs:
           extensions: json, mbstring
           coverage: none
 
-      - name: Configure Nova repository
-        run: |
-          composer config repositories.nova composer https://nova.laravel.com
-          composer config http-basic.nova.laravel.com "${{ secrets.NOVA_USERNAME }}" "${{ secrets.NOVA_LICENSE_KEY }}"
+      # Nova is a paid, private package. The suite is Nova-independent, so CI
+      # resolves laravel/nova to a local stub instead of requiring credentials.
+      # Real Nova v4/v5 compatibility is validated manually against live panels.
+      - name: Use the Nova stub
+        run: composer config repositories.nova path ./tests/stubs/nova
 
-      - name: Select Nova version
-        run: composer require "laravel/nova:${{ matrix.nova }}" --no-update
+      - name: Select Testbench version
+        run: composer require "orchestra/testbench:${{ matrix.testbench }}" --dev --no-update
 
       - name: Install dependencies
         run: composer update --prefer-dist --no-interaction --no-progress

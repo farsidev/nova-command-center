@@ -2,9 +2,9 @@ name: static analysis
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
   phpstan:
@@ -22,10 +22,11 @@ jobs:
           extensions: json, mbstring
           coverage: none
 
-      - name: Configure Nova repository
-        run: |
-          composer config repositories.nova composer https://nova.laravel.com
-          composer config http-basic.nova.laravel.com "${{ secrets.NOVA_USERNAME }}" "${{ secrets.NOVA_LICENSE_KEY }}"
+      # Nova is a paid, private package. PHPStan resolves the Nova surface via
+      # phpstan-stubs/nova.stub, so CI installs against a local Nova stub rather
+      # than requiring credentials.
+      - name: Use the Nova stub
+        run: composer config repositories.nova path ./tests/stubs/nova
 
       - name: Install dependencies
         run: composer update --prefer-dist --no-interaction --no-progress
