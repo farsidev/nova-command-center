@@ -33,6 +33,16 @@ abstract class TestCase extends Orchestra
         $config->set('cache.default', 'array');
         $config->set('queue.default', 'sync');
 
+        // Pin an in-memory SQLite connection so the database command-source tests
+        // behave the same across every Testbench/Laravel version in the matrix
+        // (some default to MySQL, which is not available in CI).
+        $config->set('database.default', 'testing');
+        $config->set('database.connections.testing', [
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
+        ]);
+
         $config->set('nova-command-center.rate_limit', null);
         $config->set('nova-command-center.authorize', null);
         $config->set('nova-command-center.history', 10);

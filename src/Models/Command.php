@@ -64,20 +64,20 @@ class Command extends Model
     ];
 
     /**
-     * @return array<string, string>
+     * The `$casts` property (rather than the Laravel 11+ `casts()` method) keeps
+     * the model compatible with Laravel 10.
+     *
+     * @var array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'timeout' => 'integer',
-            'output_size' => 'integer',
-            'queue' => 'array',
-            'variables' => 'array',
-            'flags' => 'array',
-            'enabled' => 'boolean',
-            'position' => 'integer',
-        ];
-    }
+    protected $casts = [
+        'timeout' => 'integer',
+        'output_size' => 'integer',
+        'queue' => 'array',
+        'variables' => 'array',
+        'flags' => 'array',
+        'enabled' => 'boolean',
+        'position' => 'integer',
+    ];
 
     /**
      * Convert the row into the raw definition array consumed by the repository.
