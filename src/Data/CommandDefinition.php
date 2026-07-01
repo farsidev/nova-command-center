@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Farsidev\NovaCommandCenter\Data;
 
+use Farsidev\NovaCommandCenter\Support\Cast;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Str;
 
@@ -68,8 +69,8 @@ final class CommandDefinition implements Arrayable
                 ? $definition['group']
                 : 'General',
             help: isset($definition['help']) && is_string($definition['help']) ? $definition['help'] : null,
-            timeout: (int) ($definition['timeout'] ?? $defaults['timeout'] ?? 60),
-            outputSize: (int) ($definition['output_size'] ?? $defaults['output_size'] ?? 25),
+            timeout: Cast::int($definition['timeout'] ?? $defaults['timeout'] ?? null, 60),
+            outputSize: Cast::int($definition['output_size'] ?? $defaults['output_size'] ?? null, 25),
             queue: self::normalizeQueue($definition['queue'] ?? false),
             can: isset($definition['can']) && is_string($definition['can']) ? $definition['can'] : null,
             variables: self::normalizeVariables($definition['variables'] ?? []),

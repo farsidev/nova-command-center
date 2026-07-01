@@ -17,7 +17,7 @@ it('dispatches a job for a queued command', function () {
 
     $response = $this->postJson('_ncr/commands/run', ['command' => commandId('Queued Job')]);
 
-    $response->assertStatus(202)->assertJsonPath('queued', true);
+    $response->assertAccepted()->assertJsonPath('queued', true);
 
     Queue::assertPushed(RunCommandJob::class);
 });
@@ -26,7 +26,7 @@ it('completes a queued command when the queue runs synchronously', function () {
     // Default queue connection is "sync" in the test environment.
     $response = $this->postJson('_ncr/commands/run', ['command' => commandId('Queued Job')]);
 
-    $executionId = $response->assertStatus(202)->json('execution.id');
+    $executionId = $response->assertAccepted()->json('execution.id');
 
     $this->getJson("_ncr/executions/{$executionId}")
         ->assertOk()

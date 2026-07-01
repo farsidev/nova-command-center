@@ -23,17 +23,13 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { __ } from '../util/translate'
 
-export default {
-  props: {
-    command: { type: Object, required: true },
-    running: { type: Boolean, default: false },
-  },
+defineProps({
+  command: { type: Object, required: true },
+  running: { type: Boolean, default: false },
+})
 
-  emits: ['trigger'],
-
-  methods: { __ },
-}
+defineEmits(['trigger'])
 </script>

@@ -9,6 +9,7 @@ use Farsidev\NovaCommandCenter\Data\ExecutionResult;
 use Farsidev\NovaCommandCenter\Exceptions\CommandNotAllowedException;
 use Farsidev\NovaCommandCenter\Http\Requests\RunCommandRequest;
 use Farsidev\NovaCommandCenter\Jobs\RunCommandJob;
+use Farsidev\NovaCommandCenter\Support\Cast;
 use Farsidev\NovaCommandCenter\Support\CommandRepository;
 use Farsidev\NovaCommandCenter\Support\ExecutionStore;
 use Farsidev\NovaCommandCenter\Support\History;
@@ -118,7 +119,8 @@ final class CommandController extends Controller
             return null;
         }
 
-        $key = 'nova-command-center:'.($request->user()?->getAuthIdentifier() ?? $request->ip());
+        $identifier = $request->user()?->getAuthIdentifier() ?? $request->ip();
+        $key = 'nova-command-center:'.Cast::string($identifier, 'guest');
 
         if (RateLimiter::tooManyAttempts($key, $limit)) {
             return new JsonResponse([
@@ -145,6 +147,6 @@ final class CommandController extends Controller
             }
         }
 
-        return (string) $user->getAuthIdentifier();
+        return Cast::nullableString($user->getAuthIdentifier());
     }
 }

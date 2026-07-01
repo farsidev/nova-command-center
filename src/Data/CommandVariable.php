@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Farsidev\NovaCommandCenter\Data;
 
+use Farsidev\NovaCommandCenter\Support\Cast;
 use Illuminate\Contracts\Support\Arrayable;
 
 /**
@@ -57,7 +58,7 @@ final class CommandVariable implements Arrayable
             type: in_array($type, ['text', 'select'], true) ? $type : 'text',
             options: self::normalizeOptions($definition['options'] ?? []),
             required: (bool) ($definition['required'] ?? true),
-            default: isset($definition['default']) ? (string) $definition['default'] : null,
+            default: isset($definition['default']) ? Cast::nullableString($definition['default']) : null,
             rules: self::normalizeRules($definition['rules'] ?? []),
             help: isset($definition['help']) && is_string($definition['help'])
                 ? $definition['help']
@@ -102,8 +103,8 @@ final class CommandVariable implements Arrayable
         foreach ($options as $key => $value) {
             if (is_array($value) && isset($value['value'])) {
                 $normalized[] = [
-                    'value' => (string) $value['value'],
-                    'label' => (string) ($value['label'] ?? $value['value']),
+                    'value' => Cast::string($value['value']),
+                    'label' => Cast::string($value['label'] ?? $value['value']),
                 ];
 
                 continue;
@@ -111,8 +112,8 @@ final class CommandVariable implements Arrayable
 
             // ['on' => 'Enabled'] or [0 => 'foo']
             $normalized[] = is_string($key)
-                ? ['value' => $key, 'label' => (string) $value]
-                : ['value' => (string) $value, 'label' => (string) $value];
+                ? ['value' => $key, 'label' => Cast::string($value)]
+                : ['value' => Cast::string($value), 'label' => Cast::string($value)];
         }
 
         return $normalized;

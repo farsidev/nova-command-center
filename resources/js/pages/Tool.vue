@@ -39,7 +39,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 import CommandCard from '../components/CommandCard'
 import HistoryList from '../components/HistoryList'
 import OutputConsole from '../components/OutputConsole'
@@ -47,173 +48,156 @@ import RunModal from '../components/RunModal'
 import api from '../util/api'
 import { __ } from '../util/translate'
 
-export default {
-  components: { CommandCard, HistoryList, OutputConsole, RunModal },
+// Collections and payloads are replaced wholesale from the API, so shallowRef
+// avoids the cost of deep reactivity proxies on large output/history objects.
+const loading = ref(true)
+const commands = shallowRef([])
+const history = shallowRef([])
+const config = shallowRef({})
+const current = shallowRef(null)
+const progress = shallowRef(null)
+const runningId = ref(null)
+const modalCommand = shallowRef(null)
 
-  data() {
-    return {
-      loading: true,
-      commands: [],
-      history: [],
-      config: {},
-      current: null,
-      progress: null,
-      runningId: null,
-      modalCommand: null,
-      poller: null,
+// Plain (non-reactive) timer handle — the template never reads it.
+let poller = null
+
+const heading = computed(() => config.value.navigation_label || __('Command Center'))
+
+const commandGroups = computed(() => {
+  const groups = {}
+  commands.value.forEach((command) => {
+    const name = command.group || 'General'
+    groups[name] = groups[name] || { name, commands: [] }
+    groups[name].commands.push(command)
+  })
+  return Object.values(groups)
+})
+
+onMounted(load)
+onBeforeUnmount(stopPolling)
+
+async function load() {
+  loading.value = true
+  try {
+    const { data } = await api.commands()
+    commands.value = data.commands
+    history.value = data.history
+    config.value = data.config
+  } catch (error) {
+    Nova.error(__('Failed to load commands.'))
+  } finally {
+    loading.value = false
+  }
+}
+
+function trigger(command) {
+  if (command.variables.length > 0 || command.flags.length > 0) {
+    modalCommand.value = command
+    return
+  }
+
+  if (['danger', 'warning'].includes(command.type)) {
+    Nova.request && confirmAndRun(command)
+    return
+  }
+
+  execute({ command, values: {}, flags: {} })
+}
+
+function confirmAndRun(command) {
+  if (window.confirm(__('Are you sure you want to run this command?'))) {
+    execute({ command, values: {}, flags: {} })
+  }
+}
+
+function onModalRun(payload) {
+  modalCommand.value = null
+  execute(payload)
+}
+
+async function execute({ command, values, flags }) {
+  runningId.value = command.id
+  stopPolling()
+  progress.value = null
+
+  try {
+    const { data } = await api.run({ command: command.id, variables: values, flags })
+    current.value = data.execution
+
+    if (data.queued) {
+      pollExecution(data.execution.id)
+    } else {
+      finishExecution(data.execution)
     }
-  },
+  } catch (error) {
+    const message = error?.response?.data?.message || __('Command failed to start.')
+    Nova.error(message)
+    runningId.value = null
+  }
+}
 
-  computed: {
-    heading() {
-      return this.config.navigation_label || __('Command Center')
-    },
+function pollExecution(id) {
+  poller = setInterval(async () => {
+    try {
+      const { data } = await api.execution(id)
+      current.value = data.execution
+      progress.value = data.progress
 
-    commandGroups() {
-      const groups = {}
-      this.commands.forEach((command) => {
-        const name = command.group || 'General'
-        groups[name] = groups[name] || { name, commands: [] }
-        groups[name].commands.push(command)
-      })
-      return Object.values(groups)
-    },
-  },
-
-  mounted() {
-    this.load()
-  },
-
-  beforeUnmount() {
-    this.stopPolling()
-  },
-
-  methods: {
-    __,
-
-    async load() {
-      this.loading = true
-      try {
-        const { data } = await api.commands()
-        this.commands = data.commands
-        this.history = data.history
-        this.config = data.config
-      } catch (error) {
-        Nova.error(__('Failed to load commands.'))
-      } finally {
-        this.loading = false
+      if (!['pending', 'running'].includes(data.execution.status)) {
+        finishExecution(data.execution)
       }
-    },
+    } catch (error) {
+      finishExecution(current.value)
+    }
+  }, 1500)
+}
 
-    trigger(command) {
-      if (command.variables.length > 0 || command.flags.length > 0) {
-        this.modalCommand = command
-        return
-      }
+function finishExecution(execution) {
+  stopPolling()
+  runningId.value = null
+  progress.value = null
+  if (execution) {
+    notify(execution)
+  }
+  refreshHistory()
+}
 
-      if (['danger', 'warning'].includes(command.type)) {
-        Nova.request && this.confirmAndRun(command)
-        return
-      }
+function notify(execution) {
+  if (execution.status === 'success') {
+    Nova.success(__('Command completed successfully.'))
+  } else if (execution.status !== 'pending' && execution.status !== 'running') {
+    Nova.error(__('Command finished with status: :status', { status: execution.status }))
+  }
+}
 
-      this.execute({ command, values: {}, flags: {} })
-    },
+async function refreshHistory() {
+  try {
+    const { data } = await api.history()
+    history.value = data.history
+  } catch (error) {
+    // History is non-critical; ignore failures.
+  }
+}
 
-    confirmAndRun(command) {
-      if (window.confirm(__('Are you sure you want to run this command?'))) {
-        this.execute({ command, values: {}, flags: {} })
-      }
-    },
+function selectHistory(item) {
+  current.value = item
+  progress.value = null
+}
 
-    onModalRun(payload) {
-      this.modalCommand = null
-      this.execute(payload)
-    },
+async function clearHistory() {
+  try {
+    await api.clearHistory()
+    history.value = []
+  } catch (error) {
+    Nova.error(__('Failed to clear history.'))
+  }
+}
 
-    async execute({ command, values, flags }) {
-      this.runningId = command.id
-      this.stopPolling()
-      this.progress = null
-
-      try {
-        const { data } = await api.run({ command: command.id, variables: values, flags })
-        this.current = data.execution
-
-        if (data.queued) {
-          this.pollExecution(data.execution.id)
-        } else {
-          this.finishExecution(data.execution)
-        }
-      } catch (error) {
-        const message = error?.response?.data?.message || __('Command failed to start.')
-        Nova.error(message)
-        this.runningId = null
-      }
-    },
-
-    pollExecution(id) {
-      this.poller = setInterval(async () => {
-        try {
-          const { data } = await api.execution(id)
-          this.current = data.execution
-          this.progress = data.progress
-
-          if (!['pending', 'running'].includes(data.execution.status)) {
-            this.finishExecution(data.execution)
-          }
-        } catch (error) {
-          this.finishExecution(this.current)
-        }
-      }, 1500)
-    },
-
-    finishExecution(execution) {
-      this.stopPolling()
-      this.runningId = null
-      this.progress = null
-      if (execution) {
-        this.notify(execution)
-      }
-      this.refreshHistory()
-    },
-
-    notify(execution) {
-      if (execution.status === 'success') {
-        Nova.success(__('Command completed successfully.'))
-      } else if (execution.status !== 'pending' && execution.status !== 'running') {
-        Nova.error(__('Command finished with status: :status', { status: execution.status }))
-      }
-    },
-
-    async refreshHistory() {
-      try {
-        const { data } = await api.history()
-        this.history = data.history
-      } catch (error) {
-        // History is non-critical; ignore failures.
-      }
-    },
-
-    selectHistory(item) {
-      this.current = item
-      this.progress = null
-    },
-
-    async clearHistory() {
-      try {
-        await api.clearHistory()
-        this.history = []
-      } catch (error) {
-        Nova.error(__('Failed to clear history.'))
-      }
-    },
-
-    stopPolling() {
-      if (this.poller) {
-        clearInterval(this.poller)
-        this.poller = null
-      }
-    },
-  },
+function stopPolling() {
+  if (poller) {
+    clearInterval(poller)
+    poller = null
+  }
 }
 </script>

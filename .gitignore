@@ -13,3 +13,7 @@ hot
 
 composer.testing.json
 composer.testing.lock
+
+# Local agent-skills tooling (not part of the package)
+/.agents
+skills-lock.json

@@ -2,9 +2,14 @@ includes:
     - ./vendor/larastan/larastan/extension.neon
 
 parameters:
-    level: 6
+    level: 9
     paths:
         - src
+    excludePaths:
+        # Optional Nova resource for the database source. It extends Nova's
+        # Resource and Field classes (a private, paid dependency) and is only
+        # loaded in a host app where Nova is installed, so it is not analysed.
+        - src/Nova/Command.php
     tmpDir: build/phpstan
     scanFiles:
         # Nova is a private, paid dependency. This file declares the small Nova

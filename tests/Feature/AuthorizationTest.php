@@ -16,7 +16,7 @@ it('forbids a command whose gate ability denies', function () {
 
     $id = commandId('Guarded');
 
-    $this->postJson('_ncr/commands/run', ['command' => $id])->assertStatus(403);
+    $this->postJson('_ncr/commands/run', ['command' => $id])->assertForbidden();
 });
 
 it('allows a command whose gate ability passes', function () {

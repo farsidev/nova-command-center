@@ -26,32 +26,28 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { __ } from '../util/translate'
 
-export default {
-  props: {
-    history: { type: Array, default: () => [] },
-  },
+defineProps({
+  history: { type: Array, default: () => [] },
+})
 
-  emits: ['select', 'clear'],
+defineEmits(['select', 'clear'])
 
-  methods: {
-    __,
-    formatDate(value) {
-      if (!value) return ''
-      const date = new Date(value)
-      return Number.isNaN(date.getTime()) ? value : date.toLocaleString()
-    },
-    statusClass(status) {
-      return {
-        success: 'text-green-500',
-        failed: 'text-red-500',
-        timed_out: 'text-yellow-500',
-        running: 'text-blue-500',
-        pending: 'text-gray-400',
-      }[status] || 'text-gray-400'
-    },
-  },
+function formatDate(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString()
+}
+
+function statusClass(status) {
+  return {
+    success: 'text-green-500',
+    failed: 'text-red-500',
+    timed_out: 'text-yellow-500',
+    running: 'text-blue-500',
+    pending: 'text-gray-400',
+  }[status] || 'text-gray-400'
 }
 </script>

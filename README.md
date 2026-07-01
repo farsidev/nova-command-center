@@ -123,6 +123,78 @@ display name; only `run` is required.
 | `variables`    | array           | User input, keyed by placeholder name (see below).       |
 | `flags`        | array           | Optional flags rendered as checkboxes.                   |
 
+### Where commands come from
+
+By default the allow-list is read from the config file — version-controlled,
+reviewed in pull requests, and immutable at runtime. This is the recommended,
+safest posture. The source is pluggable via the `source` key:
+
+```php
+'source' => [
+    'driver' => 'config', // 'config' (default), 'database', or a custom class-string
+    'model'  => \Farsidev\NovaCommandCenter\Models\Command::class,
+],
+```
+
+Anything that reads command definitions implements the tiny
+[`CommandSource`](src/Contracts/CommandSource.php) contract, so raw definitions
+can come from anywhere. Regardless of the source, every definition still passes
+through the same coercion, validation and security model — a custom source can
+never widen the trust boundary or bypass the bash/rate-limit/authorization gates.
+
+```php
+use Farsidev\NovaCommandCenter\Contracts\CommandSource;
+
+final class YamlCommandSource implements CommandSource
+{
+    public function definitions(): iterable
+    {
+        return yaml_parse_file(base_path('commands.yaml'));
+    }
+}
+
+// config/nova-command-center.php
+'source' => ['driver' => YamlCommandSource::class],
+```
+
+### Managing commands in the database
+
+Prefer editing commands from the Nova UI instead of a config file? Opt into the
+database source. **Read the security note first.**
+
+1. Publish and run the migration:
+
+   ```bash
+   php artisan vendor:publish --tag=nova-command-center-migrations
+   php artisan migrate
+   ```
+
+2. Switch the driver in `config/nova-command-center.php`:
+
+   ```php
+   'source' => ['driver' => 'database'],
+   ```
+
+3. Register the bundled Nova resource from your own `NovaServiceProvider` — ideally
+   behind a strict policy so only trusted operators can edit the allow-list:
+
+   ```php
+   use Farsidev\NovaCommandCenter\Nova\Command;
+
+   Nova::resources([Command::class]);
+   ```
+
+Rows in the `nova_command_center_commands` table map one-to-one onto the config
+keys documented above (`run`, `command_type`, `group`, `variables`, `flags`, …),
+plus `enabled` (bool) and `position` (int) to toggle and order them.
+
+> ⚠️ **Security:** the database driver moves the allow-list out of version control.
+> Anyone who can create or edit those rows decides what the tool will run — that is
+> remote code execution by design. Protect the resource with a policy
+> (`CommandPolicy`), restrict it to super-admins, keep bash **disabled** unless you
+> truly need it, and remember every run still emits audit events. If you don't need
+> UI-managed commands, stay on the `config` driver.
+
 ### Variables
 
 Variables are referenced in `run` with `{name}` placeholders. Because

@@ -22,43 +22,38 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
 import { __ } from '../util/translate'
 
-export default {
-  props: {
-    execution: { type: Object, required: true },
-    progress: { type: Object, default: null },
-  },
+const props = defineProps({
+  execution: { type: Object, required: true },
+  progress: { type: Object, default: null },
+})
 
-  computed: {
-    placeholder() {
-      return this.isRunning ? __('Waiting for output…') : __('No output.')
-    },
+const isRunning = computed(() => ['pending', 'running'].includes(props.execution.status))
 
-    isRunning() {
-      return ['pending', 'running'].includes(this.execution.status)
-    },
+const placeholder = computed(() => (isRunning.value ? __('Waiting for output…') : __('No output.')))
 
-    statusLabel() {
-      return {
-        pending: __('Queued'),
-        running: __('Running…'),
-        success: __('Success'),
-        failed: __('Failed'),
-        timed_out: __('Timed out'),
-      }[this.execution.status] || this.execution.status
-    },
+const statusLabel = computed(
+  () =>
+    ({
+      pending: __('Queued'),
+      running: __('Running…'),
+      success: __('Success'),
+      failed: __('Failed'),
+      timed_out: __('Timed out'),
+    })[props.execution.status] || props.execution.status,
+)
 
-    statusDotClass() {
-      return {
-        pending: 'bg-gray-400',
-        running: 'bg-blue-400 animate-pulse',
-        success: 'bg-green-500',
-        failed: 'bg-red-500',
-        timed_out: 'bg-yellow-500',
-      }[this.execution.status] || 'bg-gray-400'
-    },
-  },
-}
+const statusDotClass = computed(
+  () =>
+    ({
+      pending: 'bg-gray-400',
+      running: 'bg-blue-400 animate-pulse',
+      success: 'bg-green-500',
+      failed: 'bg-red-500',
+      timed_out: 'bg-yellow-500',
+    })[props.execution.status] || 'bg-gray-400',
+)
 </script>

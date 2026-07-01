@@ -10,6 +10,7 @@ use Farsidev\NovaCommandCenter\Data\ExecutionResult;
 use Farsidev\NovaCommandCenter\Events\CommandFinished;
 use Farsidev\NovaCommandCenter\Events\CommandStarted;
 use Farsidev\NovaCommandCenter\Exceptions\CommandNotAllowedException;
+use Farsidev\NovaCommandCenter\Support\Cast;
 use Farsidev\NovaCommandCenter\Support\CommandBuilder;
 use Farsidev\NovaCommandCenter\Support\ConcurrencyGuard;
 use Farsidev\NovaCommandCenter\Support\ExecutionStore;
@@ -171,7 +172,7 @@ final class ExecuteCommand
 
         foreach ($env as $key => $value) {
             if (is_string($key)) {
-                $normalized[$key] = (string) $value;
+                $normalized[$key] = Cast::string($value);
             }
         }
 

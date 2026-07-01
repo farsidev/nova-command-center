@@ -34,23 +34,16 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
 import { __ } from '../util/translate'
 
-export default {
-  props: {
-    variable: { type: Object, required: true },
-    modelValue: { type: String, default: '' },
-  },
+const props = defineProps({
+  variable: { type: Object, required: true },
+  modelValue: { type: String, default: '' },
+})
 
-  emits: ['update:modelValue'],
+defineEmits(['update:modelValue'])
 
-  computed: {
-    fieldId() {
-      return `ncr-var-${this.variable.name}`
-    },
-  },
-
-  methods: { __ },
-}
+const fieldId = computed(() => `ncr-var-${props.variable.name}`)
 </script>

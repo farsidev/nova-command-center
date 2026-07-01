@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use Farsidev\NovaCommandCenter\Models\Command;
 
 return [
 
@@ -17,6 +18,35 @@ return [
     'navigation_label' => 'Command Center',
 
     'help' => 'Run pre-approved Artisan and shell commands directly from Nova.',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Command Source
+    |--------------------------------------------------------------------------
+    |
+    | Where the allow-list of commands is read from.
+    |
+    |   "config"    (default, recommended) Commands live in the "commands" array
+    |               below — version-controlled, code-reviewed, immutable at
+    |               runtime. The safest posture.
+    |
+    |   "database"  Commands are stored in the "nova_command_center_commands"
+    |               table and can be managed through the bundled Nova resource.
+    |               Publish and run the migration first:
+    |                 php artisan vendor:publish --tag=nova-command-center-migrations
+    |               SECURITY: this moves the allow-list out of version control —
+    |               anyone who can edit those rows decides what runs. Gate the
+    |               resource tightly and keep bash disabled unless required.
+    |
+    |   A class-string implementing Farsidev\NovaCommandCenter\Contracts\CommandSource
+    |               for any other backing store.
+    |
+    */
+
+    'source' => [
+        'driver' => 'config',
+        'model' => Command::class,
+    ],
 
     /*
     |--------------------------------------------------------------------------

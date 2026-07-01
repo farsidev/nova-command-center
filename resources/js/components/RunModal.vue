@@ -44,47 +44,36 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, reactive } from 'vue'
 import VariableField from './VariableField'
 import { __ } from '../util/translate'
 
-export default {
-  components: { VariableField },
+const props = defineProps({
+  command: { type: Object, required: true },
+})
 
-  props: {
-    command: { type: Object, required: true },
-  },
+const emit = defineEmits(['close', 'run'])
 
-  emits: ['close', 'run'],
+const values = reactive({})
+const flags = reactive({})
 
-  data() {
-    const values = {}
-    this.command.variables.forEach((variable) => {
-      values[variable.name] = variable.default || ''
-    })
+props.command.variables.forEach((variable) => {
+  values[variable.name] = variable.default || ''
+})
 
-    const flags = {}
-    this.command.flags.forEach((flag) => {
-      flags[flag.key] = flag.default
-    })
+props.command.flags.forEach((flag) => {
+  flags[flag.key] = flag.default
+})
 
-    return { values, flags }
-  },
+const valid = computed(() =>
+  props.command.variables.every(
+    (variable) => !variable.required || (values[variable.name] || '').length > 0,
+  ),
+)
 
-  computed: {
-    valid() {
-      return this.command.variables.every(
-        (variable) => !variable.required || (this.values[variable.name] || '').length > 0,
-      )
-    },
-  },
-
-  methods: {
-    __,
-    submit() {
-      if (!this.valid) return
-      this.$emit('run', { command: this.command, values: { ...this.values }, flags: { ...this.flags } })
-    },
-  },
+function submit() {
+  if (!valid.value) return
+  emit('run', { command: props.command, values: { ...values }, flags: { ...flags } })
 }
 </script>

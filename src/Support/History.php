@@ -76,6 +76,9 @@ final class History
             return [];
         }
 
-        return array_values(array_filter($items, 'is_array'));
+        return array_values(array_map(
+            Cast::stringKeyedArray(...),
+            array_filter($items, 'is_array'),
+        ));
     }
 }
