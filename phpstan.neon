@@ -1,0 +1,20 @@
+includes:
+    - ./vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 6
+    paths:
+        - src
+    tmpDir: build/phpstan
+    scanFiles:
+        # Nova is a private, paid dependency. This file declares the small Nova
+        # surface the package touches so static analysis can resolve it without
+        # requiring Nova credentials in every analysis environment.
+        - phpstan-stubs/nova.stub
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        # Public trait intended for consumer Artisan commands; it is genuinely
+        # unused within the package's own source.
+        -
+            identifier: trait.unused
+            path: src/Concerns/InteractsWithProgress.php

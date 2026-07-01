@@ -1,0 +1,22 @@
+* text=auto eol=lf
+
+# Files & directories excluded from the distributed package archive.
+/.github            export-ignore
+/tests              export-ignore
+/phpstan-stubs      export-ignore
+/resources/js       export-ignore
+/resources/css      export-ignore
+.editorconfig       export-ignore
+.gitattributes      export-ignore
+.gitignore          export-ignore
+.php-cs-fixer.cache export-ignore
+CONTRIBUTING.md     export-ignore
+phpstan.neon        export-ignore
+phpunit.xml         export-ignore
+pint.json           export-ignore
+webpack.mix.js      export-ignore
+nova.mix.js         export-ignore
+package.json        export-ignore
+
+# Ensure compiled assets are treated as binary.
+/dist/**            binary

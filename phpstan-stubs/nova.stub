@@ -1,0 +1,49 @@
+<?php
+
+namespace Laravel\Nova {
+    class Nova
+    {
+        public static function serving(callable $callback): void {}
+
+        public static function script(string $name, string $path): void {}
+
+        public static function style(string $name, string $path): void {}
+
+        /**
+         * @return array<int, \Laravel\Nova\Tool>
+         */
+        public static function registeredTools(): array {}
+
+        /**
+         * @param  array<int, mixed>  $middleware
+         */
+        public static function router(array $middleware = [], ?string $name = null): \Laravel\Nova\PendingRouteRegistration {}
+    }
+
+    class Tool
+    {
+        public function boot(): void {}
+
+        public function authorize(\Illuminate\Http\Request $request): bool {}
+    }
+
+    class PendingRouteRegistration
+    {
+        public function group(string $path): void {}
+    }
+}
+
+namespace Laravel\Nova\Menu {
+    class MenuSection
+    {
+        public static function make(string $name): static {}
+
+        public function path(string $path): static {}
+
+        public function icon(string $icon): static {}
+    }
+}
+
+namespace Laravel\Nova\Http\Requests {
+    class NovaRequest extends \Illuminate\Http\Request {}
+}

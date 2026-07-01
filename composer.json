@@ -1,0 +1,73 @@
+{
+    "name": "farsidev/nova-command-center",
+    "description": "A secure, modern Laravel Nova tool to run Artisan and shell commands from the Nova dashboard. Compatible with Nova v4 and v5.",
+    "keywords": [
+        "laravel",
+        "nova",
+        "laravel-nova",
+        "nova-tool",
+        "artisan",
+        "command-center",
+        "commands"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/farsidev/nova-command-center",
+    "support": {
+        "issues": "https://github.com/farsidev/nova-command-center/issues",
+        "source": "https://github.com/farsidev/nova-command-center"
+    },
+    "authors": [
+        {
+            "name": "Farsidev",
+            "homepage": "https://github.com/farsidev"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "ext-json": "*",
+        "illuminate/console": "^10.0 || ^11.0 || ^12.0",
+        "illuminate/contracts": "^10.0 || ^11.0 || ^12.0",
+        "illuminate/support": "^10.0 || ^11.0 || ^12.0",
+        "laravel/nova": "^4.0 || ^5.0",
+        "symfony/process": "^6.0 || ^7.0"
+    },
+    "require-dev": {
+        "larastan/larastan": "^2.9 || ^3.0",
+        "laravel/pint": "^1.13",
+        "orchestra/testbench": "^8.0 || ^9.0 || ^10.0",
+        "pestphp/pest": "^2.34 || ^3.0",
+        "phpstan/phpstan": "^1.11 || ^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Farsidev\\NovaCommandCenter\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Farsidev\\NovaCommandCenter\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Farsidev\\NovaCommandCenter\\ToolServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "test:coverage": "vendor/bin/pest --coverage",
+        "analyse": "vendor/bin/phpstan analyse",
+        "format": "vendor/bin/pint",
+        "lint": "vendor/bin/pint --test"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
