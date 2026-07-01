@@ -1,25 +1,83 @@
 <template>
   <div>
-    <div class="flex items-center mb-6">
-      <h1 class="text-90 font-normal text-2xl flex-1">{{ heading }}</h1>
+    <div class="flex items-center gap-3 mb-6">
+      <span class="ncr-icon-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+          <polyline points="4 17 10 11 4 5" />
+          <line x1="12" y1="19" x2="20" y2="19" />
+        </svg>
+      </span>
+      <div class="flex-1 min-w-0">
+        <h1 class="text-2xl font-normal text-gray-900 dark:text-white leading-tight">{{ heading }}</h1>
+        <p v-if="config.help" class="text-sm text-gray-500 dark:text-gray-400">{{ config.help }}</p>
+      </div>
     </div>
 
-    <p v-if="config.help" class="mb-6 text-sm text-gray-500 dark:text-gray-400">{{ config.help }}</p>
+    <!-- Loading skeleton -->
+    <div v-if="loading" class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div class="lg:col-span-2 space-y-3">
+        <div v-for="n in 4" :key="n" class="ncr-card flex items-center justify-between px-4 py-3">
+          <div class="flex-1 space-y-2">
+            <div class="ncr-skeleton h-3.5 w-40"></div>
+            <div class="ncr-skeleton h-3 w-24"></div>
+          </div>
+          <div class="ncr-skeleton h-8 w-16 rounded-lg"></div>
+        </div>
+      </div>
+      <div class="ncr-card p-4 space-y-3">
+        <div class="ncr-skeleton h-4 w-24"></div>
+        <div class="ncr-skeleton h-3 w-full"></div>
+        <div class="ncr-skeleton h-3 w-2/3"></div>
+      </div>
+    </div>
 
-    <div v-if="loading" class="py-12 text-center text-gray-400">{{ __('Loading…') }}</div>
-
-    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
       <div class="lg:col-span-2 space-y-6">
-        <div v-if="current" class="mb-2">
-          <output-console :execution="current" :progress="progress" />
+        <transition name="ncr-slide">
+          <output-console v-if="current" :execution="current" :progress="progress" />
+        </transition>
+
+        <!-- Search + custom command bar -->
+        <div v-if="commands.length" class="space-y-3">
+          <div class="ncr-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input v-model="search" type="text" :placeholder="__('Search commands…')" />
+          </div>
+
+          <div v-if="customTypes.length" class="ncr-card ncr-custombar">
+            <select v-model="customType">
+              <option v-for="type in customTypes" :key="type" :value="type">{{ type }}</option>
+            </select>
+            <input
+              v-model="customRun"
+              type="text"
+              :placeholder="customType === 'bash' ? 'ls -la' : 'queue:work --once'"
+              @keyup.enter="runCustom"
+            />
+            <button type="button" class="ncr-btn" :disabled="!customRun.trim() || runningId === 'custom'" @click="runCustom">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M8 5v14l11-7z" /></svg>
+              {{ __('Run') }}
+            </button>
+          </div>
         </div>
 
-        <p v-if="commandGroups.length === 0" class="py-12 text-center text-gray-400">
-          {{ __('No commands have been configured.') }}
-        </p>
+        <div v-if="commandGroups.length === 0" class="ncr-card ncr-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-10 h-10">
+            <rect x="3" y="4" width="18" height="16" rx="2" />
+            <path d="M7 9l3 3-3 3M13 15h4" />
+          </svg>
+          <p class="text-sm font-medium">{{ commands.length ? __('No commands match your search.') : __('No commands have been configured.') }}</p>
+          <p v-if="!commands.length" class="text-xs">{{ __('Add commands to the config file or database source to get started.') }}</p>
+        </div>
 
         <div v-for="group in commandGroups" :key="group.name" class="space-y-2">
-          <h2 class="text-sm font-bold uppercase tracking-wide text-gray-400">{{ group.name }}</h2>
+          <div class="flex items-center gap-2 px-1">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-gray-400">{{ group.name }}</h2>
+            <span class="text-xs font-medium text-gray-300 dark:text-gray-600">{{ group.commands.length }}</span>
+          </div>
           <command-card
             v-for="command in group.commands"
             :key="command.id"
@@ -30,8 +88,8 @@
         </div>
       </div>
 
-      <div>
-        <history-list :history="history" @select="selectHistory" @clear="clearHistory" />
+      <div class="lg:sticky lg:top-4">
+        <history-list :history="history" @select="selectHistory" @clear="clearHistory" @rerun="rerun" />
       </div>
     </div>
 
@@ -59,14 +117,29 @@ const progress = shallowRef(null)
 const runningId = ref(null)
 const modalCommand = shallowRef(null)
 
+const search = ref('')
+const customType = ref('artisan')
+const customRun = ref('')
+
 // Plain (non-reactive) timer handle — the template never reads it.
 let poller = null
 
 const heading = computed(() => config.value.navigation_label || __('Command Center'))
 
+const customTypes = computed(() => config.value.custom_commands || [])
+
 const commandGroups = computed(() => {
+  const term = search.value.trim().toLowerCase()
+
+  const matches = commands.value.filter((command) => {
+    if (!term) return true
+    return [command.name, command.run, command.group]
+      .filter(Boolean)
+      .some((field) => field.toLowerCase().includes(term))
+  })
+
   const groups = {}
-  commands.value.forEach((command) => {
+  matches.forEach((command) => {
     const name = command.group || 'General'
     groups[name] = groups[name] || { name, commands: [] }
     groups[name].commands.push(command)
@@ -74,7 +147,10 @@ const commandGroups = computed(() => {
   return Object.values(groups)
 })
 
-onMounted(load)
+onMounted(() => {
+  load()
+  if (customTypes.value.length) customType.value = customTypes.value[0]
+})
 onBeforeUnmount(stopPolling)
 
 async function load() {
@@ -84,6 +160,7 @@ async function load() {
     commands.value = data.commands
     history.value = data.history
     config.value = data.config
+    if (customTypes.value.length) customType.value = customTypes.value[0]
   } catch (error) {
     Nova.error(__('Failed to load commands.'))
   } finally {
@@ -91,29 +168,55 @@ async function load() {
   }
 }
 
+// A command opens the modal when it needs input OR is risky (danger/warning);
+// the modal doubles as the confirmation step. Safe commands run immediately.
 function trigger(command) {
-  if (command.variables.length > 0 || command.flags.length > 0) {
-    modalCommand.value = command
-    return
-  }
+  const needsInput = command.variables.length > 0 || command.flags.length > 0
+  const needsConfirm = ['danger', 'warning'].includes(command.type)
 
-  if (['danger', 'warning'].includes(command.type)) {
-    Nova.request && confirmAndRun(command)
+  if (needsInput || needsConfirm) {
+    modalCommand.value = command
     return
   }
 
   execute({ command, values: {}, flags: {} })
 }
 
-function confirmAndRun(command) {
-  if (window.confirm(__('Are you sure you want to run this command?'))) {
-    execute({ command, values: {}, flags: {} })
-  }
-}
-
 function onModalRun(payload) {
   modalCommand.value = null
   execute(payload)
+}
+
+// Re-run a past execution by finding its source command; if that command needs
+// input it opens the modal, otherwise it runs straight away.
+function rerun(item) {
+  const command = commands.value.find((c) => c.id === item.command_id)
+  if (!command) {
+    Nova.error(__('That command is no longer available.'))
+    return
+  }
+  trigger(command)
+}
+
+function runCustom() {
+  const run = customRun.value.trim()
+  if (!run) return
+
+  runningId.value = 'custom'
+  stopPolling()
+  progress.value = null
+
+  api
+    .run({ custom: { type: customType.value, run } })
+    .then(({ data }) => {
+      current.value = data.execution
+      if (data.queued) pollExecution(data.execution.id)
+      else finishExecution(data.execution)
+    })
+    .catch((error) => {
+      Nova.error(error?.response?.data?.message || __('Command failed to start.'))
+      runningId.value = null
+    })
 }
 
 async function execute({ command, values, flags }) {

@@ -43,8 +43,13 @@ final class ConcurrencyGuard
         /** @var list<Lock> $locks */
         $locks = [];
 
+        // A lock must outlive the process it guards. When the command has no
+        // timeout (0), fall back to a long TTL so a lock never expires mid-run
+        // and lets a second execution slip through.
+        $ttl = $timeout > 0 ? $timeout + 10 : 3600;
+
         foreach ($this->lockNames($command) as $name) {
-            $lock = $store->lock($name, max(1, $timeout) + 10);
+            $lock = $store->lock($name, $ttl);
 
             if (!$lock->get()) {
                 foreach ($locks as $acquired) {

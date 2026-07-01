@@ -1,69 +1,265 @@
-/* Command Center — styles are intentionally self-contained and lean on Nova's
-   Tailwind utility classes for colors so the tool matches the host theme. */
+/* Command Center styles.
+ *
+ * The Vue templates lean on Nova's Tailwind utility classes for basic layout and
+ * colour so the tool matches the host theme. The pieces below add the polish that
+ * cannot safely rely on Nova's purged Tailwind build (buttons, console, cards,
+ * badges, progress, modal) and provide complete dark-mode support.
+ *
+ * Nova toggles a `.dark` class on the <html> element; every rule here keys off
+ * that so the tool follows Nova's light/dark switch automatically.
+ */
 
-.ncr-console {
-  background-color: #0f172a;
-  color: #e2e8f0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  white-space: pre-wrap;
-  word-break: break-word;
+/* ------------------------------------------------------------------ Cards -- */
+.ncr-card {
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 }
 
+.dark .ncr-card {
+  background-color: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.ncr-card--interactive {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.ncr-card--interactive:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.dark .ncr-card--interactive:hover {
+  border-color: #475569;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+/* -------------------------------------------------------------- Icon badge -- */
+.ncr-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.625rem;
+  color: var(--primary, #4099de);
+  background-color: rgba(64, 153, 222, 0.12);
+  flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------- Buttons -- */
 .ncr-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.4rem 0.9rem;
+  gap: 0.375rem;
+  padding: 0.45rem 0.95rem;
   border-radius: 0.5rem;
   font-size: 0.8rem;
   font-weight: 700;
   line-height: 1;
-  cursor: pointer;
-  transition: opacity 0.15s ease-in-out, background-color 0.15s ease-in-out;
   color: #fff;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
   background-color: var(--primary, #4099de);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease,
+    background-color 0.12s ease;
 }
 
 .ncr-btn:hover {
-  opacity: 0.85;
+  opacity: 0.92;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+}
+
+.ncr-btn:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.ncr-btn:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 3px rgba(64, 153, 222, 0.45);
 }
 
 .ncr-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
-.ncr-btn-primary {
-  background-color: var(--primary, #4099de);
-}
-
-.ncr-btn-success {
-  background-color: #21b978;
-}
-
-.ncr-btn-warning {
-  background-color: #ce9500;
-}
-
-.ncr-btn-danger {
-  background-color: #e74c3c;
-}
-
-.ncr-btn-info {
-  background-color: #03a9f4;
-}
+.ncr-btn-primary { background-color: var(--primary, #4099de); }
+.ncr-btn-success { background-color: #21b978; }
+.ncr-btn-warning { background-color: #d99a00; }
+.ncr-btn-danger { background-color: #e74c3c; }
+.ncr-btn-info { background-color: #03a9f4; }
 
 .ncr-btn-secondary,
 .ncr-btn-light,
-.ncr-btn-dark {
-  background-color: #64748b;
-}
+.ncr-btn-dark { background-color: #64748b; }
 
 .ncr-btn-link {
   background-color: transparent;
   color: #64748b;
+  box-shadow: none;
 }
 
+.ncr-btn-link:hover {
+  background-color: rgba(100, 116, 139, 0.12);
+  opacity: 1;
+  box-shadow: none;
+}
+
+.dark .ncr-btn-link { color: #94a3b8; }
+.dark .ncr-btn-link:hover { background-color: rgba(148, 163, 184, 0.14); }
+
+/* ----------------------------------------------------------------- Badges -- */
+.ncr-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.ncr-badge-artisan { color: #2563eb; background-color: rgba(37, 99, 235, 0.12); }
+.ncr-badge-bash { color: #b45309; background-color: rgba(217, 119, 6, 0.15); }
+.dark .ncr-badge-artisan { color: #93c5fd; background-color: rgba(59, 130, 246, 0.2); }
+.dark .ncr-badge-bash { color: #fcd34d; background-color: rgba(217, 119, 6, 0.24); }
+
+/* Status dot + label colours used in the console and history. */
+.ncr-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+.ncr-dot-pending { background-color: #94a3b8; }
+.ncr-dot-running { background-color: #3b82f6; animation: ncr-pulse 1.4s ease-in-out infinite; }
+.ncr-dot-success { background-color: #22c55e; }
+.ncr-dot-failed { background-color: #ef4444; }
+.ncr-dot-timed_out { background-color: #f59e0b; }
+
+.ncr-status-success { color: #16a34a; }
+.ncr-status-failed { color: #dc2626; }
+.ncr-status-timed_out { color: #d97706; }
+.ncr-status-running { color: #2563eb; }
+.ncr-status-pending { color: #64748b; }
+.dark .ncr-status-success { color: #4ade80; }
+.dark .ncr-status-failed { color: #f87171; }
+.dark .ncr-status-timed_out { color: #fbbf24; }
+.dark .ncr-status-running { color: #60a5fa; }
+.dark .ncr-status-pending { color: #94a3b8; }
+
+/* --------------------------------------------------------------- Progress -- */
+.ncr-progress {
+  height: 0.5rem;
+  width: 100%;
+  border-radius: 9999px;
+  overflow: hidden;
+  background-color: #e2e8f0;
+}
+
+.dark .ncr-progress { background-color: #334155; }
+
+.ncr-progress-bar {
+  height: 100%;
+  border-radius: 9999px;
+  background-color: var(--primary, #4099de);
+  transition: width 0.3s ease;
+}
+
+/* ---------------------------------------------------------------- Console -- */
+.ncr-console-shell {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.dark .ncr-console-shell { border-color: #334155; }
+
+.ncr-console-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.9rem;
+  background-color: #f1f5f9;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dark .ncr-console-head {
+  background-color: #0f172a;
+  border-bottom-color: #1e293b;
+}
+
+.ncr-console {
+  margin: 0;
+  padding: 0.85rem 0.95rem;
+  max-height: 24rem;
+  overflow: auto;
+  background-color: #0f172a;
+  color: #e2e8f0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ncr-console::-webkit-scrollbar { width: 10px; height: 10px; }
+.ncr-console::-webkit-scrollbar-thumb {
+  background-color: #334155;
+  border-radius: 9999px;
+  border: 2px solid #0f172a;
+}
+.ncr-console::-webkit-scrollbar-track { background: transparent; }
+
+.ncr-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.375rem;
+  font-size: 0.7rem;
+  color: #64748b;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.ncr-copy:hover { background-color: rgba(100, 116, 139, 0.14); color: #334155; }
+.dark .ncr-copy { color: #94a3b8; }
+.dark .ncr-copy:hover { background-color: rgba(148, 163, 184, 0.16); color: #e2e8f0; }
+
+/* ------------------------------------------------------------- Empty state -- */
+.ncr-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.ncr-empty svg { opacity: 0.5; }
+
+/* ------------------------------------------------------------------ Modal -- */
 .ncr-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -72,10 +268,260 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background-color: rgba(15, 23, 42, 0.5);
+  background-color: rgba(15, 23, 42, 0.55);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  animation: ncr-fade 0.15s ease-out;
 }
 
 .ncr-modal {
   width: 100%;
-  max-width: 32rem;
+  max-width: 34rem;
+  animation: ncr-pop 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ncr-modal-body {
+  padding: 1rem 1.5rem;
+  max-height: 60vh;
+  overflow: auto;
+}
+
+/* Checkbox row / flag toggle in the run modal. */
+.ncr-flag {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.65rem;
+  margin-bottom: 0.4rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  color: #475569;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.ncr-flag:hover { border-color: #cbd5e1; background-color: #f8fafc; }
+.dark .ncr-flag { border-color: #334155; color: #cbd5e1; }
+.dark .ncr-flag:hover { border-color: #475569; background-color: #0f172a; }
+
+/* ---------------------------------------------------------------- Toolbar -- */
+.ncr-search {
+  position: relative;
+  flex: 1;
+}
+
+.ncr-search input {
+  width: 100%;
+  padding: 0.5rem 0.75rem 0.5rem 2.1rem;
+  border-radius: 0.6rem;
+  border: 1px solid #e5e7eb;
+  background-color: #fff;
+  color: #1e293b;
+  font-size: 0.875rem;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.ncr-search input::placeholder { color: #94a3b8; }
+.ncr-search input:focus {
+  outline: none;
+  border-color: var(--primary, #4099de);
+  box-shadow: 0 0 0 3px rgba(64, 153, 222, 0.18);
+}
+
+.ncr-search svg {
+  position: absolute;
+  left: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.dark .ncr-search input {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+/* Small square icon button (rerun, clear a field, …). */
+.ncr-iconbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.45rem;
+  color: #64748b;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.ncr-iconbtn:hover { background-color: rgba(100, 116, 139, 0.14); color: #334155; }
+.dark .ncr-iconbtn { color: #94a3b8; }
+.dark .ncr-iconbtn:hover { background-color: rgba(148, 163, 184, 0.16); color: #e2e8f0; }
+
+/* -------------------------------------------------------- Terminal window -- */
+.ncr-traffic {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-right: 0.35rem;
+}
+
+.ncr-traffic span {
+  width: 0.68rem;
+  height: 0.68rem;
+  border-radius: 9999px;
+  display: inline-block;
+}
+
+.ncr-traffic .r { background-color: #ff5f57; }
+.ncr-traffic .y { background-color: #febc2e; }
+.ncr-traffic .g { background-color: #28c840; }
+
+.ncr-timer {
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Blinking cursor shown while a command is still producing output. */
+.ncr-cursor {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.95rem;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background-color: #38bdf8;
+  animation: ncr-blink 1s step-end infinite;
+}
+
+@keyframes ncr-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* --------------------------------------------------------- Custom command -- */
+.ncr-custombar {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  padding: 0.75rem;
+}
+
+.ncr-custombar input,
+.ncr-custombar select {
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background-color: #fff;
+  color: #1e293b;
+  font-size: 0.85rem;
+  padding: 0.45rem 0.6rem;
+}
+
+.ncr-custombar input {
+  flex: 1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.ncr-custombar input:focus,
+.ncr-custombar select:focus {
+  outline: none;
+  border-color: var(--primary, #4099de);
+  box-shadow: 0 0 0 3px rgba(64, 153, 222, 0.18);
+}
+
+.dark .ncr-custombar input,
+.dark .ncr-custombar select {
+  background-color: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+/* -------------------------------------------------------------- Notices -- */
+.ncr-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  text-transform: capitalize;
+}
+
+.ncr-notice-danger { color: #b91c1c; background-color: rgba(239, 68, 68, 0.1); }
+.ncr-notice-warning { color: #b45309; background-color: rgba(217, 119, 6, 0.12); }
+.dark .ncr-notice-danger { color: #fca5a5; background-color: rgba(239, 68, 68, 0.16); }
+.dark .ncr-notice-warning { color: #fcd34d; background-color: rgba(217, 119, 6, 0.18); }
+
+/* ------------------------------------------------------------- Skeletons -- */
+.ncr-skeleton {
+  border-radius: 0.35rem;
+  background: linear-gradient(90deg, #e2e8f0 25%, #eef2f7 37%, #e2e8f0 63%);
+  background-size: 400% 100%;
+  animation: ncr-shimmer 1.4s ease infinite;
+}
+
+.dark .ncr-skeleton {
+  background: linear-gradient(90deg, #1e293b 25%, #263449 37%, #1e293b 63%);
+  background-size: 400% 100%;
+}
+
+@keyframes ncr-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* ------------------------------------------------------------- Animations -- */
+@keyframes ncr-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ncr-pop {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes ncr-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@keyframes ncr-spin {
+  to { transform: rotate(360deg); }
+}
+
+.ncr-spin { animation: ncr-spin 0.7s linear infinite; }
+
+/* Output console enter/leave transition (Vue <transition name="ncr-slide">). */
+.ncr-slide-enter-active,
+.ncr-slide-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.ncr-slide-enter-from,
+.ncr-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ncr-modal,
+  .ncr-modal-backdrop,
+  .ncr-btn,
+  .ncr-dot-running,
+  .ncr-spin,
+  .ncr-cursor,
+  .ncr-skeleton,
+  .ncr-slide-enter-active,
+  .ncr-slide-leave-active {
+    animation: none;
+    transition: none;
+  }
 }

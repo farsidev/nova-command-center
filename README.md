@@ -29,6 +29,8 @@ optional variables and the absence of authorization hooks.
 - 🕓 **History** without a database migration.
 - 🔧 **Variables & flags**, including optional variables and `select` inputs.
 - 🚦 **Concurrency control** (`without_overlapping`) and **rate limiting**.
+- 🎨 **Polished, responsive UI** that follows Nova's light/dark theme, with live
+  output, copy-to-clipboard and progress bars.
 
 ---
 
@@ -287,6 +289,17 @@ class RebuildSearchIndex extends Command
 Every execution dispatches `Farsidev\NovaCommandCenter\Events\CommandStarted` and
 `CommandFinished`, each carrying the command definition, the execution result and
 the operator — handy for audit logging.
+
+## Documentation
+
+Deep-dive guides live in [`docs/`](docs/README.md):
+
+- [Configuration](docs/configuration.md) — every config key.
+- [Command sources](docs/command-sources.md) — config, database (Nova resource) and custom sources.
+- [Security model](docs/security.md) — the full threat model.
+- [Authorization](docs/authorization.md) — gate, ability and per-command policies.
+- [Queued execution & progress bars](docs/progress-bars.md) — queueing and live progress.
+- [Frontend, theming & dark mode](docs/frontend.md) — building and customising the UI.
 
 ## Security
 

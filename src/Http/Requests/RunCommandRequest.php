@@ -175,6 +175,28 @@ final class RunCommandRequest extends FormRequest
         return $flags;
     }
 
+    /**
+     * The raw ad-hoc command payload, when this request runs a custom command.
+     * Queued custom commands must carry their definition with the job because
+     * they are built per-request and never exist in the repository.
+     *
+     * @return array{type: string, run: string}|null
+     */
+    public function customPayload(): ?array
+    {
+        if (!$this->filled('custom')) {
+            return null;
+        }
+
+        $custom = $this->input('custom');
+
+        if (is_array($custom) && is_string($custom['type'] ?? null) && is_string($custom['run'] ?? null)) {
+            return ['type' => $custom['type'], 'run' => $custom['run']];
+        }
+
+        return null;
+    }
+
     public function queued(): bool
     {
         $command = $this->command();

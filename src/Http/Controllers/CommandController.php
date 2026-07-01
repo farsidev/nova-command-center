@@ -82,7 +82,15 @@ final class CommandController extends Controller
                     ranBy: $ranBy,
                 ));
 
-                $job = new RunCommandJob($command->id, $values, $flags, $executionId, $ranBy, $command->timeout);
+                $job = new RunCommandJob(
+                    $command->id,
+                    $values,
+                    $flags,
+                    $executionId,
+                    $ranBy,
+                    $command->timeout,
+                    $request->customPayload(),
+                );
 
                 if ($command->queue !== null && $command->queue['connection'] !== null) {
                     $job->onConnection($command->queue['connection']);

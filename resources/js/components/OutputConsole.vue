@@ -1,29 +1,44 @@
 <template>
-  <div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-    <div class="flex items-center justify-between px-4 py-2 bg-gray-100 dark:bg-gray-900">
-      <div class="flex items-center gap-2">
-        <span class="inline-block w-2 h-2 rounded-full" :class="statusDotClass"></span>
-        <span class="text-sm font-bold text-gray-700 dark:text-gray-200">{{ execution.name }}</span>
-        <span class="text-xs text-gray-500 dark:text-gray-400">{{ statusLabel }}</span>
+  <div class="ncr-console-shell">
+    <div class="ncr-console-head">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="ncr-traffic"><span class="r" /><span class="y" /><span class="g" /></span>
+        <span class="ncr-dot" :class="`ncr-dot-${execution.status}`"></span>
+        <span class="text-sm font-bold text-gray-700 dark:text-gray-200 truncate">{{ execution.name }}</span>
+        <span class="text-xs" :class="`ncr-status-${execution.status}`">{{ statusLabel }}</span>
       </div>
-      <div class="text-xs text-gray-400" v-if="execution.duration != null">
-        {{ execution.duration }}s
+      <div class="flex items-center gap-3 shrink-0">
+        <span class="ncr-timer text-xs text-gray-400">{{ elapsedLabel }}</span>
+        <button v-if="execution.output" type="button" class="ncr-copy" @click="copy">
+          <svg v-if="!copied" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+            <rect x="9" y="9" width="13" height="13" rx="2" />
+            <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+          </svg>
+          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          {{ copied ? __('Copied') : __('Copy') }}
+        </button>
       </div>
     </div>
 
-    <div v-if="progress && progress.total > 0" class="px-4 pt-3">
-      <div class="h-2 w-full rounded bg-gray-200 dark:bg-gray-700 overflow-hidden">
-        <div class="h-2 bg-primary-500 transition-all" :style="{ width: (progress.percentage || 0) + '%' }"></div>
+    <div v-if="progress && progress.total > 0" class="px-4 pt-3 bg-white dark:bg-gray-800">
+      <div class="flex items-center justify-between mb-1">
+        <p v-if="progress.message" class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ progress.message }}</p>
+        <span class="text-xs font-medium text-gray-400 shrink-0 ml-2">{{ Math.round(progress.percentage || 0) }}%</span>
       </div>
-      <p v-if="progress.message" class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ progress.message }}</p>
+      <div class="ncr-progress">
+        <div class="ncr-progress-bar" :style="{ width: (progress.percentage || 0) + '%' }"></div>
+      </div>
+      <div class="h-3"></div>
     </div>
 
-    <pre class="ncr-console px-4 py-3 text-xs leading-relaxed overflow-auto max-h-96"><code>{{ execution.output || placeholder }}</code></pre>
+    <pre ref="body" class="ncr-console"><code>{{ execution.output || placeholder }}</code><span v-if="isRunning" class="ncr-cursor" /></pre>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { __ } from '../util/translate'
 
 const props = defineProps({
@@ -31,7 +46,54 @@ const props = defineProps({
   progress: { type: Object, default: null },
 })
 
+const body = ref(null)
+const copied = ref(false)
+const now = ref(Date.now())
+let ticker = null
+
 const isRunning = computed(() => ['pending', 'running'].includes(props.execution.status))
+
+// A live, ticking clock only while the command runs; stopped otherwise so we
+// never leave an interval behind.
+watch(
+  isRunning,
+  (running) => {
+    stopTicker()
+    if (running) {
+      now.value = Date.now()
+      ticker = setInterval(() => (now.value = Date.now()), 1000)
+    }
+  },
+  { immediate: true },
+)
+
+onBeforeUnmount(stopTicker)
+
+function stopTicker() {
+  if (ticker) {
+    clearInterval(ticker)
+    ticker = null
+  }
+}
+
+// Auto-scroll to the newest output as it streams in.
+watch(
+  () => props.execution.output,
+  () => {
+    nextTick(() => {
+      if (body.value) body.value.scrollTop = body.value.scrollHeight
+    })
+  },
+)
+
+const elapsedLabel = computed(() => {
+  if (props.execution.duration != null) return `${props.execution.duration}s`
+  if (!isRunning.value || !props.execution.started_at) return ''
+  const start = new Date(props.execution.started_at).getTime()
+  if (Number.isNaN(start)) return ''
+  const secs = Math.max(0, (now.value - start) / 1000)
+  return `${secs.toFixed(0)}s`
+})
 
 const placeholder = computed(() => (isRunning.value ? __('Waiting for output…') : __('No output.')))
 
@@ -46,14 +108,16 @@ const statusLabel = computed(
     })[props.execution.status] || props.execution.status,
 )
 
-const statusDotClass = computed(
-  () =>
-    ({
-      pending: 'bg-gray-400',
-      running: 'bg-blue-400 animate-pulse',
-      success: 'bg-green-500',
-      failed: 'bg-red-500',
-      timed_out: 'bg-yellow-500',
-    })[props.execution.status] || 'bg-gray-400',
-)
+function copy() {
+  const text = props.execution.output || ''
+
+  const done = () => {
+    copied.value = true
+    setTimeout(() => (copied.value = false), 1500)
+  }
+
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => {})
+  }
+}
 </script>
