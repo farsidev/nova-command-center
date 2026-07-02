@@ -115,3 +115,37 @@ argument.
     ['label' => 'Force', 'flag' => '--force', 'default' => true],
 ],
 ```
+
+## Migrating from other command-runner packages
+
+The `run` string is executed exactly as written — every token in it must be a
+real argument the target command understands. This package does not scan the
+`run` string for special tokens of its own.
+
+Some other Nova command-runner packages do the opposite: they let you embed a
+control flag like `--should-queue` directly in the run string and strip it out
+before executing, using it purely as a signal to that package (not the command
+being run). If you copy a `run` string from one of those configs verbatim, that
+token gets passed straight through to the real command, which will reject it
+with something like:
+
+```
+The "--should-queue" option does not exist.
+```
+
+To migrate such a command, remove the magic token from `run` and use this
+package's own `queue` key instead:
+
+```php
+// Before (another package's config):
+'run' => 'my:command --should-queue',
+
+// After:
+'run' => 'my:command',
+'queue' => true,
+```
+
+Only remove the token if the target command does not itself define that option
+— check its `$signature`. A command can legitimately have its own real
+`--should-queue` (or similarly named) option with completely different meaning;
+in that case leave it in `run` untouched.
