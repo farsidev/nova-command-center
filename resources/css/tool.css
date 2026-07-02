@@ -15,6 +15,10 @@
   border: 1px solid #e9edf2;
   border-radius: 0.75rem;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.03);
+  /* Explicit rather than a Tailwind `overflow-hidden` utility, which Nova's
+     purged build does not reliably ship — content must not bleed past the
+     rounded corners regardless of the host app's build. */
+  overflow: hidden;
 }
 
 .dark .ncr-card {
@@ -93,6 +97,9 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
+  /* No-op in normal block flow; lets this shrink correctly when it happens to
+     be a flex/grid item too, without needing a separate min-w-0 utility. */
+  min-width: 0;
 }
 
 /* -------------------------------------------------------------- Icon badge -- */
@@ -351,6 +358,40 @@
 .ncr-copy:hover { background-color: rgba(100, 116, 139, 0.14); color: #334155; }
 .dark .ncr-copy { color: #94a3b8; }
 .dark .ncr-copy:hover { background-color: rgba(148, 163, 184, 0.16); color: #e2e8f0; }
+
+/* ---------------------------------------------------------------- History -- */
+.ncr-history-list {
+  max-height: 32rem;
+  overflow-y: auto;
+}
+
+.ncr-history-row {
+  position: relative;
+  overflow: hidden;
+  padding-left: 1rem;
+}
+
+.ncr-history-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: currentColor;
+  opacity: 0.7;
+}
+
+.ncr-history-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ncr-history-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
 /* ------------------------------------------------------------- Empty state -- */
 .ncr-empty {
@@ -695,7 +736,6 @@
   border-radius: 0.5rem;
   font-size: 0.8rem;
   line-height: 1.35;
-  text-transform: capitalize;
 }
 
 .ncr-notice-danger { color: #b91c1c; background-color: rgba(239, 68, 68, 0.1); }

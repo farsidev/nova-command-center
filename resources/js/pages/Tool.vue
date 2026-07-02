@@ -298,8 +298,12 @@ async function runCustom() {
   try {
     const { data } = await api.run({ custom: { type: customType.value, run } })
     current.value = data.execution
-    if (data.queued) pollExecution(data.execution.id)
-    else finishExecution(data.execution)
+    if (data.queued) {
+      pollExecution(data.execution.id)
+      refreshHistory()
+    } else {
+      finishExecution(data.execution)
+    }
   } catch (error) {
     const { message } = handleRunError(error)
     Nova.error(message)
@@ -324,6 +328,10 @@ async function execute({ command, values, flags }) {
 
     if (data.queued) {
       pollExecution(data.execution.id)
+      // The backend records a pending entry the instant a command is queued
+      // (so it survives a reload even if nothing ever consumes the job); pull
+      // it in now rather than waiting for the command to finish.
+      refreshHistory()
     } else {
       finishExecution(data.execution)
     }
@@ -456,9 +464,19 @@ async function refreshHistory() {
   }
 }
 
+// Selecting a history entry normally just shows a snapshot. But a pending or
+// still-running entry (e.g. a queued command the operator navigated away from,
+// or reloaded the page on) has no live tracking yet — resume polling it so the
+// console updates instead of showing a permanently frozen "Running…".
 function selectHistory(item) {
   current.value = item
   progress.value = null
+
+  if (['pending', 'running'].includes(item.status)) {
+    runningId.value = item.command_id
+    stopPolling()
+    pollExecution(item.id)
+  }
 }
 
 async function clearHistory() {

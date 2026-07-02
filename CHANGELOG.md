@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Queued commands now record a `pending` entry in History the instant they are
+  dispatched, not just once they finish. Previously a queued command that was
+  slow to start — or never started, e.g. because no queue worker was consuming
+  jobs — left no trace anywhere once the operator reloaded the page or came
+  back later; History now shows it immediately and keeps it updated in place.
+- Selecting a still-pending or still-running entry from History resumes live
+  polling instead of showing a frozen snapshot.
+- A "still queued" warning appears in the console after a command has been
+  pending for a while, naming the likely cause (no queue worker consuming
+  jobs) instead of leaving the operator staring at "Waiting for output…" with
+  no information.
+
 - Initial release.
 - An explicit `confirm` command option that forces or skips the confirmation
   modal, independent of button type (previously only `danger`/`warning` types
@@ -85,3 +97,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   transient failures a few times, stops immediately (with a clear message) on an
   expired session or a missing execution, and otherwise gives up honestly after a
   few attempts instead of pretending to know the outcome.
+- A history row with a long name and a "success"/"failed" badge could push the
+  badge past the visible edge of the panel instead of the row truncating —
+  another instance of Nova's purged Tailwind build not shipping `min-w-0`.
+  Fixed with the same explicit-CSS approach used elsewhere, and hardened
+  `.ncr-truncate` and `.ncr-card` generally so this class of bug can't recur.
+- A notice banner's `text-transform: capitalize` — meant only to capitalize an
+  interpolated word like "danger" — was title-casing entire sentences in
+  longer messages (e.g. the new staleness warning). Scoped the capitalization
+  to just the interpolated value.

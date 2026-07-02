@@ -70,7 +70,7 @@ final class CommandController extends Controller
             if ($request->queued()) {
                 $executionId = (string) Str::uuid();
 
-                $this->store->put(new ExecutionResult(
+                $pending = new ExecutionResult(
                     id: $executionId,
                     commandId: $command->id,
                     name: $command->name,
@@ -80,7 +80,17 @@ final class CommandController extends Controller
                     output: '',
                     startedAt: now()->toIso8601String(),
                     ranBy: $ranBy,
-                ));
+                );
+
+                $this->store->put($pending);
+
+                // Record it in history immediately, not just the live-poll
+                // store. Otherwise a queued command that is slow to start (or
+                // never starts, e.g. no worker is consuming the queue) leaves
+                // no trace anywhere once the operator navigates away or
+                // reloads — the job that eventually finishes replaces this
+                // same entry in place (History::push dedupes by id).
+                $this->history->push($pending);
 
                 $job = new RunCommandJob(
                     $command->id,

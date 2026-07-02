@@ -22,6 +22,14 @@
       </div>
     </div>
 
+    <div v-if="isStalePending" class="ncr-notice ncr-notice-warning" style="margin: 0.75rem 1rem 0;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0 mt-0.5">
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </svg>
+      <span>{{ __('Still queued after :seconds. If no queue worker is processing jobs, this may never start — check your queue configuration.', { seconds: pendingSecondsLabel }) }}</span>
+    </div>
+
     <div v-if="progress && progress.total > 0" class="px-4 pt-3 bg-white dark:bg-gray-800">
       <div class="flex items-center justify-between mb-1">
         <p v-if="progress.message" class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ progress.message }}</p>
@@ -86,14 +94,29 @@ watch(
   },
 )
 
+const elapsedSeconds = computed(() => {
+  if (!isRunning.value || !props.execution.started_at) return null
+  const start = new Date(props.execution.started_at).getTime()
+  if (Number.isNaN(start)) return null
+  return Math.max(0, (now.value - start) / 1000)
+})
+
 const elapsedLabel = computed(() => {
   if (props.execution.duration != null) return `${props.execution.duration}s`
-  if (!isRunning.value || !props.execution.started_at) return ''
-  const start = new Date(props.execution.started_at).getTime()
-  if (Number.isNaN(start)) return ''
-  const secs = Math.max(0, (now.value - start) / 1000)
-  return `${secs.toFixed(0)}s`
+  return elapsedSeconds.value == null ? '' : `${elapsedSeconds.value.toFixed(0)}s`
 })
+
+// A command still "pending" (never even started) after a while is a much
+// stronger signal something is wrong than one merely taking a while to
+// finish — most likely nothing is consuming the queue. "running" for a long
+// time is often entirely normal for a genuinely slow command.
+const STALE_PENDING_THRESHOLD = 20
+
+const isStalePending = computed(
+  () => props.execution.status === 'pending' && (elapsedSeconds.value ?? 0) > STALE_PENDING_THRESHOLD,
+)
+
+const pendingSecondsLabel = computed(() => `${Math.round(elapsedSeconds.value ?? 0)}s`)
 
 const placeholder = computed(() => (isRunning.value ? __('Waiting for output…') : __('No output.')))
 

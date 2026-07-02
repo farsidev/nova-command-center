@@ -26,6 +26,35 @@ it('dispatches a job for a queued command', function () {
     Queue::assertPushed(RunCommandJob::class);
 });
 
+it('records a pending entry in history the moment a command is queued', function () {
+    Queue::fake();
+
+    $response = $this->postJson('_ncr/commands/run', ['command' => commandId('Queued Job')]);
+    $executionId = $response->assertAccepted()->json('execution.id');
+
+    // The job never actually runs (Queue::fake), so if history only recorded
+    // finished executions this would never appear — proving the operator has
+    // a persistent record even when nothing ever consumes the queue.
+    $this->getJson('_ncr/history')
+        ->assertOk()
+        ->assertJsonCount(1, 'history')
+        ->assertJsonPath('history.0.id', $executionId)
+        ->assertJsonPath('history.0.status', 'pending');
+});
+
+it('replaces the pending history entry once the queued command finishes', function () {
+    // Default queue connection is "sync" in the test environment, so the job
+    // runs inline and the pending record must be replaced, not duplicated.
+    $response = $this->postJson('_ncr/commands/run', ['command' => commandId('Queued Job')]);
+    $executionId = $response->assertAccepted()->json('execution.id');
+
+    $this->getJson('_ncr/history')
+        ->assertOk()
+        ->assertJsonCount(1, 'history')
+        ->assertJsonPath('history.0.id', $executionId)
+        ->assertJsonPath('history.0.status', 'success');
+});
+
 it('completes a queued command when the queue runs synchronously', function () {
     // Default queue connection is "sync" in the test environment.
     $response = $this->postJson('_ncr/commands/run', ['command' => commandId('Queued Job')]);

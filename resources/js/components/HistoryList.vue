@@ -1,5 +1,5 @@
 <template>
-  <div class="ncr-card overflow-hidden">
+  <div class="ncr-card">
     <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
       <div class="flex items-center gap-2">
         <h3 class="font-bold text-gray-700 dark:text-gray-200">{{ __('History') }}</h3>
@@ -16,21 +16,28 @@
       </button>
     </div>
 
-    <ul v-if="history.length" class="divide-y divide-gray-100 dark:divide-gray-700">
+    <ul v-if="history.length" class="ncr-history-list divide-y divide-gray-100 dark:divide-gray-700">
       <li
         v-for="item in history"
         :key="item.id"
-        class="group flex items-center justify-between gap-2 px-4 py-2.5 cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+        class="group ncr-history-row flex items-center justify-between gap-2 px-4 py-2.5 cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+        :style="{ '--ncr-row-accent': statusColor(item.status) }"
+        :title="isActive(item.status) ? __('Still in progress — click to follow it live') : ''"
         @click="$emit('select', item)"
       >
-        <div class="min-w-0 pr-2">
-          <p class="text-sm font-medium text-gray-700 dark:text-gray-200 truncate" :title="item.name">{{ item.name }}</p>
-          <p class="text-xs text-gray-400 truncate">
-            {{ item.ran_by || '—' }} · <span :title="absolute(item.started_at)">{{ relative(item.started_at) }}</span>
+        <div class="ncr-history-body">
+          <p class="text-sm font-medium text-gray-700 dark:text-gray-200 ncr-truncate" :title="item.name">{{ item.name }}</p>
+          <p class="ncr-history-meta text-xs text-gray-400">
+            <span class="ncr-truncate">{{ item.ran_by || '—' }} · <span :title="absolute(item.started_at)">{{ relative(item.started_at) }}</span></span>
+            <span v-if="item.duration != null" class="shrink-0">· {{ item.duration }}s</span>
           </p>
         </div>
         <div class="flex items-center gap-1 shrink-0">
+          <svg v-if="isActive(item.status)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ncr-spin w-3.5 h-3.5 text-gray-400">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+          </svg>
           <button
+            v-else
             type="button"
             class="ncr-iconbtn opacity-0 group-hover:opacity-100 focus:opacity-100"
             :title="__('Run again')"
@@ -87,6 +94,24 @@ function onClearClick() {
 }
 
 onBeforeUnmount(() => clearTimeout(resetTimer))
+
+function isActive(status) {
+  return status === 'pending' || status === 'running'
+}
+
+// Mirrors the .ncr-dot-* palette in tool.css so the accent stripe always
+// matches the status dot/label shown on the same row.
+const STATUS_COLORS = {
+  pending: '#94a3b8',
+  running: '#3b82f6',
+  success: '#22c55e',
+  failed: '#ef4444',
+  timed_out: '#f59e0b',
+}
+
+function statusColor(status) {
+  return STATUS_COLORS[status] || STATUS_COLORS.pending
+}
 
 function absolute(value) {
   if (!value) return ''

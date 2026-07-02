@@ -41,7 +41,7 @@
             <line x1="12" y1="9" x2="12" y2="13" />
             <line x1="12" y1="17" x2="12.01" y2="17" />
           </svg>
-          <span>{{ __('This is a :type command. Make sure you want to run it.', { type: command.type }) }}</span>
+          <span>{{ __('This is a :type command. Make sure you want to run it.', { type: capitalize(command.type) }) }}</span>
         </div>
 
         <variable-field
@@ -129,6 +129,10 @@ function fieldError(name) {
 }
 
 const isRisky = computed(() => props.command.needs_confirm ?? ['danger', 'warning'].includes(props.command.type))
+
+function capitalize(value) {
+  return value ? value.charAt(0).toUpperCase() + value.slice(1) : value
+}
 
 const valid = computed(() =>
   props.command.variables.every(
