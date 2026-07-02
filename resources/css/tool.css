@@ -631,9 +631,25 @@
 /* --------------------------------------------------------- Custom command -- */
 .ncr-custombar {
   display: flex;
+  flex-wrap: wrap;
   align-items: stretch;
   gap: 0.5rem;
   padding: 0.75rem;
+}
+
+.ncr-custombar select {
+  flex: 1 1 7rem;
+  min-width: 6rem;
+}
+
+.ncr-custombar input {
+  flex: 3 1 12rem;
+  min-width: 8rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.ncr-custombar .ncr-btn {
+  flex: 0 0 auto;
 }
 
 .ncr-custombar input,
@@ -644,11 +660,6 @@
   color: #1e293b;
   font-size: 0.85rem;
   padding: 0.45rem 0.6rem;
-}
-
-.ncr-custombar input {
-  flex: 1;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 .ncr-custombar input:focus,
@@ -663,6 +674,15 @@
   background-color: #0f172a;
   border-color: #334155;
   color: #e2e8f0;
+}
+
+/* Below ~400px even the flex-wrapped layout gets tight; stack fully. */
+@media (max-width: 25rem) {
+  .ncr-custombar select,
+  .ncr-custombar input,
+  .ncr-custombar .ncr-btn {
+    flex-basis: 100%;
+  }
 }
 
 /* -------------------------------------------------------------- Notices -- */
@@ -682,6 +702,21 @@
 .ncr-notice-warning { color: #b45309; background-color: rgba(217, 119, 6, 0.12); }
 .dark .ncr-notice-danger { color: #fca5a5; background-color: rgba(239, 68, 68, 0.16); }
 .dark .ncr-notice-warning { color: #fcd34d; background-color: rgba(217, 119, 6, 0.18); }
+
+/* A generic notice used for server-side submit errors (not tied to a type). */
+.ncr-notice-error {
+  color: #b91c1c;
+  background-color: rgba(239, 68, 68, 0.1);
+  text-transform: none;
+}
+
+.dark .ncr-notice-error { color: #fca5a5; background-color: rgba(239, 68, 68, 0.16); }
+
+/* Invalid form field (server-side validation failure). */
+.ncr-field-invalid {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25) !important;
+}
 
 /* ------------------------------------------------------------- Skeletons -- */
 .ncr-skeleton {

@@ -75,6 +75,7 @@ optional and falls back to a safe default.
     'output_size' => 50,
     'queue' => false,              // true, or ['connection' => …, 'queue' => …]
     'can' => 'runMigrations',      // optional gate ability for this command
+    'confirm' => true,             // force/skip the confirmation modal; default: danger/warning types confirm, others don't
     'variables' => [/* … */],      // see below
     'flags' => [
         ['label' => 'Force in production', 'flag' => '--force', 'default' => true],

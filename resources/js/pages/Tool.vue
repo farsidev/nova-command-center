@@ -17,21 +17,31 @@
       </div>
     </div>
 
-    <!-- Loading skeleton -->
-    <div v-if="loading" class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-      <div class="lg:col-span-2 space-y-3">
-        <div v-for="n in 4" :key="n" class="ncr-card flex items-center justify-between px-4 py-3">
-          <div class="flex-1 space-y-2">
-            <div class="ncr-skeleton h-3.5 w-40"></div>
-            <div class="ncr-skeleton h-3 w-24"></div>
-          </div>
-          <div class="ncr-skeleton h-8 w-16 rounded-lg"></div>
+    <!-- Loading skeleton, mirroring the real rail/commands/history layout to
+         avoid a jarring reflow once the data arrives. -->
+    <div v-if="loading" class="space-y-6">
+      <div class="ncr-skeleton h-10 w-full rounded-xl"></div>
+
+      <div class="ncr-columns">
+        <div class="ncr-col-rail ncr-rail-desktop ncr-card p-3 space-y-2">
+          <div v-for="n in 5" :key="n" class="ncr-skeleton h-6 w-full rounded-lg"></div>
         </div>
-      </div>
-      <div class="ncr-card p-4 space-y-3">
-        <div class="ncr-skeleton h-4 w-24"></div>
-        <div class="ncr-skeleton h-3 w-full"></div>
-        <div class="ncr-skeleton h-3 w-2/3"></div>
+
+        <div class="ncr-col-main space-y-3">
+          <div v-for="n in 4" :key="n" class="ncr-card flex items-center justify-between px-4 py-3">
+            <div class="flex-1 space-y-2">
+              <div class="ncr-skeleton h-3.5 w-40"></div>
+              <div class="ncr-skeleton h-3 w-56"></div>
+            </div>
+            <div class="ncr-skeleton h-8 w-16 rounded-lg shrink-0"></div>
+          </div>
+        </div>
+
+        <div class="ncr-col-history ncr-card p-4 space-y-3">
+          <div class="ncr-skeleton h-4 w-24"></div>
+          <div class="ncr-skeleton h-3 w-full"></div>
+          <div class="ncr-skeleton h-3 w-2/3"></div>
+        </div>
       </div>
     </div>
 
@@ -112,7 +122,15 @@
       </div>
     </div>
 
-    <run-modal v-if="modalCommand" :command="modalCommand" @close="modalCommand = null" @run="onModalRun" />
+    <run-modal
+      v-if="modalCommand"
+      :command="modalCommand"
+      :errors="modalErrors"
+      :submit-error="modalSubmitError"
+      :submitting="modalSubmitting"
+      @close="modalCommand = null"
+      @run="onModalRun"
+    />
   </div>
 </template>
 
@@ -137,6 +155,9 @@ const current = shallowRef(null)
 const progress = shallowRef(null)
 const runningId = ref(null)
 const modalCommand = shallowRef(null)
+const modalErrors = shallowRef({})
+const modalSubmitError = ref(null)
+const modalSubmitting = ref(false)
 
 const search = ref('')
 const activeCategory = ref(null)
@@ -215,13 +236,17 @@ async function load() {
   }
 }
 
-// A command opens the modal when it needs input OR is risky (danger/warning);
-// the modal doubles as the confirmation step. Safe commands run immediately.
+// A command opens the modal when it needs input OR the backend says it needs
+// confirmation (needs_confirm — explicit `confirm` config, or danger/warning
+// type by default); the modal doubles as the confirmation step. Safe commands
+// run immediately.
 function trigger(command) {
   const needsInput = command.variables.length > 0 || command.flags.length > 0
-  const needsConfirm = ['danger', 'warning'].includes(command.type)
+  const needsConfirm = command.needs_confirm ?? ['danger', 'warning'].includes(command.type)
 
   if (needsInput || needsConfirm) {
+    modalErrors.value = {}
+    modalSubmitError.value = null
     modalCommand.value = command
     return
   }
@@ -229,9 +254,25 @@ function trigger(command) {
   execute({ command, values: {}, flags: {} })
 }
 
-function onModalRun(payload) {
-  modalCommand.value = null
-  execute(payload)
+async function onModalRun(payload) {
+  modalSubmitting.value = true
+  modalErrors.value = {}
+  modalSubmitError.value = null
+
+  const result = await execute(payload)
+
+  modalSubmitting.value = false
+
+  if (result.success) {
+    modalCommand.value = null
+    return
+  }
+
+  if (result.fieldErrors && Object.keys(result.fieldErrors).length) {
+    modalErrors.value = result.fieldErrors
+  } else {
+    modalSubmitError.value = result.message
+  }
 }
 
 // Re-run a past execution by finding its source command; if that command needs
@@ -245,31 +286,37 @@ function rerun(item) {
   trigger(command)
 }
 
-function runCustom() {
+async function runCustom() {
   const run = customRun.value.trim()
   if (!run) return
 
   runningId.value = 'custom'
   stopPolling()
   progress.value = null
+  scrollToConsole()
 
-  api
-    .run({ custom: { type: customType.value, run } })
-    .then(({ data }) => {
-      current.value = data.execution
-      if (data.queued) pollExecution(data.execution.id)
-      else finishExecution(data.execution)
-    })
-    .catch((error) => {
-      Nova.error(error?.response?.data?.message || __('Command failed to start.'))
-      runningId.value = null
-    })
+  try {
+    const { data } = await api.run({ custom: { type: customType.value, run } })
+    current.value = data.execution
+    if (data.queued) pollExecution(data.execution.id)
+    else finishExecution(data.execution)
+  } catch (error) {
+    const { message } = handleRunError(error)
+    Nova.error(message)
+    runningId.value = null
+  }
 }
 
+/**
+ * Run a command and report back whether it succeeded.
+ *
+ * @returns {Promise<{success: boolean, fieldErrors?: object, message?: string}>}
+ */
 async function execute({ command, values, flags }) {
   runningId.value = command.id
   stopPolling()
   progress.value = null
+  scrollToConsole()
 
   try {
     const { data } = await api.run({ command: command.id, variables: values, flags })
@@ -280,17 +327,68 @@ async function execute({ command, values, flags }) {
     } else {
       finishExecution(data.execution)
     }
+
+    return { success: true }
   } catch (error) {
-    const message = error?.response?.data?.message || __('Command failed to start.')
-    Nova.error(message)
     runningId.value = null
+
+    const result = handleRunError(error)
+    // Field-level errors are shown inline in the modal instead of a toast;
+    // anything else (auth, rate limit, lock conflicts) still gets a toast so
+    // it's visible even for commands that ran without opening the modal.
+    if (!result.fieldErrors) Nova.error(result.message)
+
+    return { success: false, ...result }
   }
 }
 
+/**
+ * Translate an API error into a user-facing message, splitting out per-field
+ * validation errors (`variables.foo`) so the caller can surface them inline.
+ */
+function handleRunError(error) {
+  const status = error?.response?.status
+  const data = error?.response?.data
+
+  if (status === 422 && data?.errors) {
+    const fieldErrors = {}
+    Object.entries(data.errors).forEach(([key, messages]) => {
+      const match = key.match(/^variables\.(.+)$/)
+      if (match) fieldErrors[match[1]] = messages[0]
+    })
+
+    if (Object.keys(fieldErrors).length) {
+      return { fieldErrors, message: data.message || __('Please fix the highlighted fields.') }
+    }
+  }
+
+  if (status === 429) {
+    return { message: data?.message || __('Too many commands. Please wait a moment and try again.') }
+  }
+
+  if (status === 403) {
+    return { message: data?.message || __('You are not authorized to run this command.') }
+  }
+
+  return { message: data?.message || __('Command failed to start.') }
+}
+
+function scrollToConsole() {
+  if (typeof window !== 'undefined' && window.scrollY > 0) {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
+
+const POLL_INTERVAL = 1500
+const POLL_MAX_FAILURES = 4
+
 function pollExecution(id) {
+  let failures = 0
+
   poller = setInterval(async () => {
     try {
       const { data } = await api.execution(id)
+      failures = 0
       current.value = data.execution
       progress.value = data.progress
 
@@ -298,9 +396,37 @@ function pollExecution(id) {
         finishExecution(data.execution)
       }
     } catch (error) {
-      finishExecution(current.value)
+      const status = error?.response?.status
+
+      // Session expired or the execution record is gone (cache eviction) —
+      // retrying will not help, so stop immediately with an honest message.
+      if (status === 401 || status === 419) {
+        stopPolling()
+        runningId.value = null
+        Nova.error(__('Your session has expired. Refresh the page to continue.'))
+        return
+      }
+
+      if (status === 404) {
+        stopPolling()
+        runningId.value = null
+        Nova.error(__('Lost track of this execution. It may still be running — check History shortly.'))
+        return
+      }
+
+      // Transient failure (network blip). Retry a few times before giving up
+      // — and when we do give up, say so honestly instead of silently
+      // pretending the command finished.
+      failures += 1
+
+      if (failures >= POLL_MAX_FAILURES) {
+        stopPolling()
+        runningId.value = null
+        Nova.error(__('Lost connection while checking status. The command may still be running — check History shortly.'))
+        refreshHistory()
+      }
     }
-  }, 1500)
+  }, POLL_INTERVAL)
 }
 
 function finishExecution(execution) {

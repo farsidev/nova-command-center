@@ -1,5 +1,5 @@
 <template>
-  <div class="ncr-modal-backdrop" @click.self="$emit('close')">
+  <div class="ncr-modal-backdrop" @click.self="onBackdropClick">
     <div class="ncr-modal ncr-card shadow-lg" role="dialog" aria-modal="true">
       <div class="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-100 dark:border-gray-700">
         <div class="min-w-0">
@@ -7,7 +7,7 @@
             <span class="ncr-badge" :class="command.command_type === 'bash' ? 'ncr-badge-bash' : 'ncr-badge-artisan'">
               {{ command.command_type === 'bash' ? 'bash' : 'artisan' }}
             </span>
-            <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 truncate">{{ command.name }}</h3>
+            <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 truncate" :title="command.name">{{ command.name }}</h3>
           </div>
           <p v-if="command.help" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ command.help }}</p>
           <code class="block mt-2 text-xs text-gray-400 dark:text-gray-500 break-all">{{ command.run }}</code>
@@ -26,7 +26,16 @@
       </div>
 
       <div class="ncr-modal-body">
-        <div v-if="isRisky" class="ncr-notice" :class="command.type === 'danger' ? 'ncr-notice-danger' : 'ncr-notice-warning'">
+        <div v-if="submitError" class="ncr-notice ncr-notice-error">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0 mt-0.5">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span>{{ submitError }}</span>
+        </div>
+
+        <div v-else-if="isRisky" class="ncr-notice" :class="command.type === 'danger' ? 'ncr-notice-danger' : 'ncr-notice-warning'">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0 mt-0.5">
             <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
             <line x1="12" y1="9" x2="12" y2="13" />
@@ -39,7 +48,9 @@
           v-for="variable in command.variables"
           :key="variable.name"
           :variable="variable"
+          :error="fieldError(variable.name)"
           v-model="values[variable.name]"
+          @update:model-value="touch(variable.name)"
         />
 
         <div v-if="command.flags.length">
@@ -57,14 +68,17 @@
       </div>
 
       <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 dark:border-gray-700">
-        <button type="button" class="ncr-btn ncr-btn-link" @click="$emit('close')">
+        <button type="button" class="ncr-btn ncr-btn-link" :disabled="submitting" @click="$emit('close')">
           {{ __('Cancel') }}
         </button>
-        <button type="button" class="ncr-btn" :class="`ncr-btn-${command.type}`" :disabled="!valid" @click="submit">
-          <svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+        <button type="button" class="ncr-btn" :class="`ncr-btn-${command.type}`" :disabled="!valid || submitting" @click="submit">
+          <svg v-if="submitting" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ncr-spin w-3.5 h-3.5">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+          </svg>
+          <svg v-else viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
             <path d="M8 5v14l11-7z" />
           </svg>
-          {{ __('Run') }}
+          {{ submitting ? __('Running…') : __('Run') }}
         </button>
       </div>
     </div>
@@ -72,12 +86,15 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, reactive } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import VariableField from './VariableField'
 import { __ } from '../util/translate'
 
 const props = defineProps({
   command: { type: Object, required: true },
+  errors: { type: Object, default: () => ({}) },
+  submitError: { type: String, default: null },
+  submitting: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close', 'run'])
@@ -93,7 +110,25 @@ props.command.flags.forEach((flag) => {
   flags[flag.key] = flag.default
 })
 
-const isRisky = computed(() => ['danger', 'warning'].includes(props.command.type))
+// Fields the operator has edited since the last failed submission — their
+// server-side error is hidden immediately so correcting a value doesn't leave
+// a stale red border until the next round-trip.
+const touchedFields = ref(new Set())
+
+watch(
+  () => props.errors,
+  () => (touchedFields.value = new Set()),
+)
+
+function touch(name) {
+  touchedFields.value.add(name)
+}
+
+function fieldError(name) {
+  return touchedFields.value.has(name) ? null : props.errors[name] || null
+}
+
+const isRisky = computed(() => props.command.needs_confirm ?? ['danger', 'warning'].includes(props.command.type))
 
 const valid = computed(() =>
   props.command.variables.every(
@@ -102,12 +137,16 @@ const valid = computed(() =>
 )
 
 function submit() {
-  if (!valid.value) return
+  if (!valid.value || props.submitting) return
   emit('run', { command: props.command, values: { ...values }, flags: { ...flags } })
 }
 
+function onBackdropClick() {
+  if (!props.submitting) emit('close')
+}
+
 function onKey(event) {
-  if (event.key === 'Escape') emit('close')
+  if (event.key === 'Escape' && !props.submitting) emit('close')
   if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) submit()
 }
 

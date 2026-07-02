@@ -8,10 +8,11 @@
       <button
         v-if="history.length"
         type="button"
-        class="text-xs font-medium text-red-500 hover:text-red-600 hover:underline"
-        @click="$emit('clear')"
+        class="text-xs font-medium hover:underline"
+        :class="confirmingClear ? 'text-red-600' : 'text-red-500 hover:text-red-600'"
+        @click="onClearClick"
       >
-        {{ __('Clear') }}
+        {{ confirmingClear ? __('Click again to confirm') : __('Clear') }}
       </button>
     </div>
 
@@ -23,7 +24,7 @@
         @click="$emit('select', item)"
       >
         <div class="min-w-0 pr-2">
-          <p class="text-sm font-medium text-gray-700 dark:text-gray-200 truncate">{{ item.name }}</p>
+          <p class="text-sm font-medium text-gray-700 dark:text-gray-200 truncate" :title="item.name">{{ item.name }}</p>
           <p class="text-xs text-gray-400 truncate">
             {{ item.ran_by || '—' }} · <span :title="absolute(item.started_at)">{{ relative(item.started_at) }}</span>
           </p>
@@ -59,13 +60,33 @@
 </template>
 
 <script setup>
+import { onBeforeUnmount, ref } from 'vue'
 import { __ } from '../util/translate'
 
 defineProps({
   history: { type: Array, default: () => [] },
 })
 
-defineEmits(['select', 'clear', 'rerun'])
+const emit = defineEmits(['select', 'clear', 'rerun'])
+
+// Two-step confirm: the first click arms it, the second (within 4s) clears.
+// Avoids both a native confirm() dialog and an accidental full history wipe.
+const confirmingClear = ref(false)
+let resetTimer = null
+
+function onClearClick() {
+  if (confirmingClear.value) {
+    clearTimeout(resetTimer)
+    confirmingClear.value = false
+    emit('clear')
+    return
+  }
+
+  confirmingClear.value = true
+  resetTimer = setTimeout(() => (confirmingClear.value = false), 4000)
+}
+
+onBeforeUnmount(() => clearTimeout(resetTimer))
 
 function absolute(value) {
   if (!value) return ''

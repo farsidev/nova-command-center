@@ -5,7 +5,7 @@
         <span class="ncr-badge shrink-0" :class="command.command_type === 'bash' ? 'ncr-badge-bash' : 'ncr-badge-artisan'">
           {{ command.command_type === 'bash' ? 'bash' : 'artisan' }}
         </span>
-        <p class="font-bold text-gray-800 dark:text-gray-200 ncr-truncate">{{ command.name }}</p>
+        <p class="font-bold text-gray-800 dark:text-gray-200 ncr-truncate" :title="command.name">{{ command.name }}</p>
         <span
           v-if="command.queued"
           class="text-gray-400"
@@ -17,8 +17,8 @@
           </svg>
         </span>
       </div>
-      <code class="ncr-cmd-run ncr-truncate text-xs text-gray-400 dark:text-gray-500">{{ command.run }}</code>
-      <p v-if="command.help" class="mt-1 text-xs text-gray-500 dark:text-gray-400 ncr-truncate">{{ command.help }}</p>
+      <code class="ncr-cmd-run ncr-truncate text-xs text-gray-400 dark:text-gray-500" :title="command.run">{{ command.run }}</code>
+      <p v-if="command.help" class="mt-1 text-xs text-gray-500 dark:text-gray-400 ncr-truncate" :title="command.help">{{ command.help }}</p>
     </div>
 
     <button

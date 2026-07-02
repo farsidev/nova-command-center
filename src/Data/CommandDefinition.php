@@ -35,6 +35,7 @@ final class CommandDefinition implements Arrayable
         public readonly int $outputSize,
         public readonly ?array $queue,
         public readonly ?string $can,
+        public readonly ?bool $confirm,
         public readonly array $variables,
         public readonly array $flags,
     ) {}
@@ -73,6 +74,7 @@ final class CommandDefinition implements Arrayable
             outputSize: Cast::int($definition['output_size'] ?? $defaults['output_size'] ?? null, 25),
             queue: self::normalizeQueue($definition['queue'] ?? false),
             can: isset($definition['can']) && is_string($definition['can']) ? $definition['can'] : null,
+            confirm: isset($definition['confirm']) && is_bool($definition['confirm']) ? $definition['confirm'] : null,
             variables: self::normalizeVariables($definition['variables'] ?? []),
             flags: self::normalizeFlags($definition['flags'] ?? []),
         );
@@ -91,6 +93,16 @@ final class CommandDefinition implements Arrayable
     public function shouldQueue(): bool
     {
         return $this->queue !== null;
+    }
+
+    /**
+     * Whether the UI should ask for confirmation before running this command.
+     * An explicit `confirm` config value always wins; otherwise it falls back
+     * to the command's button type (danger/warning imply a risky action).
+     */
+    public function requiresConfirmation(): bool
+    {
+        return $this->confirm ?? in_array($this->type, ['danger', 'warning'], true);
     }
 
     /**
@@ -183,6 +195,7 @@ final class CommandDefinition implements Arrayable
             'group' => $this->group,
             'help' => $this->help,
             'queued' => $this->shouldQueue(),
+            'needs_confirm' => $this->requiresConfirmation(),
             'variables' => array_values(array_map(
                 static fn (CommandVariable $variable): array => $variable->toArray(),
                 $this->variables,

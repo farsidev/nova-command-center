@@ -122,6 +122,7 @@ display name; only `run` is required.
 | `output_size`  | int             | Number of trailing output lines to display.             |
 | `queue`        | bool / array    | Run on the queue. Array may set `connection` / `queue`.  |
 | `can`          | string          | Gate ability required to run this specific command.      |
+| `confirm`      | bool            | Force/skip the confirmation modal. Default: `danger`/`warning` types confirm, others don't. |
 | `variables`    | array           | User input, keyed by placeholder name (see below).       |
 | `flags`        | array           | Optional flags rendered as checkboxes.                   |
 

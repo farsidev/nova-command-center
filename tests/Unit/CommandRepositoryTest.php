@@ -68,3 +68,41 @@ it('reports whether bash is enabled', function () {
     expect(repository(['bash' => ['enabled' => false]])->bashEnabled())->toBeFalse()
         ->and(repository(['bash' => ['enabled' => true]])->bashEnabled())->toBeTrue();
 });
+
+it('infers confirmation from type when confirm is not set', function () {
+    $repo = repository([
+        'commands' => [
+            'Danger' => ['run' => 'x', 'type' => 'danger'],
+            'Warning' => ['run' => 'x', 'type' => 'warning'],
+            'Safe' => ['run' => 'x', 'type' => 'primary'],
+        ],
+    ]);
+
+    $byName = fn (string $name) => collect($repo->visible())->firstWhere('name', $name);
+
+    expect($byName('Danger')->requiresConfirmation())->toBeTrue()
+        ->and($byName('Warning')->requiresConfirmation())->toBeTrue()
+        ->and($byName('Safe')->requiresConfirmation())->toBeFalse();
+});
+
+it('lets an explicit confirm override the type-based default', function () {
+    $repo = repository([
+        'commands' => [
+            'Forced safe' => ['run' => 'x', 'type' => 'danger', 'confirm' => false],
+            'Forced risky' => ['run' => 'x', 'type' => 'primary', 'confirm' => true],
+        ],
+    ]);
+
+    $byName = fn (string $name) => collect($repo->visible())->firstWhere('name', $name);
+
+    expect($byName('Forced safe')->requiresConfirmation())->toBeFalse()
+        ->and($byName('Forced risky')->requiresConfirmation())->toBeTrue();
+});
+
+it('exposes needs_confirm in the API array shape', function () {
+    $repo = repository([
+        'commands' => ['Risky' => ['run' => 'x', 'type' => 'danger']],
+    ]);
+
+    expect($repo->visible()[0]->toArray())->toHaveKey('needs_confirm', true);
+});

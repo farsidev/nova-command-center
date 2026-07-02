@@ -17,6 +17,7 @@
       type="button"
       class="ncr-rail-item"
       :class="{ 'is-active': active === category.name }"
+      :title="category.name"
       @click="$emit('select', category.name)"
     >
       <span class="ncr-rail-dot" :style="{ backgroundColor: categoryColor(category.name) }"></span>

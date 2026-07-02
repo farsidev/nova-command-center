@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Initial release.
+- An explicit `confirm` command option that forces or skips the confirmation
+  modal, independent of button type (previously only `danger`/`warning` types
+  confirmed).
 - Run allow-listed Artisan and shell commands from the Nova dashboard.
 - Injection-proof command execution via Symfony Process argument vectors.
 - Full compatibility with Laravel Nova v4 and v5.
@@ -40,6 +43,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   gradient tool icon and softer shadows.
 - In-repo documentation under `docs/` (configuration, command sources, security,
   authorization, queued execution, and frontend/theming guides).
+- UX polish: a two-step inline confirmation for "Clear history" (no native
+  dialog, no accidental data loss), the page auto-scrolls to the console when a
+  run starts, and truncated command names/run strings/help/categories carry a
+  `title` tooltip with the full text.
 
 ### Changed
 
@@ -66,3 +73,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   that could expire mid-run and allow an overlap; they now use a long TTL.
 - Command names and the run-modal title were invisible in dark mode on Nova's
   purged Tailwind build (`dark:text-gray-100` → `dark:text-gray-200`).
+- The run modal closed immediately on submit regardless of the outcome, so a
+  server-side validation error (a variable's `rules` failing, e.g. `max:255`)
+  silently discarded the operator's input behind a generic toast. The modal now
+  stays open on failure, shows the real per-field error inline (cleared the
+  moment that field is edited again), and only closes once the run actually
+  succeeds.
+- Polling a queued execution treated *any* failure — a network blip, an expired
+  session, an evicted execution record — as "the command finished", freezing the
+  console on a stale "Running…" forever with no feedback. Polling now retries
+  transient failures a few times, stops immediately (with a clear message) on an
+  expired session or a missing execution, and otherwise gives up honestly after a
+  few attempts instead of pretending to know the outcome.
