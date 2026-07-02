@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Support;
+namespace Farsi\NovaCommandCenter\Support;
 
-use Farsidev\NovaCommandCenter\Contracts\CommandExecutor;
+use Farsi\NovaCommandCenter\Contracts\CommandExecutor;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 

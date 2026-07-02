@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use Farsi\NovaCommandCenter\Models\Command;
 
 return [
 
@@ -17,6 +18,35 @@ return [
     'navigation_label' => 'Command Center',
 
     'help' => 'Run pre-approved Artisan and shell commands directly from Nova.',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Command Source
+    |--------------------------------------------------------------------------
+    |
+    | Where the allow-list of commands is read from.
+    |
+    |   "config"    (default, recommended) Commands live in the "commands" array
+    |               below — version-controlled, code-reviewed, immutable at
+    |               runtime. The safest posture.
+    |
+    |   "database"  Commands are stored in the "nova_command_center_commands"
+    |               table and can be managed through the bundled Nova resource.
+    |               Publish and run the migration first:
+    |                 php artisan vendor:publish --tag=nova-command-center-migrations
+    |               SECURITY: this moves the allow-list out of version control —
+    |               anyone who can edit those rows decides what runs. Gate the
+    |               resource tightly and keep bash disabled unless required.
+    |
+    |   A class-string implementing Farsi\NovaCommandCenter\Contracts\CommandSource
+    |               for any other backing store.
+    |
+    */
+
+    'source' => [
+        'driver' => 'config',
+        'model' => Command::class,
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -108,6 +138,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Searchable Models
+    |--------------------------------------------------------------------------
+    |
+    | Eloquent models allowed to back a "model" variable — a searchable,
+    | type-ahead field for picking a record (e.g. a Club) instead of typing
+    | its id blind. Nothing is searchable until its class is listed here.
+    | The search endpoint only ever selects the two configured columns
+    | (value_column/label_column), never the full row. Example:
+    |
+    |   'searchable_models' => [\App\Models\Club::class],
+    |
+    */
+
+    'searchable_models' => [],
+
+    /*
+    |--------------------------------------------------------------------------
     | Concurrency
     |--------------------------------------------------------------------------
     |
@@ -156,8 +203,13 @@ return [
     |                             "connection" and/or "queue" name.
     |   can          (string) Gate ability required to run this command.
     |   variables    (array)  User-supplied values, keyed by placeholder name.
-    |                         Each: [label, type(text|select), options,
-    |                                required(bool), default, rules].
+    |                         Each: [label, type(text|select|model), options,
+    |                                required(bool), default, rules]. A "model"
+    |                         variable additionally takes: model (class-string,
+    |                         must be listed in "searchable_models" above),
+    |                         value_column (default "id"), label_column
+    |                         (default "name"), search_columns (default
+    |                         [label_column]).
     |   flags        (array)  Optional flags rendered as checkboxes. Each:
     |                         [label, flag, default(bool)].
     |
@@ -165,6 +217,7 @@ return [
 
     'commands' => [
 
+        // ---- Cache ---------------------------------------------------------
         'Clear Application Cache' => [
             'run' => 'cache:clear',
             'group' => 'Cache',
@@ -176,19 +229,6 @@ return [
             'run' => 'config:cache',
             'group' => 'Cache',
             'type' => 'primary',
-        ],
-
-        'Run Migrations' => [
-            'run' => 'migrate',
-            'group' => 'Database',
-            'type' => 'danger',
-            'flags' => [
-                [
-                    'label' => 'Force in production',
-                    'flag' => '--force',
-                    'default' => true,
-                ],
-            ],
         ],
 
         'Forget Cache Key' => [
@@ -204,6 +244,76 @@ return [
                     'rules' => ['string', 'max:255'],
                 ],
             ],
+        ],
+
+        // ---- Optimization --------------------------------------------------
+        'Optimize' => [
+            'run' => 'optimize',
+            'group' => 'Optimization',
+            'type' => 'primary',
+            'help' => 'Cache config, routes, events and views.',
+        ],
+
+        'Clear Optimizations' => [
+            'run' => 'optimize:clear',
+            'group' => 'Optimization',
+            'type' => 'warning',
+        ],
+
+        // ---- Database ------------------------------------------------------
+        'Run Migrations' => [
+            'run' => 'migrate',
+            'group' => 'Database',
+            'type' => 'danger',
+            'flags' => [
+                [
+                    'label' => 'Force in production',
+                    'flag' => '--force',
+                    'default' => true,
+                ],
+            ],
+        ],
+
+        'Migration Status' => [
+            'run' => 'migrate:status',
+            'group' => 'Database',
+            'type' => 'primary',
+        ],
+
+        // ---- Queue ---------------------------------------------------------
+        'Restart Queue Workers' => [
+            'run' => 'queue:restart',
+            'group' => 'Queue',
+            'type' => 'warning',
+            'help' => 'Gracefully restart queue workers after a deploy.',
+        ],
+
+        'Retry Failed Jobs' => [
+            'run' => 'queue:retry {id}',
+            'group' => 'Queue',
+            'type' => 'primary',
+            'help' => 'Retry a failed job by id, or use "all".',
+            'variables' => [
+                'id' => [
+                    'label' => 'Job id',
+                    'type' => 'text',
+                    'default' => 'all',
+                    'required' => true,
+                ],
+            ],
+        ],
+
+        // ---- Maintenance ---------------------------------------------------
+        'Maintenance Mode' => [
+            'run' => 'down',
+            'group' => 'Maintenance',
+            'type' => 'danger',
+        ],
+
+        'Bring Application Up' => [
+            'run' => 'up',
+            'group' => 'Maintenance',
+            'type' => 'success',
         ],
 
     ],

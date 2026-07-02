@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Contracts;
+namespace Farsi\NovaCommandCenter\Contracts;
 
 interface CommandExecutor
 {

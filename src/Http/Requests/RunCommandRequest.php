@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Http\Requests;
+namespace Farsi\NovaCommandCenter\Http\Requests;
 
-use Farsidev\NovaCommandCenter\Data\CommandDefinition;
-use Farsidev\NovaCommandCenter\Data\CommandVariable;
-use Farsidev\NovaCommandCenter\Exceptions\CommandNotAllowedException;
-use Farsidev\NovaCommandCenter\Support\CommandRepository;
+use Farsi\NovaCommandCenter\Data\CommandDefinition;
+use Farsi\NovaCommandCenter\Data\CommandVariable;
+use Farsi\NovaCommandCenter\Exceptions\CommandNotAllowedException;
+use Farsi\NovaCommandCenter\Support\CommandRepository;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -52,9 +53,40 @@ final class RunCommandRequest extends FormRequest
 
         if ($command !== null) {
             foreach ($command->variables as $variable) {
-                $rules['variables.'.$variable->name] = $variable->validationRules();
+                $rules['variables.'.$variable->name] = $this->variableRules($variable);
             }
         }
+
+        return $rules;
+    }
+
+    /**
+     * A "model" variable's submitted value is checked against the real table
+     * via an "exists" rule, but only when its model class is allow-listed in
+     * "searchable_models" — otherwise the class string is untrusted and is
+     * never instantiated.
+     *
+     * @return list<string>
+     */
+    private function variableRules(CommandVariable $variable): array
+    {
+        $rules = $variable->validationRules();
+
+        if ($variable->type !== 'model' || $variable->model === null) {
+            return $rules;
+        }
+
+        $repository = app(CommandRepository::class);
+
+        if (!in_array($variable->model, $repository->searchableModels(), true)) {
+            return $rules;
+        }
+
+        /** @var class-string<Model> $modelClass */
+        $modelClass = $variable->model;
+        $table = (new $modelClass)->getTable();
+
+        $rules[] = 'exists:'.$table.','.$variable->valueColumn;
 
         return $rules;
     }
@@ -173,6 +205,28 @@ final class RunCommandRequest extends FormRequest
         }
 
         return $flags;
+    }
+
+    /**
+     * The raw ad-hoc command payload, when this request runs a custom command.
+     * Queued custom commands must carry their definition with the job because
+     * they are built per-request and never exist in the repository.
+     *
+     * @return array{type: string, run: string}|null
+     */
+    public function customPayload(): ?array
+    {
+        if (!$this->filled('custom')) {
+            return null;
+        }
+
+        $custom = $this->input('custom');
+
+        if (is_array($custom) && is_string($custom['type'] ?? null) && is_string($custom['run'] ?? null)) {
+            return ['type' => $custom['type'], 'run' => $custom['run']];
+        }
+
+        return null;
     }
 
     public function queued(): bool

@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Data;
+namespace Farsi\NovaCommandCenter\Data;
 
+use Farsi\NovaCommandCenter\Support\Cast;
 use Illuminate\Contracts\Support\Arrayable;
 
 /**
@@ -65,17 +66,17 @@ final class ExecutionResult implements Arrayable
     public static function fromArray(array $data): self
     {
         return new self(
-            id: (string) ($data['id'] ?? ''),
-            commandId: (string) ($data['command_id'] ?? ''),
-            name: (string) ($data['name'] ?? ''),
-            display: (string) ($data['display'] ?? ''),
-            status: (string) ($data['status'] ?? self::STATUS_PENDING),
-            exitCode: isset($data['exit_code']) ? (int) $data['exit_code'] : null,
-            output: (string) ($data['output'] ?? ''),
-            startedAt: (string) ($data['started_at'] ?? ''),
-            finishedAt: isset($data['finished_at']) ? (string) $data['finished_at'] : null,
-            duration: isset($data['duration']) ? (float) $data['duration'] : null,
-            ranBy: isset($data['ran_by']) ? (string) $data['ran_by'] : null,
+            id: Cast::string($data['id'] ?? null),
+            commandId: Cast::string($data['command_id'] ?? null),
+            name: Cast::string($data['name'] ?? null),
+            display: Cast::string($data['display'] ?? null),
+            status: Cast::string($data['status'] ?? null, self::STATUS_PENDING),
+            exitCode: isset($data['exit_code']) ? Cast::nullableInt($data['exit_code']) : null,
+            output: Cast::string($data['output'] ?? null),
+            startedAt: Cast::string($data['started_at'] ?? null),
+            finishedAt: isset($data['finished_at']) ? Cast::nullableString($data['finished_at']) : null,
+            duration: isset($data['duration']) ? Cast::nullableFloat($data['duration']) : null,
+            ranBy: isset($data['ran_by']) ? Cast::nullableString($data['ran_by']) : null,
         );
     }
 

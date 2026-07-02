@@ -2,18 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Actions;
+namespace Farsi\NovaCommandCenter\Actions;
 
-use Farsidev\NovaCommandCenter\Contracts\CommandExecutor;
-use Farsidev\NovaCommandCenter\Data\CommandDefinition;
-use Farsidev\NovaCommandCenter\Data\ExecutionResult;
-use Farsidev\NovaCommandCenter\Events\CommandFinished;
-use Farsidev\NovaCommandCenter\Events\CommandStarted;
-use Farsidev\NovaCommandCenter\Exceptions\CommandNotAllowedException;
-use Farsidev\NovaCommandCenter\Support\CommandBuilder;
-use Farsidev\NovaCommandCenter\Support\ConcurrencyGuard;
-use Farsidev\NovaCommandCenter\Support\ExecutionStore;
-use Farsidev\NovaCommandCenter\Support\History;
+use Farsi\NovaCommandCenter\Contracts\CommandExecutor;
+use Farsi\NovaCommandCenter\Data\CommandDefinition;
+use Farsi\NovaCommandCenter\Data\ExecutionResult;
+use Farsi\NovaCommandCenter\Events\CommandFinished;
+use Farsi\NovaCommandCenter\Events\CommandStarted;
+use Farsi\NovaCommandCenter\Exceptions\CommandNotAllowedException;
+use Farsi\NovaCommandCenter\Support\Cast;
+use Farsi\NovaCommandCenter\Support\CommandBuilder;
+use Farsi\NovaCommandCenter\Support\ConcurrencyGuard;
+use Farsi\NovaCommandCenter\Support\ExecutionStore;
+use Farsi\NovaCommandCenter\Support\History;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -171,7 +172,7 @@ final class ExecuteCommand
 
         foreach ($env as $key => $value) {
             if (is_string($key)) {
-                $normalized[$key] = (string) $value;
+                $normalized[$key] = Cast::string($value);
             }
         }
 

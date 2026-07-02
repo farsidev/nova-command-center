@@ -10,7 +10,9 @@
       :id="fieldId"
       :value="modelValue"
       class="w-full form-control form-input form-input-bordered"
-      @change="$emit('update:modelValue', $event.target.value)"
+      :class="{ 'ncr-field-invalid': error }"
+      :aria-invalid="!!error"
+      @change="onInput($event.target.value)"
     >
       <option v-if="!variable.required" value="">—</option>
       <option v-for="option in variable.options" :key="option.value" :value="option.value">
@@ -18,39 +20,55 @@
       </option>
     </select>
 
+    <model-search-field
+      v-else-if="variable.type === 'model'"
+      :field-id="fieldId"
+      :command-id="commandId"
+      :variable-name="variable.name"
+      :model-value="modelValue"
+      :placeholder="variable.placeholder || ''"
+      :error="error"
+      @update:model-value="onInput"
+    />
+
     <input
       v-else
       :id="fieldId"
       :value="modelValue"
       type="text"
       class="w-full form-control form-input form-input-bordered"
+      :class="{ 'ncr-field-invalid': error }"
+      :aria-invalid="!!error"
       :placeholder="variable.placeholder || ''"
-      @input="$emit('update:modelValue', $event.target.value)"
+      @input="onInput($event.target.value)"
     />
 
-    <p v-if="variable.help" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+    <p v-if="error" class="mt-1 text-xs text-red-500 dark:text-red-400">
+      {{ error }}
+    </p>
+    <p v-else-if="variable.help" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
       {{ variable.help }}
     </p>
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+import ModelSearchField from './ModelSearchField'
 import { __ } from '../util/translate'
 
-export default {
-  props: {
-    variable: { type: Object, required: true },
-    modelValue: { type: String, default: '' },
-  },
+const props = defineProps({
+  variable: { type: Object, required: true },
+  commandId: { type: String, default: '' },
+  modelValue: { type: String, default: '' },
+  error: { type: String, default: null },
+})
 
-  emits: ['update:modelValue'],
+const emit = defineEmits(['update:modelValue'])
 
-  computed: {
-    fieldId() {
-      return `ncr-var-${this.variable.name}`
-    },
-  },
+const fieldId = computed(() => `ncr-var-${props.variable.name}`)
 
-  methods: { __ },
+function onInput(value) {
+  emit('update:modelValue', value)
 }
 </script>

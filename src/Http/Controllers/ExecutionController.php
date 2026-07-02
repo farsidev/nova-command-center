@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Http\Controllers;
+namespace Farsi\NovaCommandCenter\Http\Controllers;
 
-use Farsidev\NovaCommandCenter\Support\ExecutionStore;
+use Farsi\NovaCommandCenter\Support\ExecutionStore;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 

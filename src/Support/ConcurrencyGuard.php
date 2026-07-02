@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Support;
+namespace Farsi\NovaCommandCenter\Support;
 
-use Farsidev\NovaCommandCenter\Data\CommandDefinition;
-use Farsidev\NovaCommandCenter\Exceptions\CommandNotAllowedException;
+use Farsi\NovaCommandCenter\Data\CommandDefinition;
+use Farsi\NovaCommandCenter\Exceptions\CommandNotAllowedException;
 use Illuminate\Contracts\Cache\Lock;
 use Illuminate\Contracts\Cache\LockProvider;
 use Illuminate\Contracts\Cache\Repository as Cache;
@@ -43,8 +43,13 @@ final class ConcurrencyGuard
         /** @var list<Lock> $locks */
         $locks = [];
 
+        // A lock must outlive the process it guards. When the command has no
+        // timeout (0), fall back to a long TTL so a lock never expires mid-run
+        // and lets a second execution slip through.
+        $ttl = $timeout > 0 ? $timeout + 10 : 3600;
+
         foreach ($this->lockNames($command) as $name) {
-            $lock = $store->lock($name, max(1, $timeout) + 10);
+            $lock = $store->lock($name, $ttl);
 
             if (!$lock->get()) {
                 foreach ($locks as $acquired) {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Exceptions;
+namespace Farsi\NovaCommandCenter\Exceptions;
 
 use RuntimeException;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Farsidev\NovaCommandCenter\Support\CommandRepository;
+use Farsi\NovaCommandCenter\Support\CommandRepository;
 
 function commandId(string $name): string
 {
@@ -38,7 +38,7 @@ it('runs a command synchronously via the API', function () {
 it('validates required variables', function () {
     $response = $this->postJson('_ncr/commands/run', ['command' => commandId('Forget Key')]);
 
-    $response->assertStatus(422)->assertJsonValidationErrors('variables.key');
+    $response->assertUnprocessable()->assertJsonValidationErrors('variables.key');
 });
 
 it('passes a validated variable through safely', function () {
@@ -66,16 +66,16 @@ it('appends a checked flag', function () {
 it('rejects a bash command over the API while bash is disabled', function () {
     $response = $this->postJson('_ncr/commands/run', ['command' => commandId('Disk Usage')]);
 
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 it('enforces the rate limit', function () {
     config()->set('nova-command-center.rate_limit', 1);
 
     $this->postJson('_ncr/commands/run', ['command' => commandId('Clear Cache')])->assertOk();
-    $this->postJson('_ncr/commands/run', ['command' => commandId('Clear Cache')])->assertStatus(429);
+    $this->postJson('_ncr/commands/run', ['command' => commandId('Clear Cache')])->assertTooManyRequests();
 });
 
 it('returns 422 for an unknown command', function () {
-    $this->postJson('_ncr/commands/run', ['command' => 'does-not-exist'])->assertStatus(422);
+    $this->postJson('_ncr/commands/run', ['command' => 'does-not-exist'])->assertUnprocessable();
 });

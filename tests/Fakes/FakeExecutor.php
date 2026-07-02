@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Tests\Fakes;
+namespace Farsi\NovaCommandCenter\Tests\Fakes;
 
-use Farsidev\NovaCommandCenter\Contracts\CommandExecutor;
+use Farsi\NovaCommandCenter\Contracts\CommandExecutor;
 
 /**
  * A deterministic test double that records the argument vector it was given

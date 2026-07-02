@@ -2,20 +2,25 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Http\Controllers;
+namespace Farsi\NovaCommandCenter\Http\Controllers;
 
-use Farsidev\NovaCommandCenter\Actions\ExecuteCommand;
-use Farsidev\NovaCommandCenter\Data\ExecutionResult;
-use Farsidev\NovaCommandCenter\Exceptions\CommandNotAllowedException;
-use Farsidev\NovaCommandCenter\Http\Requests\RunCommandRequest;
-use Farsidev\NovaCommandCenter\Jobs\RunCommandJob;
-use Farsidev\NovaCommandCenter\Support\CommandRepository;
-use Farsidev\NovaCommandCenter\Support\ExecutionStore;
-use Farsidev\NovaCommandCenter\Support\History;
+use Farsi\NovaCommandCenter\Actions\ExecuteCommand;
+use Farsi\NovaCommandCenter\Data\ExecutionResult;
+use Farsi\NovaCommandCenter\Exceptions\CommandNotAllowedException;
+use Farsi\NovaCommandCenter\Http\Requests\RunCommandRequest;
+use Farsi\NovaCommandCenter\Jobs\RunCommandJob;
+use Farsi\NovaCommandCenter\Support\Cast;
+use Farsi\NovaCommandCenter\Support\CommandRepository;
+use Farsi\NovaCommandCenter\Support\ExecutionStore;
+use Farsi\NovaCommandCenter\Support\History;
 use Illuminate\Config\Repository as Config;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
@@ -69,7 +74,7 @@ final class CommandController extends Controller
             if ($request->queued()) {
                 $executionId = (string) Str::uuid();
 
-                $this->store->put(new ExecutionResult(
+                $pending = new ExecutionResult(
                     id: $executionId,
                     commandId: $command->id,
                     name: $command->name,
@@ -79,9 +84,27 @@ final class CommandController extends Controller
                     output: '',
                     startedAt: now()->toIso8601String(),
                     ranBy: $ranBy,
-                ));
+                );
 
-                $job = new RunCommandJob($command->id, $values, $flags, $executionId, $ranBy, $command->timeout);
+                $this->store->put($pending);
+
+                // Record it in history immediately, not just the live-poll
+                // store. Otherwise a queued command that is slow to start (or
+                // never starts, e.g. no worker is consuming the queue) leaves
+                // no trace anywhere once the operator navigates away or
+                // reloads — the job that eventually finishes replaces this
+                // same entry in place (History::push dedupes by id).
+                $this->history->push($pending);
+
+                $job = new RunCommandJob(
+                    $command->id,
+                    $values,
+                    $flags,
+                    $executionId,
+                    $ranBy,
+                    $command->timeout,
+                    $request->customPayload(),
+                );
 
                 if ($command->queue !== null && $command->queue['connection'] !== null) {
                     $job->onConnection($command->queue['connection']);
@@ -110,6 +133,83 @@ final class CommandController extends Controller
         }
     }
 
+    /**
+     * Type-ahead search backing a "model" variable. Only selects the two
+     * configured columns (never the whole row) and only ever queries a
+     * model class explicitly allow-listed in "searchable_models", so this
+     * endpoint cannot be used to read arbitrary application data.
+     */
+    public function search(Request $request, string $command, string $variable): JsonResponse
+    {
+        $definition = $this->commands->find($command);
+
+        if ($definition === null) {
+            return new JsonResponse(['message' => 'The selected command does not exist.'], 404);
+        }
+
+        if ($definition->can !== null && !Gate::allows($definition->can, $definition)) {
+            abort(403);
+        }
+
+        $target = null;
+
+        foreach ($definition->variables as $candidate) {
+            if ($candidate->name === $variable) {
+                $target = $candidate;
+
+                break;
+            }
+        }
+
+        if ($target === null || $target->type !== 'model' || $target->model === null) {
+            return new JsonResponse(['message' => 'This variable is not searchable.'], 404);
+        }
+
+        if (!in_array($target->model, $this->commands->searchableModels(), true)) {
+            return new JsonResponse(['message' => 'This model is not allow-listed for search.'], 403);
+        }
+
+        /** @var class-string<Model> $modelClass */
+        $modelClass = $target->model;
+        $term = Cast::string($request->query('q'), '');
+        $valueColumn = $target->valueColumn;
+        $labelColumn = $target->labelColumn;
+        $searchColumns = $target->searchColumns;
+
+        $query = $modelClass::query();
+
+        if ($term !== '') {
+            // LIKE is case-sensitive on some drivers (e.g. PostgreSQL) and not
+            // others (MySQL's default collation, SQLite), so both sides are
+            // explicitly lower-cased with the portable LOWER() SQL function
+            // instead of relying on driver-specific behaviour (or ILIKE,
+            // which isn't available everywhere). The column is cast to a
+            // character type first: LOWER() rejects non-text column types
+            // outright on strict drivers (e.g. Postgres jsonb, as used by
+            // some translatable-column packages), where a plain LIKE would
+            // otherwise still work via an implicit cast.
+            $escaped = mb_strtolower(addcslashes($term, '%_\\'));
+            $castType = (new $modelClass)->getConnection()->getDriverName() === 'mysql' ? 'CHAR' : 'TEXT';
+
+            $query->where(function (Builder $builder) use ($searchColumns, $escaped, $castType): void {
+                foreach ($searchColumns as $column) {
+                    $builder->orWhere(DB::raw('LOWER(CAST('.$column.' AS '.$castType.'))'), 'like', '%'.$escaped.'%');
+                }
+            });
+        }
+
+        $results = $query
+            ->limit(20)
+            ->get([$valueColumn, $labelColumn])
+            ->map(static fn (Model $record): array => [
+                'value' => Cast::string($record->getAttribute($valueColumn)),
+                'label' => Cast::string($record->getAttribute($labelColumn)),
+            ])
+            ->values();
+
+        return new JsonResponse(['results' => $results]);
+    }
+
     private function enforceRateLimit(Request $request): ?JsonResponse
     {
         $limit = $this->config->get('nova-command-center.rate_limit');
@@ -118,7 +218,8 @@ final class CommandController extends Controller
             return null;
         }
 
-        $key = 'nova-command-center:'.($request->user()?->getAuthIdentifier() ?? $request->ip());
+        $identifier = $request->user()?->getAuthIdentifier() ?? $request->ip();
+        $key = 'nova-command-center:'.Cast::string($identifier, 'guest');
 
         if (RateLimiter::tooManyAttempts($key, $limit)) {
             return new JsonResponse([
@@ -145,6 +246,6 @@ final class CommandController extends Controller
             }
         }
 
-        return (string) $user->getAuthIdentifier();
+        return Cast::nullableString($user->getAuthIdentifier());
     }
 }

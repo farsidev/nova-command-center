@@ -2,16 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Support;
+namespace Farsi\NovaCommandCenter\Support;
 
-use Farsidev\NovaCommandCenter\Data\CommandDefinition;
-use Farsidev\NovaCommandCenter\Exceptions\CommandNotAllowedException;
-use Farsidev\NovaCommandCenter\Exceptions\CommandNotFoundException;
+use Farsi\NovaCommandCenter\Contracts\CommandSource;
+use Farsi\NovaCommandCenter\Data\CommandDefinition;
+use Farsi\NovaCommandCenter\Exceptions\CommandNotAllowedException;
+use Farsi\NovaCommandCenter\Exceptions\CommandNotFoundException;
+use Farsi\NovaCommandCenter\Support\Sources\ConfigCommandSource;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * Loads the configured allow-list into typed {@see CommandDefinition} objects
- * and provides safe lookups. This is the only place the raw config array is
- * interpreted, guaranteeing the rest of the package works with clean data.
+ * Loads the allow-list — from whatever {@see CommandSource} is bound — into typed
+ * {@see CommandDefinition} objects and provides safe lookups. This is the only
+ * place raw definitions are interpreted, guaranteeing the rest of the package
+ * works with clean data regardless of where the definitions come from.
  */
 final class CommandRepository
 {
@@ -20,10 +24,18 @@ final class CommandRepository
      */
     private ?array $commands = null;
 
+    private readonly CommandSource $source;
+
     /**
      * @param  array<string, mixed>  $config
+     * @param  CommandSource|null  $source  Where command definitions are read from.
+     *                                      Defaults to the config file for backward
+     *                                      compatibility and the safest posture.
      */
-    public function __construct(private readonly array $config) {}
+    public function __construct(private readonly array $config, ?CommandSource $source = null)
+    {
+        $this->source = $source ?? new ConfigCommandSource($config);
+    }
 
     /**
      * @return array<string, CommandDefinition>
@@ -37,7 +49,7 @@ final class CommandRepository
         $defaults = $this->defaults();
         $commands = [];
 
-        foreach ($this->arrayConfig('commands') as $name => $definition) {
+        foreach ($this->source->definitions() as $name => $definition) {
             if (!is_string($name)) {
                 continue;
             }
@@ -103,9 +115,9 @@ final class CommandRepository
         $defaults = $this->arrayConfig('defaults');
 
         return [
-            'timeout' => (int) ($defaults['timeout'] ?? 60),
-            'output_size' => (int) ($defaults['output_size'] ?? 25),
-            'type' => (string) ($defaults['type'] ?? 'primary'),
+            'timeout' => Cast::int($defaults['timeout'] ?? null, 60),
+            'output_size' => Cast::int($defaults['output_size'] ?? null, 25),
+            'type' => Cast::string($defaults['type'] ?? null, 'primary'),
         ];
     }
 
@@ -133,9 +145,32 @@ final class CommandRepository
         ));
     }
 
+    /**
+     * The Eloquent models permitted to back a "model" variable's search
+     * endpoint. Nothing is searchable until explicitly allow-listed here —
+     * the same posture as {@see self::allowedCustomTypes()}. A configured
+     * value that isn't a real Model subclass is silently dropped rather than
+     * risking an attempt to query/instantiate an arbitrary class string.
+     *
+     * @return list<class-string<Model>>
+     */
+    public function searchableModels(): array
+    {
+        $models = $this->config['searchable_models'] ?? [];
+
+        if (!is_array($models)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            array_map(static fn ($model): string => is_string($model) ? $model : '', $models),
+            static fn (string $model): bool => $model !== '' && is_subclass_of($model, Model::class),
+        ));
+    }
+
     public function historySize(): int
     {
-        return max(0, (int) ($this->config['history'] ?? 0));
+        return max(0, Cast::int($this->config['history'] ?? null));
     }
 
     /**

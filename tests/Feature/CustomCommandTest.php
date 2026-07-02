@@ -6,7 +6,7 @@ it('rejects a custom command when custom types are disabled', function () {
     // custom_commands is empty by default in the test environment.
     $this->postJson('_ncr/commands/run', [
         'custom' => ['type' => 'artisan', 'run' => 'migrate'],
-    ])->assertStatus(422);
+    ])->assertUnprocessable();
 });
 
 it('runs a custom command when its type is allow-listed', function () {
@@ -27,5 +27,5 @@ it('never lets a custom bash command bypass the bash switch', function () {
 
     $this->postJson('_ncr/commands/run', [
         'custom' => ['type' => 'bash', 'run' => 'rm -rf /'],
-    ])->assertStatus(422);
+    ])->assertUnprocessable();
 });

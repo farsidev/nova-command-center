@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Support;
+namespace Farsi\NovaCommandCenter\Support;
 
-use Farsidev\NovaCommandCenter\Data\ExecutionResult;
+use Farsi\NovaCommandCenter\Data\ExecutionResult;
 use Illuminate\Contracts\Cache\Repository as Cache;
 
 /**
@@ -36,7 +36,7 @@ final class ExecutionStore
     {
         $data = $this->cache->get(self::PROGRESS_PREFIX.$id);
 
-        return is_array($data) ? $data : null;
+        return is_array($data) ? Cast::stringKeyedArray($data) : null;
     }
 
     public function forgetProgress(string $id): void
@@ -53,7 +53,7 @@ final class ExecutionStore
     {
         $data = $this->cache->get(self::PREFIX.$id);
 
-        return is_array($data) ? ExecutionResult::fromArray($data) : null;
+        return is_array($data) ? ExecutionResult::fromArray(Cast::stringKeyedArray($data)) : null;
     }
 
     public function forget(string $id): void

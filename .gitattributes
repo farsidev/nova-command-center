@@ -2,6 +2,7 @@
 
 # Files & directories excluded from the distributed package archive.
 /.github            export-ignore
+/docs               export-ignore
 /tests              export-ignore
 /phpstan-stubs      export-ignore
 /resources/js       export-ignore

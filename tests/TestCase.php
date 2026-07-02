@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Tests;
+namespace Farsi\NovaCommandCenter\Tests;
 
-use Farsidev\NovaCommandCenter\Contracts\CommandExecutor;
-use Farsidev\NovaCommandCenter\Http\Controllers\CommandController;
-use Farsidev\NovaCommandCenter\Http\Controllers\ExecutionController;
-use Farsidev\NovaCommandCenter\Http\Controllers\HistoryController;
-use Farsidev\NovaCommandCenter\Support\CommandRepository;
-use Farsidev\NovaCommandCenter\Tests\Fakes\FakeExecutor;
-use Farsidev\NovaCommandCenter\ToolServiceProvider;
+use Farsi\NovaCommandCenter\Contracts\CommandExecutor;
+use Farsi\NovaCommandCenter\Http\Controllers\CommandController;
+use Farsi\NovaCommandCenter\Http\Controllers\ExecutionController;
+use Farsi\NovaCommandCenter\Http\Controllers\HistoryController;
+use Farsi\NovaCommandCenter\Support\CommandRepository;
+use Farsi\NovaCommandCenter\Tests\Fakes\FakeExecutor;
+use Farsi\NovaCommandCenter\ToolServiceProvider;
 use Illuminate\Routing\Router;
 use Orchestra\Testbench\TestCase as Orchestra;
 
@@ -33,11 +33,22 @@ abstract class TestCase extends Orchestra
         $config->set('cache.default', 'array');
         $config->set('queue.default', 'sync');
 
+        // Pin an in-memory SQLite connection so the database command-source tests
+        // behave the same across every Testbench/Laravel version in the matrix
+        // (some default to MySQL, which is not available in CI).
+        $config->set('database.default', 'testing');
+        $config->set('database.connections.testing', [
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
+        ]);
+
         $config->set('nova-command-center.rate_limit', null);
         $config->set('nova-command-center.authorize', null);
         $config->set('nova-command-center.history', 10);
         $config->set('nova-command-center.bash', ['enabled' => false, 'working_directory' => null, 'env' => []]);
         $config->set('nova-command-center.custom_commands', []);
+        $config->set('nova-command-center.searchable_models', []);
         $config->set('nova-command-center.without_overlapping', ['commands' => [], 'groups' => []]);
         $config->set('nova-command-center.commands', $this->defaultCommands());
 
@@ -50,6 +61,7 @@ abstract class TestCase extends Orchestra
         /** @var Router $router */
         $router->get('_ncr/commands', [CommandController::class, 'index']);
         $router->post('_ncr/commands/run', [CommandController::class, 'run']);
+        $router->get('_ncr/commands/{command}/variables/{variable}/search', [CommandController::class, 'search']);
         $router->get('_ncr/executions/{execution}', [ExecutionController::class, 'show']);
         $router->get('_ncr/history', [HistoryController::class, 'index']);
         $router->delete('_ncr/history', [HistoryController::class, 'destroy']);

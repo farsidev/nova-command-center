@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter;
+namespace Farsi\NovaCommandCenter;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Menu\MenuSection;

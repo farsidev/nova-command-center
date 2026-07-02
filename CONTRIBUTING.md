@@ -48,7 +48,7 @@ All pull requests must pass:
 
 ```bash
 composer test      # Pest
-composer analyse   # PHPStan (level 6)
+composer analyse   # PHPStan (level 9)
 composer lint      # Pint (dry run) — run `composer format` to auto-fix
 ```
 

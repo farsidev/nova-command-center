@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Data;
+namespace Farsi\NovaCommandCenter\Data;
 
+use Farsi\NovaCommandCenter\Support\Cast;
 use Illuminate\Contracts\Support\Arrayable;
 
 /**
@@ -16,6 +17,7 @@ final class CommandVariable implements Arrayable
     /**
      * @param  list<array{value: string, label: string}>  $options
      * @param  list<string>  $rules
+     * @param  list<string>  $searchColumns
      */
     public function __construct(
         public readonly string $name,
@@ -27,6 +29,10 @@ final class CommandVariable implements Arrayable
         public readonly array $rules = [],
         public readonly ?string $help = null,
         public readonly ?string $placeholder = null,
+        public readonly ?string $model = null,
+        public readonly string $valueColumn = 'id',
+        public readonly string $labelColumn = 'name',
+        public readonly array $searchColumns = [],
     ) {}
 
     /**
@@ -49,15 +55,19 @@ final class CommandVariable implements Arrayable
             ? $definition['type']
             : 'text';
 
+        $labelColumn = isset($definition['label_column']) && is_string($definition['label_column']) && $definition['label_column'] !== ''
+            ? $definition['label_column']
+            : 'name';
+
         return new self(
             name: $name,
             label: isset($definition['label']) && is_string($definition['label'])
                 ? $definition['label']
                 : self::humanize($name),
-            type: in_array($type, ['text', 'select'], true) ? $type : 'text',
+            type: in_array($type, ['text', 'select', 'model'], true) ? $type : 'text',
             options: self::normalizeOptions($definition['options'] ?? []),
             required: (bool) ($definition['required'] ?? true),
-            default: isset($definition['default']) ? (string) $definition['default'] : null,
+            default: isset($definition['default']) ? Cast::nullableString($definition['default']) : null,
             rules: self::normalizeRules($definition['rules'] ?? []),
             help: isset($definition['help']) && is_string($definition['help'])
                 ? $definition['help']
@@ -65,6 +75,14 @@ final class CommandVariable implements Arrayable
             placeholder: isset($definition['placeholder']) && is_string($definition['placeholder'])
                 ? $definition['placeholder']
                 : null,
+            model: isset($definition['model']) && is_string($definition['model']) && $definition['model'] !== ''
+                ? $definition['model']
+                : null,
+            valueColumn: isset($definition['value_column']) && is_string($definition['value_column']) && $definition['value_column'] !== ''
+                ? $definition['value_column']
+                : 'id',
+            labelColumn: $labelColumn,
+            searchColumns: self::normalizeSearchColumns($definition['search_columns'] ?? null, $labelColumn),
         );
     }
 
@@ -102,8 +120,8 @@ final class CommandVariable implements Arrayable
         foreach ($options as $key => $value) {
             if (is_array($value) && isset($value['value'])) {
                 $normalized[] = [
-                    'value' => (string) $value['value'],
-                    'label' => (string) ($value['label'] ?? $value['value']),
+                    'value' => Cast::string($value['value']),
+                    'label' => Cast::string($value['label'] ?? $value['value']),
                 ];
 
                 continue;
@@ -111,8 +129,8 @@ final class CommandVariable implements Arrayable
 
             // ['on' => 'Enabled'] or [0 => 'foo']
             $normalized[] = is_string($key)
-                ? ['value' => $key, 'label' => (string) $value]
-                : ['value' => (string) $value, 'label' => (string) $value];
+                ? ['value' => $key, 'label' => Cast::string($value)]
+                : ['value' => Cast::string($value), 'label' => Cast::string($value)];
         }
 
         return $normalized;
@@ -136,6 +154,28 @@ final class CommandVariable implements Arrayable
             array_map(static fn ($rule): string => is_string($rule) ? $rule : '', $rules),
             static fn (string $rule): bool => $rule !== '',
         ));
+    }
+
+    /**
+     * @param  mixed  $columns
+     * @return list<string>
+     */
+    private static function normalizeSearchColumns($columns, string $labelColumn): array
+    {
+        if (is_string($columns)) {
+            $columns = [$columns];
+        }
+
+        if (!is_array($columns)) {
+            return [$labelColumn];
+        }
+
+        $normalized = array_values(array_filter(
+            array_map(static fn ($column): string => is_string($column) ? $column : '', $columns),
+            static fn (string $column): bool => $column !== '',
+        ));
+
+        return $normalized !== [] ? $normalized : [$labelColumn];
     }
 
     private static function humanize(string $value): string

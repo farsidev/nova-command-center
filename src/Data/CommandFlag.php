@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Data;
+namespace Farsi\NovaCommandCenter\Data;
 
 use Illuminate\Contracts\Support\Arrayable;
 

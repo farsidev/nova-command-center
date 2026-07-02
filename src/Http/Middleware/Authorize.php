@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Http\Middleware;
+namespace Farsi\NovaCommandCenter\Http\Middleware;
 
 use Closure;
-use Farsidev\NovaCommandCenter\CommandCenter;
+use Farsi\NovaCommandCenter\CommandCenter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Nova;
