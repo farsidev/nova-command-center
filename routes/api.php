@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/commands', [CommandController::class, 'index'])->name('nova-command-center.commands');
 Route::post('/commands/run', [CommandController::class, 'run'])->name('nova-command-center.run');
+Route::get('/commands/{command}/variables/{variable}/search', [CommandController::class, 'search'])->name('nova-command-center.search');
 Route::get('/executions/{execution}', [ExecutionController::class, 'show'])->name('nova-command-center.execution');
 Route::get('/history', [HistoryController::class, 'index'])->name('nova-command-center.history');
 Route::delete('/history', [HistoryController::class, 'destroy'])->name('nova-command-center.history.clear');

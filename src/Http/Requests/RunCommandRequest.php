@@ -9,6 +9,7 @@ use Farsidev\NovaCommandCenter\Data\CommandVariable;
 use Farsidev\NovaCommandCenter\Exceptions\CommandNotAllowedException;
 use Farsidev\NovaCommandCenter\Support\CommandRepository;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -52,9 +53,40 @@ final class RunCommandRequest extends FormRequest
 
         if ($command !== null) {
             foreach ($command->variables as $variable) {
-                $rules['variables.'.$variable->name] = $variable->validationRules();
+                $rules['variables.'.$variable->name] = $this->variableRules($variable);
             }
         }
+
+        return $rules;
+    }
+
+    /**
+     * A "model" variable's submitted value is checked against the real table
+     * via an "exists" rule, but only when its model class is allow-listed in
+     * "searchable_models" — otherwise the class string is untrusted and is
+     * never instantiated.
+     *
+     * @return list<string>
+     */
+    private function variableRules(CommandVariable $variable): array
+    {
+        $rules = $variable->validationRules();
+
+        if ($variable->type !== 'model' || $variable->model === null) {
+            return $rules;
+        }
+
+        $repository = app(CommandRepository::class);
+
+        if (!in_array($variable->model, $repository->searchableModels(), true)) {
+            return $rules;
+        }
+
+        /** @var class-string<Model> $modelClass */
+        $modelClass = $variable->model;
+        $table = (new $modelClass)->getTable();
+
+        $rules[] = 'exists:'.$table.','.$variable->valueColumn;
 
         return $rules;
     }

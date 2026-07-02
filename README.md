@@ -208,7 +208,7 @@ ever become the content of a single argument — never a new one.
 'variables' => [
     'email' => [
         'label' => 'User email',
-        'type' => 'text',            // or 'select'
+        'type' => 'text',            // 'text', 'select' or 'model'
         'required' => false,         // optional variables are fully supported
         'default' => null,
         'options' => [               // for 'select'
@@ -222,6 +222,13 @@ ever become the content of a single argument — never a new one.
 
 An optional variable that is left blank simply removes its placeholder token,
 so `foo --tag={tag}` becomes `foo` when `tag` is empty.
+
+A `type => 'model'` variable renders as a type-ahead search box backed by a
+real Eloquent model instead of a plain text input — useful when the argument
+is a record id picked from a large or dynamic table. Its backing model must
+be explicitly allow-listed via `searchable_models`. See "Searchable model
+variables" in [`docs/configuration.md`](docs/configuration.md) for the full
+schema and security notes.
 
 ### Authorization
 

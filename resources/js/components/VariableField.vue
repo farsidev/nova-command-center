@@ -20,6 +20,17 @@
       </option>
     </select>
 
+    <model-search-field
+      v-else-if="variable.type === 'model'"
+      :field-id="fieldId"
+      :command-id="commandId"
+      :variable-name="variable.name"
+      :model-value="modelValue"
+      :placeholder="variable.placeholder || ''"
+      :error="error"
+      @update:model-value="onInput"
+    />
+
     <input
       v-else
       :id="fieldId"
@@ -43,10 +54,12 @@
 
 <script setup>
 import { computed } from 'vue'
+import ModelSearchField from './ModelSearchField'
 import { __ } from '../util/translate'
 
 const props = defineProps({
   variable: { type: Object, required: true },
+  commandId: { type: String, default: '' },
   modelValue: { type: String, default: '' },
   error: { type: String, default: null },
 })

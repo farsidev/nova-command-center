@@ -31,7 +31,16 @@ run them freely, and each run is still gated and logged.
 `bash.enabled => false`. Even when enabled, only allow-listed commands with
 `command_type => 'bash'` may run, still as an escaped argument vector.
 
-## 4. Authorization
+## 4. Searchable model variables are allow-listed too
+
+A `model` variable's type-ahead search only ever queries an Eloquent class
+listed in `searchable_models` (empty by default), and only ever selects the
+two configured columns — never the full row. A model class that isn't
+allow-listed is never instantiated, even if a misconfigured or
+maliciously-edited command definition names one. See [Searchable model
+variables](configuration.md#searchable-model-variables).
+
+## 5. Authorization
 
 Every request passes through the `Authorize` middleware, which checks:
 
@@ -41,13 +50,14 @@ Every request passes through the `Authorize` middleware, which checks:
 
 See [authorization](authorization.md).
 
-## 5. Input validation
+## 6. Input validation
 
 `RunCommandRequest` validates each submitted variable against its definition
-(required/optional, `select` options, custom rules) before anything runs.
-Non-scalar or unexpected values are rejected with a 422, not executed.
+(required/optional, `select` options, custom rules, `model` existence) before
+anything runs. Non-scalar or unexpected values are rejected with a 422, not
+executed.
 
-## 6. Rate limiting & auditing
+## 7. Rate limiting & auditing
 
 The run endpoint is rate limited per user (`rate_limit`). Every execution
 dispatches `CommandStarted` and `CommandFinished` events carrying the command,

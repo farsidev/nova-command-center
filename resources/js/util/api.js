@@ -22,6 +22,12 @@ export default {
     return client().get(`${BASE}/executions/${id}`)
   },
 
+  searchVariable(commandId, variableName, query) {
+    return client().get(`${BASE}/commands/${commandId}/variables/${encodeURIComponent(variableName)}/search`, {
+      params: { q: query },
+    })
+  },
+
   history() {
     return client().get(`${BASE}/history`)
   },

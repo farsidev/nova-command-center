@@ -19,6 +19,7 @@ php artisan vendor:publish --tag=nova-command-center-config
 | `rate_limit` | int\|null | `30` | Max executions per authenticated user per minute. `null` disables it. |
 | `bash` | array | disabled | Shell command settings — see below. |
 | `custom_commands` | list | `[]` | Command types operators may type ad-hoc. Empty = off. |
+| `searchable_models` | list | `[]` | Eloquent model classes allowed to back a `model` variable. Empty = no model variable can be searched. See [Searchable model variables](#searchable-model-variables). |
 | `without_overlapping` | array | `[]` | Concurrency locks — see below. |
 | `defaults` | array | see below | Fallback `timeout`, `output_size` and button `type`. |
 | `commands` | array | example set | The allow-list, keyed by display name. |
@@ -92,7 +93,7 @@ the command is tokenised, so a value is always a single argument.
 'variables' => [
     'key' => [
         'label' => 'Cache key',
-        'type' => 'text',          // 'text' (default) or 'select'
+        'type' => 'text',          // 'text' (default), 'select' or 'model'
         'options' => [],           // for select: ['a' => 'Label', …] or [['value','label']]
         'required' => true,
         'default' => null,
@@ -105,6 +106,46 @@ the command is tokenised, so a value is always a single argument.
 
 Shorthand forms are accepted: `'variables' => ['key', 'value']` (a list of
 names) or `'key' => 'Label'` (name → label).
+
+### Searchable model variables
+
+Some commands take an id that isn't practical to guess or pick from a static
+dropdown — e.g. "which Club" out of a few thousand rows. A `model` variable
+renders as a type-ahead search box instead of a plain text input, backed by a
+real Eloquent model, and submits the matched record's id.
+
+```php
+'searchable_models' => [
+    \App\Models\Club::class,
+],
+
+// …
+
+'variables' => [
+    'club' => [
+        'label' => 'Club',
+        'type' => 'model',
+        'model' => \App\Models\Club::class,   // must appear in searchable_models above
+        'value_column' => 'id',               // default: 'id' — submitted as the variable's value
+        'label_column' => 'name',             // default: 'name' — shown in the results list
+        'search_columns' => ['name', 'slug'], // default: [label_column] — columns matched against the query
+    ],
+],
+```
+
+**Security.** A `model` class is only searchable once it is explicitly listed
+in `searchable_models` — the same allow-list posture as `bash` and
+`custom_commands`. The search endpoint (`GET
+.../commands/{command}/variables/{variable}/search?q=`) only ever selects
+`value_column` and `label_column` from the table — never the full row — so it
+cannot be used to read unrelated columns, and it is gated behind the same
+authorization as running the command itself (the tool's gate, plus the
+command's own `can` ability, if set). A submitted value is additionally
+checked with an `exists:table,column` rule before the command runs, so a
+tampered id is rejected rather than silently passed through. Anyone who can
+run the command can search the allow-listed model's `label_column` and
+`search_columns` — don't allow-list a model whose display columns you
+wouldn't want a lower-privileged operator to search by.
 
 ### Flags
 

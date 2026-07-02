@@ -9,6 +9,7 @@ use Farsidev\NovaCommandCenter\Data\CommandDefinition;
 use Farsidev\NovaCommandCenter\Exceptions\CommandNotAllowedException;
 use Farsidev\NovaCommandCenter\Exceptions\CommandNotFoundException;
 use Farsidev\NovaCommandCenter\Support\Sources\ConfigCommandSource;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Loads the allow-list — from whatever {@see CommandSource} is bound — into typed
@@ -141,6 +142,29 @@ final class CommandRepository
         return array_values(array_filter(
             array_map(static fn ($type): string => is_string($type) ? strtolower($type) : '', $types),
             static fn (string $type): bool => in_array($type, ['artisan', 'bash'], true),
+        ));
+    }
+
+    /**
+     * The Eloquent models permitted to back a "model" variable's search
+     * endpoint. Nothing is searchable until explicitly allow-listed here —
+     * the same posture as {@see self::allowedCustomTypes()}. A configured
+     * value that isn't a real Model subclass is silently dropped rather than
+     * risking an attempt to query/instantiate an arbitrary class string.
+     *
+     * @return list<class-string<Model>>
+     */
+    public function searchableModels(): array
+    {
+        $models = $this->config['searchable_models'] ?? [];
+
+        if (!is_array($models)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            array_map(static fn ($model): string => is_string($model) ? $model : '', $models),
+            static fn (string $model): bool => $model !== '' && is_subclass_of($model, Model::class),
         ));
     }
 

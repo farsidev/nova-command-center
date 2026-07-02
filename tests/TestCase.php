@@ -48,6 +48,7 @@ abstract class TestCase extends Orchestra
         $config->set('nova-command-center.history', 10);
         $config->set('nova-command-center.bash', ['enabled' => false, 'working_directory' => null, 'env' => []]);
         $config->set('nova-command-center.custom_commands', []);
+        $config->set('nova-command-center.searchable_models', []);
         $config->set('nova-command-center.without_overlapping', ['commands' => [], 'groups' => []]);
         $config->set('nova-command-center.commands', $this->defaultCommands());
 
@@ -60,6 +61,7 @@ abstract class TestCase extends Orchestra
         /** @var Router $router */
         $router->get('_ncr/commands', [CommandController::class, 'index']);
         $router->post('_ncr/commands/run', [CommandController::class, 'run']);
+        $router->get('_ncr/commands/{command}/variables/{variable}/search', [CommandController::class, 'search']);
         $router->get('_ncr/executions/{execution}', [ExecutionController::class, 'show']);
         $router->get('_ncr/history', [HistoryController::class, 'index']);
         $router->delete('_ncr/history', [HistoryController::class, 'destroy']);

@@ -48,6 +48,7 @@
           v-for="variable in command.variables"
           :key="variable.name"
           :variable="variable"
+          :command-id="command.id"
           :error="fieldError(variable.name)"
           v-model="values[variable.name]"
           @update:model-value="touch(variable.name)"

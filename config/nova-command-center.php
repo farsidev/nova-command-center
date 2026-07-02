@@ -138,6 +138,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Searchable Models
+    |--------------------------------------------------------------------------
+    |
+    | Eloquent models allowed to back a "model" variable — a searchable,
+    | type-ahead field for picking a record (e.g. a Club) instead of typing
+    | its id blind. Nothing is searchable until its class is listed here.
+    | The search endpoint only ever selects the two configured columns
+    | (value_column/label_column), never the full row. Example:
+    |
+    |   'searchable_models' => [\App\Models\Club::class],
+    |
+    */
+
+    'searchable_models' => [],
+
+    /*
+    |--------------------------------------------------------------------------
     | Concurrency
     |--------------------------------------------------------------------------
     |
@@ -186,8 +203,13 @@ return [
     |                             "connection" and/or "queue" name.
     |   can          (string) Gate ability required to run this command.
     |   variables    (array)  User-supplied values, keyed by placeholder name.
-    |                         Each: [label, type(text|select), options,
-    |                                required(bool), default, rules].
+    |                         Each: [label, type(text|select|model), options,
+    |                                required(bool), default, rules]. A "model"
+    |                         variable additionally takes: model (class-string,
+    |                         must be listed in "searchable_models" above),
+    |                         value_column (default "id"), label_column
+    |                         (default "name"), search_columns (default
+    |                         [label_column]).
     |   flags        (array)  Optional flags rendered as checkboxes. Each:
     |                         [label, flag, default(bool)].
     |

@@ -14,9 +14,12 @@ use Farsidev\NovaCommandCenter\Support\CommandRepository;
 use Farsidev\NovaCommandCenter\Support\ExecutionStore;
 use Farsidev\NovaCommandCenter\Support\History;
 use Illuminate\Config\Repository as Config;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
@@ -127,6 +130,73 @@ final class CommandController extends Controller
         } catch (CommandNotAllowedException $exception) {
             return new JsonResponse(['message' => $exception->getMessage()], 422);
         }
+    }
+
+    /**
+     * Type-ahead search backing a "model" variable. Only selects the two
+     * configured columns (never the whole row) and only ever queries a
+     * model class explicitly allow-listed in "searchable_models", so this
+     * endpoint cannot be used to read arbitrary application data.
+     */
+    public function search(Request $request, string $command, string $variable): JsonResponse
+    {
+        $definition = $this->commands->find($command);
+
+        if ($definition === null) {
+            return new JsonResponse(['message' => 'The selected command does not exist.'], 404);
+        }
+
+        if ($definition->can !== null && !Gate::allows($definition->can, $definition)) {
+            abort(403);
+        }
+
+        $target = null;
+
+        foreach ($definition->variables as $candidate) {
+            if ($candidate->name === $variable) {
+                $target = $candidate;
+
+                break;
+            }
+        }
+
+        if ($target === null || $target->type !== 'model' || $target->model === null) {
+            return new JsonResponse(['message' => 'This variable is not searchable.'], 404);
+        }
+
+        if (!in_array($target->model, $this->commands->searchableModels(), true)) {
+            return new JsonResponse(['message' => 'This model is not allow-listed for search.'], 403);
+        }
+
+        /** @var class-string<Model> $modelClass */
+        $modelClass = $target->model;
+        $term = Cast::string($request->query('q'), '');
+        $valueColumn = $target->valueColumn;
+        $labelColumn = $target->labelColumn;
+        $searchColumns = $target->searchColumns;
+
+        $query = $modelClass::query();
+
+        if ($term !== '') {
+            $escaped = addcslashes($term, '%_\\');
+
+            $query->where(function (Builder $builder) use ($searchColumns, $escaped): void {
+                foreach ($searchColumns as $column) {
+                    $builder->orWhere($column, 'like', '%'.$escaped.'%');
+                }
+            });
+        }
+
+        $results = $query
+            ->limit(20)
+            ->get([$valueColumn, $labelColumn])
+            ->map(static fn (Model $record): array => [
+                'value' => Cast::string($record->getAttribute($valueColumn)),
+                'label' => Cast::string($record->getAttribute($labelColumn)),
+            ])
+            ->values();
+
+        return new JsonResponse(['results' => $results]);
     }
 
     private function enforceRateLimit(Request $request): ?JsonResponse

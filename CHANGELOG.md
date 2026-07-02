@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- A `model` variable type: a searchable, type-ahead field backed by a real
+  Eloquent model instead of a plain text input, for commands whose argument
+  is a record id picked from a large or dynamic table (e.g. "which Club" out
+  of thousands). The backing model must be explicitly allow-listed via the
+  new `searchable_models` config key; the search endpoint only ever selects
+  the two configured columns, and a submitted value is checked with an
+  `exists` rule before the command runs. See "Searchable model variables" in
+  the configuration docs.
 - Queued commands now record a `pending` entry in History the instant they are
   dispatched, not just once they finish. Previously a queued command that was
   slow to start — or never started, e.g. because no queue worker was consuming
