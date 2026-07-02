@@ -73,6 +73,16 @@ it('searches the allow-listed model and returns only value/label', function () {
     expect($response->json('results.0'))->not->toHaveKey('secret');
 });
 
+it('searches case-insensitively', function () {
+    $id = commandId('Add Flight Services');
+
+    $response = $this->getJson("_ncr/commands/{$id}/variables/club/search?q=CHELSEA");
+
+    $response->assertOk()
+        ->assertJsonCount(1, 'results')
+        ->assertJsonPath('results.0.label', 'Chelsea FC');
+});
+
 it('returns results for an empty search term, capped at the page size', function () {
     $id = commandId('Add Flight Services');
 

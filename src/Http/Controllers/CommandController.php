@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -178,11 +179,21 @@ final class CommandController extends Controller
         $query = $modelClass::query();
 
         if ($term !== '') {
-            $escaped = addcslashes($term, '%_\\');
+            // LIKE is case-sensitive on some drivers (e.g. PostgreSQL) and not
+            // others (MySQL's default collation, SQLite), so both sides are
+            // explicitly lower-cased with the portable LOWER() SQL function
+            // instead of relying on driver-specific behaviour (or ILIKE,
+            // which isn't available everywhere). The column is cast to a
+            // character type first: LOWER() rejects non-text column types
+            // outright on strict drivers (e.g. Postgres jsonb, as used by
+            // some translatable-column packages), where a plain LIKE would
+            // otherwise still work via an implicit cast.
+            $escaped = mb_strtolower(addcslashes($term, '%_\\'));
+            $castType = (new $modelClass)->getConnection()->getDriverName() === 'mysql' ? 'CHAR' : 'TEXT';
 
-            $query->where(function (Builder $builder) use ($searchColumns, $escaped): void {
+            $query->where(function (Builder $builder) use ($searchColumns, $escaped, $castType): void {
                 foreach ($searchColumns as $column) {
-                    $builder->orWhere($column, 'like', '%'.$escaped.'%');
+                    $builder->orWhere(DB::raw('LOWER(CAST('.$column.' AS '.$castType.'))'), 'like', '%'.$escaped.'%');
                 }
             });
         }

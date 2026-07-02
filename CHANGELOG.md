@@ -13,8 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is a record id picked from a large or dynamic table (e.g. "which Club" out
   of thousands). The backing model must be explicitly allow-listed via the
   new `searchable_models` config key; the search endpoint only ever selects
-  the two configured columns, and a submitted value is checked with an
-  `exists` rule before the command runs. See "Searchable model variables" in
+  the two configured columns, matches case-insensitively regardless of
+  database driver, and a submitted value is checked with an `exists` rule
+  before the command runs. See "Searchable model variables" in
   the configuration docs.
 - Queued commands now record a `pending` entry in History the instant they are
   dispatched, not just once they finish. Previously a queued command that was

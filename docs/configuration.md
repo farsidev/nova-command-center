@@ -133,6 +133,11 @@ real Eloquent model, and submits the matched record's id.
 ],
 ```
 
+Matching against `search_columns` is always case-insensitive, regardless of
+database driver — including on drivers like PostgreSQL where `LIKE` is
+case-sensitive by default, and on JSON-typed columns (e.g. a translatable
+column stored as `jsonb`, matched as its raw JSON text).
+
 **Security.** A `model` class is only searchable once it is explicitly listed
 in `searchable_models` — the same allow-list posture as `bash` and
 `custom_commands`. The search endpoint (`GET
