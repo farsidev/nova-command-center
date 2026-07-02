@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Tests;
+namespace Farsi\NovaCommandCenter\Tests;
 
-use Farsidev\NovaCommandCenter\Contracts\CommandExecutor;
-use Farsidev\NovaCommandCenter\Http\Controllers\CommandController;
-use Farsidev\NovaCommandCenter\Http\Controllers\ExecutionController;
-use Farsidev\NovaCommandCenter\Http\Controllers\HistoryController;
-use Farsidev\NovaCommandCenter\Support\CommandRepository;
-use Farsidev\NovaCommandCenter\Tests\Fakes\FakeExecutor;
-use Farsidev\NovaCommandCenter\ToolServiceProvider;
+use Farsi\NovaCommandCenter\Contracts\CommandExecutor;
+use Farsi\NovaCommandCenter\Http\Controllers\CommandController;
+use Farsi\NovaCommandCenter\Http\Controllers\ExecutionController;
+use Farsi\NovaCommandCenter\Http\Controllers\HistoryController;
+use Farsi\NovaCommandCenter\Support\CommandRepository;
+use Farsi\NovaCommandCenter\Tests\Fakes\FakeExecutor;
+use Farsi\NovaCommandCenter\ToolServiceProvider;
 use Illuminate\Routing\Router;
 use Orchestra\Testbench\TestCase as Orchestra;
 

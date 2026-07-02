@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Support;
+namespace Farsi\NovaCommandCenter\Support;
 
-use Farsidev\NovaCommandCenter\Data\CommandDefinition;
-use Farsidev\NovaCommandCenter\Exceptions\CommandNotAllowedException;
+use Farsi\NovaCommandCenter\Data\CommandDefinition;
+use Farsi\NovaCommandCenter\Exceptions\CommandNotAllowedException;
 use Illuminate\Contracts\Cache\Lock;
 use Illuminate\Contracts\Cache\LockProvider;
 use Illuminate\Contracts\Cache\Repository as Cache;

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Http\Controllers;
+namespace Farsi\NovaCommandCenter\Http\Controllers;
 
-use Farsidev\NovaCommandCenter\Actions\ExecuteCommand;
-use Farsidev\NovaCommandCenter\Data\ExecutionResult;
-use Farsidev\NovaCommandCenter\Exceptions\CommandNotAllowedException;
-use Farsidev\NovaCommandCenter\Http\Requests\RunCommandRequest;
-use Farsidev\NovaCommandCenter\Jobs\RunCommandJob;
-use Farsidev\NovaCommandCenter\Support\Cast;
-use Farsidev\NovaCommandCenter\Support\CommandRepository;
-use Farsidev\NovaCommandCenter\Support\ExecutionStore;
-use Farsidev\NovaCommandCenter\Support\History;
+use Farsi\NovaCommandCenter\Actions\ExecuteCommand;
+use Farsi\NovaCommandCenter\Data\ExecutionResult;
+use Farsi\NovaCommandCenter\Exceptions\CommandNotAllowedException;
+use Farsi\NovaCommandCenter\Http\Requests\RunCommandRequest;
+use Farsi\NovaCommandCenter\Jobs\RunCommandJob;
+use Farsi\NovaCommandCenter\Support\Cast;
+use Farsi\NovaCommandCenter\Support\CommandRepository;
+use Farsi\NovaCommandCenter\Support\ExecutionStore;
+use Farsi\NovaCommandCenter\Support\History;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;

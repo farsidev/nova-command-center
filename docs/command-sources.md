@@ -4,7 +4,7 @@ Where the allow-list of commands is read from is pluggable. The contract is one
 method:
 
 ```php
-namespace Farsidev\NovaCommandCenter\Contracts;
+namespace Farsi\NovaCommandCenter\Contracts;
 
 interface CommandSource
 {
@@ -22,7 +22,7 @@ Select the driver in `config/nova-command-center.php`:
 ```php
 'source' => [
     'driver' => 'config', // 'config' | 'database' | Custom::class
-    'model'  => \Farsidev\NovaCommandCenter\Models\Command::class,
+    'model'  => \Farsi\NovaCommandCenter\Models\Command::class,
 ],
 ```
 
@@ -59,7 +59,7 @@ a bundled Nova resource.
 3. Register the resource from your `NovaServiceProvider`, ideally behind a policy:
 
    ```php
-   use Farsidev\NovaCommandCenter\Nova\Command;
+   use Farsi\NovaCommandCenter\Nova\Command;
 
    Nova::resources([Command::class]);
    ```
@@ -84,7 +84,7 @@ Any class implementing `CommandSource` can be bound by class-string. Useful for
 YAML files, a remote registry, or feature-flagged command sets.
 
 ```php
-use Farsidev\NovaCommandCenter\Contracts\CommandSource;
+use Farsi\NovaCommandCenter\Contracts\CommandSource;
 
 final class YamlCommandSource implements CommandSource
 {

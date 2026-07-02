@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter;
+namespace Farsi\NovaCommandCenter;
 
-use Farsidev\NovaCommandCenter\Actions\ExecuteCommand;
-use Farsidev\NovaCommandCenter\Contracts\CommandExecutor;
-use Farsidev\NovaCommandCenter\Contracts\CommandSource;
-use Farsidev\NovaCommandCenter\Http\Middleware\Authorize;
-use Farsidev\NovaCommandCenter\Models\Command;
-use Farsidev\NovaCommandCenter\Support\Cast;
-use Farsidev\NovaCommandCenter\Support\CommandBuilder;
-use Farsidev\NovaCommandCenter\Support\CommandRepository;
-use Farsidev\NovaCommandCenter\Support\ConcurrencyGuard;
-use Farsidev\NovaCommandCenter\Support\ExecutionStore;
-use Farsidev\NovaCommandCenter\Support\History;
-use Farsidev\NovaCommandCenter\Support\ProcessExecutor;
-use Farsidev\NovaCommandCenter\Support\Sources\ConfigCommandSource;
-use Farsidev\NovaCommandCenter\Support\Sources\DatabaseCommandSource;
+use Farsi\NovaCommandCenter\Actions\ExecuteCommand;
+use Farsi\NovaCommandCenter\Contracts\CommandExecutor;
+use Farsi\NovaCommandCenter\Contracts\CommandSource;
+use Farsi\NovaCommandCenter\Http\Middleware\Authorize;
+use Farsi\NovaCommandCenter\Models\Command;
+use Farsi\NovaCommandCenter\Support\Cast;
+use Farsi\NovaCommandCenter\Support\CommandBuilder;
+use Farsi\NovaCommandCenter\Support\CommandRepository;
+use Farsi\NovaCommandCenter\Support\ConcurrencyGuard;
+use Farsi\NovaCommandCenter\Support\ExecutionStore;
+use Farsi\NovaCommandCenter\Support\History;
+use Farsi\NovaCommandCenter\Support\ProcessExecutor;
+use Farsi\NovaCommandCenter\Support\Sources\ConfigCommandSource;
+use Farsi\NovaCommandCenter\Support\Sources\DatabaseCommandSource;
 use Illuminate\Contracts\Cache\Factory as CacheFactory;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
@@ -151,7 +151,7 @@ final class ToolServiceProvider extends ServiceProvider
             ->group(__DIR__.'/../routes/inertia.php');
 
         Route::middleware(['nova', Authorize::class])
-            ->prefix('nova-vendor/farsidev/nova-command-center')
+            ->prefix('nova-vendor/farsi/nova-command-center')
             ->group(__DIR__.'/../routes/api.php');
     }
 

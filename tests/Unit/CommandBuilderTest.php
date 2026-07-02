@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Farsidev\NovaCommandCenter\Data\CommandDefinition;
-use Farsidev\NovaCommandCenter\Support\CommandBuilder;
+use Farsi\NovaCommandCenter\Data\CommandDefinition;
+use Farsi\NovaCommandCenter\Support\CommandBuilder;
 
 function builder(): CommandBuilder
 {

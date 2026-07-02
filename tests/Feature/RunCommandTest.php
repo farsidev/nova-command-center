@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use Farsidev\NovaCommandCenter\Actions\ExecuteCommand;
-use Farsidev\NovaCommandCenter\Data\CommandDefinition;
-use Farsidev\NovaCommandCenter\Data\ExecutionResult;
-use Farsidev\NovaCommandCenter\Events\CommandFinished;
-use Farsidev\NovaCommandCenter\Events\CommandStarted;
-use Farsidev\NovaCommandCenter\Exceptions\CommandNotAllowedException;
-use Farsidev\NovaCommandCenter\Support\CommandRepository;
-use Farsidev\NovaCommandCenter\Support\History;
+use Farsi\NovaCommandCenter\Actions\ExecuteCommand;
+use Farsi\NovaCommandCenter\Data\CommandDefinition;
+use Farsi\NovaCommandCenter\Data\ExecutionResult;
+use Farsi\NovaCommandCenter\Events\CommandFinished;
+use Farsi\NovaCommandCenter\Events\CommandStarted;
+use Farsi\NovaCommandCenter\Exceptions\CommandNotAllowedException;
+use Farsi\NovaCommandCenter\Support\CommandRepository;
+use Farsi\NovaCommandCenter\Support\History;
 use Illuminate\Support\Facades\Event;
 
 function command(string $name): CommandDefinition

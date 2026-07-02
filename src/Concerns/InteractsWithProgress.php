@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Concerns;
+namespace Farsi\NovaCommandCenter\Concerns;
 
-use Farsidev\NovaCommandCenter\Support\ExecutionStore;
+use Farsi\NovaCommandCenter\Support\ExecutionStore;
 
 /**
  * Add to any Artisan command to report progress back to the Command Center UI.

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Farsidev\NovaCommandCenter\Contracts\CommandSource;
-use Farsidev\NovaCommandCenter\Models\Command;
-use Farsidev\NovaCommandCenter\Support\CommandRepository;
-use Farsidev\NovaCommandCenter\Support\Sources\DatabaseCommandSource;
+use Farsi\NovaCommandCenter\Contracts\CommandSource;
+use Farsi\NovaCommandCenter\Models\Command;
+use Farsi\NovaCommandCenter\Support\CommandRepository;
+use Farsi\NovaCommandCenter\Support\Sources\DatabaseCommandSource;
 use Illuminate\Support\Facades\Schema;
 
 beforeEach(function () {

@@ -1,5 +1,5 @@
 {
-    "name": "farsidev/nova-command-center",
+    "name": "farsi/nova-command-center",
     "description": "A secure, modern Laravel Nova tool to run Artisan and shell commands from the Nova dashboard. Compatible with Nova v4 and v5.",
     "keywords": [
         "laravel",
@@ -40,12 +40,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Farsidev\\NovaCommandCenter\\": "src/"
+            "Farsi\\NovaCommandCenter\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Farsidev\\NovaCommandCenter\\Tests\\": "tests/"
+            "Farsi\\NovaCommandCenter\\Tests\\": "tests/"
         }
     },
     "config": {
@@ -57,7 +57,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Farsidev\\NovaCommandCenter\\ToolServiceProvider"
+                "Farsi\\NovaCommandCenter\\ToolServiceProvider"
             ]
         }
     },

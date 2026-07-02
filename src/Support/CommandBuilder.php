@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Support;
+namespace Farsi\NovaCommandCenter\Support;
 
-use Farsidev\NovaCommandCenter\Data\BuiltCommand;
-use Farsidev\NovaCommandCenter\Data\CommandDefinition;
+use Farsi\NovaCommandCenter\Data\BuiltCommand;
+use Farsi\NovaCommandCenter\Data\CommandDefinition;
 use Symfony\Component\Process\PhpExecutableFinder;
 
 /**

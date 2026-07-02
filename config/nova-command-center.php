@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-use Farsidev\NovaCommandCenter\Models\Command;
+use Farsi\NovaCommandCenter\Models\Command;
 
 return [
 
@@ -38,7 +38,7 @@ return [
     |               anyone who can edit those rows decides what runs. Gate the
     |               resource tightly and keep bash disabled unless required.
     |
-    |   A class-string implementing Farsidev\NovaCommandCenter\Contracts\CommandSource
+    |   A class-string implementing Farsi\NovaCommandCenter\Contracts\CommandSource
     |               for any other backing store.
     |
     */

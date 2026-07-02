@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Farsidev\NovaCommandCenter\Support\CommandRepository;
+use Farsi\NovaCommandCenter\Support\CommandRepository;
 
 function commandId(string $name): string
 {

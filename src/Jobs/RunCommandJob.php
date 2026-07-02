@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Jobs;
+namespace Farsi\NovaCommandCenter\Jobs;
 
-use Farsidev\NovaCommandCenter\Actions\ExecuteCommand;
-use Farsidev\NovaCommandCenter\Data\ExecutionResult;
-use Farsidev\NovaCommandCenter\Support\CommandRepository;
-use Farsidev\NovaCommandCenter\Support\ExecutionStore;
-use Farsidev\NovaCommandCenter\Support\History;
+use Farsi\NovaCommandCenter\Actions\ExecuteCommand;
+use Farsi\NovaCommandCenter\Data\ExecutionResult;
+use Farsi\NovaCommandCenter\Support\CommandRepository;
+use Farsi\NovaCommandCenter\Support\ExecutionStore;
+use Farsi\NovaCommandCenter\Support\History;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Support\Sources;
+namespace Farsi\NovaCommandCenter\Support\Sources;
 
-use Farsidev\NovaCommandCenter\Contracts\CommandSource;
+use Farsi\NovaCommandCenter\Contracts\CommandSource;
 
 /**
  * The default source: command definitions come from the published config file.

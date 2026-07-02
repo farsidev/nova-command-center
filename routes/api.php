@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Farsidev\NovaCommandCenter\Http\Controllers\CommandController;
-use Farsidev\NovaCommandCenter\Http\Controllers\ExecutionController;
-use Farsidev\NovaCommandCenter\Http\Controllers\HistoryController;
+use Farsi\NovaCommandCenter\Http\Controllers\CommandController;
+use Farsi\NovaCommandCenter\Http\Controllers\ExecutionController;
+use Farsi\NovaCommandCenter\Http\Controllers\HistoryController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 | Tool API Routes
 |--------------------------------------------------------------------------
 |
-| Prefixed with "nova-vendor/farsidev/nova-command-center" and guarded by
+| Prefixed with "nova-vendor/farsi/nova-command-center" and guarded by
 | Nova's middleware plus the tool Authorize middleware.
 |
 */

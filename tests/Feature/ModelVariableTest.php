@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Farsidev\NovaCommandCenter\Tests\Fakes\TestClub;
+use Farsi\NovaCommandCenter\Tests\Fakes\TestClub;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Farsidev\NovaCommandCenter\Contracts\CommandSource;
-use Farsidev\NovaCommandCenter\Support\CommandRepository;
-use Farsidev\NovaCommandCenter\Support\Sources\ConfigCommandSource;
+use Farsi\NovaCommandCenter\Contracts\CommandSource;
+use Farsi\NovaCommandCenter\Support\CommandRepository;
+use Farsi\NovaCommandCenter\Support\Sources\ConfigCommandSource;
 
 it('reads definitions from the config array', function () {
     $source = new ConfigCommandSource([

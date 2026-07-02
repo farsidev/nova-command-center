@@ -27,7 +27,7 @@ command it exposes the execution id to the child process, which the trait picks
 up automatically.
 
 ```php
-use Farsidev\NovaCommandCenter\Concerns\InteractsWithProgress;
+use Farsi\NovaCommandCenter\Concerns\InteractsWithProgress;
 use Illuminate\Console\Command;
 
 class ImportUsers extends Command

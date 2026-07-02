@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Models;
+namespace Farsi\NovaCommandCenter\Models;
 
-use Farsidev\NovaCommandCenter\Data\CommandDefinition;
+use Farsi\NovaCommandCenter\Data\CommandDefinition;
 use Illuminate\Database\Eloquent\Model;
 
 /**

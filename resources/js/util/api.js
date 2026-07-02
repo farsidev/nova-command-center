@@ -3,7 +3,7 @@
  * Using Nova.request keeps CSRF, base URL and auth headers consistent with the
  * host Nova application across v4 and v5.
  */
-const BASE = '/nova-vendor/farsidev/nova-command-center'
+const BASE = '/nova-vendor/farsi/nova-command-center'
 
 function client() {
   return window.Nova.request()

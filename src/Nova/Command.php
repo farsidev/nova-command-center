@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Nova;
+namespace Farsi\NovaCommandCenter\Nova;
 
-use Farsidev\NovaCommandCenter\Models\Command as CommandModel;
+use Farsi\NovaCommandCenter\Models\Command as CommandModel;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Code;
 use Laravel\Nova\Fields\Field;
@@ -24,7 +24,7 @@ use Laravel\Nova\Resource;
  * then register this resource from your own NovaServiceProvider — ideally behind
  * a strict policy so only trusted operators can edit the allow-list:
  *
- *     use Farsidev\NovaCommandCenter\Nova\Command;
+ *     use Farsi\NovaCommandCenter\Nova\Command;
  *
  *     Nova::resources([Command::class]);
  *

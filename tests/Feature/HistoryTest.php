@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Farsidev\NovaCommandCenter\Actions\ExecuteCommand;
-use Farsidev\NovaCommandCenter\Support\History;
+use Farsi\NovaCommandCenter\Actions\ExecuteCommand;
+use Farsi\NovaCommandCenter\Support\History;
 
 it('lists history over the API', function () {
     app(ExecuteCommand::class)->handle(command('Clear Cache'), [], []);

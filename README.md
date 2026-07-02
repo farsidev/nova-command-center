@@ -2,8 +2,8 @@
 
 [![Tests](https://github.com/farsidev/nova-command-center/actions/workflows/tests.yml/badge.svg)](https://github.com/farsidev/nova-command-center/actions/workflows/tests.yml)
 [![Static Analysis](https://github.com/farsidev/nova-command-center/actions/workflows/static-analysis.yml/badge.svg)](https://github.com/farsidev/nova-command-center/actions/workflows/static-analysis.yml)
-[![Latest Version](https://img.shields.io/packagist/v/farsidev/nova-command-center.svg)](https://packagist.org/packages/farsidev/nova-command-center)
-[![License](https://img.shields.io/packagist/l/farsidev/nova-command-center.svg)](LICENSE.md)
+[![Latest Version](https://img.shields.io/packagist/v/farsi/nova-command-center.svg)](https://packagist.org/packages/farsi/nova-command-center)
+[![License](https://img.shields.io/packagist/l/farsi/nova-command-center.svg)](LICENSE.md)
 
 Run pre-approved Artisan and shell commands directly from your Laravel Nova
 dashboard — safely. Built for and tested against **Nova v4 and v5**.
@@ -45,13 +45,13 @@ optional variables and the absence of authorization hooks.
 ## Installation
 
 ```bash
-composer require farsidev/nova-command-center
+composer require farsi/nova-command-center
 ```
 
 Register the tool in `app/Providers/NovaServiceProvider.php`:
 
 ```php
-use Farsidev\NovaCommandCenter\CommandCenter;
+use Farsi\NovaCommandCenter\CommandCenter;
 
 public function tools(): array
 {
@@ -135,7 +135,7 @@ safest posture. The source is pluggable via the `source` key:
 ```php
 'source' => [
     'driver' => 'config', // 'config' (default), 'database', or a custom class-string
-    'model'  => \Farsidev\NovaCommandCenter\Models\Command::class,
+    'model'  => \Farsi\NovaCommandCenter\Models\Command::class,
 ],
 ```
 
@@ -146,7 +146,7 @@ through the same coercion, validation and security model — a custom source can
 never widen the trust boundary or bypass the bash/rate-limit/authorization gates.
 
 ```php
-use Farsidev\NovaCommandCenter\Contracts\CommandSource;
+use Farsi\NovaCommandCenter\Contracts\CommandSource;
 
 final class YamlCommandSource implements CommandSource
 {
@@ -182,7 +182,7 @@ database source. **Read the security note first.**
    behind a strict policy so only trusted operators can edit the allow-list:
 
    ```php
-   use Farsidev\NovaCommandCenter\Nova\Command;
+   use Farsi\NovaCommandCenter\Nova\Command;
 
    Nova::resources([Command::class]);
    ```
@@ -271,7 +271,7 @@ Mark a command as `queue => true` to run it on a worker with live, polled output
 To report progress from your own Artisan command, use the provided trait:
 
 ```php
-use Farsidev\NovaCommandCenter\Concerns\InteractsWithProgress;
+use Farsi\NovaCommandCenter\Concerns\InteractsWithProgress;
 
 class RebuildSearchIndex extends Command
 {
@@ -295,7 +295,7 @@ class RebuildSearchIndex extends Command
 
 ## Events
 
-Every execution dispatches `Farsidev\NovaCommandCenter\Events\CommandStarted` and
+Every execution dispatches `Farsi\NovaCommandCenter\Events\CommandStarted` and
 `CommandFinished`, each carrying the command definition, the execution result and
 the operator — handy for audit logging.
 

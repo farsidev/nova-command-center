@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 arch('all source declares strict types')
-    ->expect('Farsidev\NovaCommandCenter')
+    ->expect('Farsi\NovaCommandCenter')
     ->toUseStrictTypes();
 
 arch('no debug statements leak into source')
@@ -11,28 +11,28 @@ arch('no debug statements leak into source')
     ->not->toBeUsed();
 
 arch('data transfer objects are immutable value objects')
-    ->expect('Farsidev\NovaCommandCenter\Data')
+    ->expect('Farsi\NovaCommandCenter\Data')
     ->toBeFinal()
     ->toHaveConstructor();
 
 arch('contracts are interfaces')
-    ->expect('Farsidev\NovaCommandCenter\Contracts')
+    ->expect('Farsi\NovaCommandCenter\Contracts')
     ->toBeInterfaces();
 
 arch('actions are final')
-    ->expect('Farsidev\NovaCommandCenter\Actions')
+    ->expect('Farsi\NovaCommandCenter\Actions')
     ->toBeClasses()
     ->toBeFinal();
 
 arch('command sources implement the contract')
-    ->expect('Farsidev\NovaCommandCenter\Support\Sources')
-    ->toImplement('Farsidev\NovaCommandCenter\Contracts\CommandSource')
+    ->expect('Farsi\NovaCommandCenter\Support\Sources')
+    ->toImplement('Farsi\NovaCommandCenter\Contracts\CommandSource')
     ->toBeFinal();
 
 arch('exceptions extend the SPL exception hierarchy')
-    ->expect('Farsidev\NovaCommandCenter\Exceptions')
+    ->expect('Farsi\NovaCommandCenter\Exceptions')
     ->toExtend('Exception');
 
 arch('the security-critical builder never touches the shell')
-    ->expect('Farsidev\NovaCommandCenter\Support\CommandBuilder')
+    ->expect('Farsi\NovaCommandCenter\Support\CommandBuilder')
     ->not->toUse(['shell_exec', 'exec', 'system', 'passthru', 'proc_open', 'popen']);

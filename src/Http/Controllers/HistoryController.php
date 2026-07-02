@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Http\Controllers;
+namespace Farsi\NovaCommandCenter\Http\Controllers;
 
-use Farsidev\NovaCommandCenter\Data\ExecutionResult;
-use Farsidev\NovaCommandCenter\Support\History;
+use Farsi\NovaCommandCenter\Data\ExecutionResult;
+use Farsi\NovaCommandCenter\Support\History;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 

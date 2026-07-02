@@ -1,7 +1,7 @@
 {
     "private": true,
     "name": "nova-command-center",
-    "description": "Frontend assets for farsidev/nova-command-center.",
+    "description": "Frontend assets for farsi/nova-command-center.",
     "scripts": {
         "dev": "npm run development",
         "development": "mix",

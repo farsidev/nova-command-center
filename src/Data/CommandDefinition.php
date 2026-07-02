@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Data;
+namespace Farsi\NovaCommandCenter\Data;
 
-use Farsidev\NovaCommandCenter\Support\Cast;
+use Farsi\NovaCommandCenter\Support\Cast;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Str;
 

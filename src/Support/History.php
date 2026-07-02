@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Support;
+namespace Farsi\NovaCommandCenter\Support;
 
-use Farsidev\NovaCommandCenter\Data\ExecutionResult;
+use Farsi\NovaCommandCenter\Data\ExecutionResult;
 use Illuminate\Contracts\Cache\Repository as Cache;
 
 /**

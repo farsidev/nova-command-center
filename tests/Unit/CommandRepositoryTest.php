@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Farsidev\NovaCommandCenter\Exceptions\CommandNotAllowedException;
-use Farsidev\NovaCommandCenter\Support\CommandRepository;
+use Farsi\NovaCommandCenter\Exceptions\CommandNotAllowedException;
+use Farsi\NovaCommandCenter\Support\CommandRepository;
 
 function repository(array $config = []): CommandRepository
 {

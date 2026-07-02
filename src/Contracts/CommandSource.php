@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Contracts;
+namespace Farsi\NovaCommandCenter\Contracts;
 
-use Farsidev\NovaCommandCenter\Data\CommandDefinition;
-use Farsidev\NovaCommandCenter\Support\CommandRepository;
-use Farsidev\NovaCommandCenter\Support\Sources\ConfigCommandSource;
+use Farsi\NovaCommandCenter\Data\CommandDefinition;
+use Farsi\NovaCommandCenter\Support\CommandRepository;
+use Farsi\NovaCommandCenter\Support\Sources\ConfigCommandSource;
 
 /**
  * Supplies the raw command definitions that make up the allow-list.

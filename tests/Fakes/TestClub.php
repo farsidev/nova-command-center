@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Tests\Fakes;
+namespace Farsi\NovaCommandCenter\Tests\Fakes;
 
 use Illuminate\Database\Eloquent\Model;
 

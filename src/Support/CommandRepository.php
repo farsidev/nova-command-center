@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Support;
+namespace Farsi\NovaCommandCenter\Support;
 
-use Farsidev\NovaCommandCenter\Contracts\CommandSource;
-use Farsidev\NovaCommandCenter\Data\CommandDefinition;
-use Farsidev\NovaCommandCenter\Exceptions\CommandNotAllowedException;
-use Farsidev\NovaCommandCenter\Exceptions\CommandNotFoundException;
-use Farsidev\NovaCommandCenter\Support\Sources\ConfigCommandSource;
+use Farsi\NovaCommandCenter\Contracts\CommandSource;
+use Farsi\NovaCommandCenter\Data\CommandDefinition;
+use Farsi\NovaCommandCenter\Exceptions\CommandNotAllowedException;
+use Farsi\NovaCommandCenter\Exceptions\CommandNotFoundException;
+use Farsi\NovaCommandCenter\Support\Sources\ConfigCommandSource;
 use Illuminate\Database\Eloquent\Model;
 
 /**

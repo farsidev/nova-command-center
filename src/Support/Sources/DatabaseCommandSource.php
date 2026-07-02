@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Farsidev\NovaCommandCenter\Support\Sources;
+namespace Farsi\NovaCommandCenter\Support\Sources;
 
-use Farsidev\NovaCommandCenter\Contracts\CommandSource;
-use Farsidev\NovaCommandCenter\Models\Command;
+use Farsi\NovaCommandCenter\Contracts\CommandSource;
+use Farsi\NovaCommandCenter\Models\Command;
 use Illuminate\Database\Eloquent\Model;
 
 /**

@@ -9,7 +9,7 @@ Controls whether the tool appears and is reachable at all. Set it when
 registering the tool:
 
 ```php
-use Farsidev\NovaCommandCenter\CommandCenter;
+use Farsi\NovaCommandCenter\CommandCenter;
 
 public function tools(): array
 {
