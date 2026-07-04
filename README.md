@@ -191,6 +191,11 @@ Rows in the `nova_command_center_commands` table map one-to-one onto the config
 keys documented above (`run`, `command_type`, `group`, `variables`, `flags`, …),
 plus `enabled` (bool) and `position` (int) to toggle and order them.
 
+Variables and flags are edited through structured, repeatable sub-forms — add a
+variable block, pick its type (`text`, `select` or searchable `model`), fill in
+labels, options and validation rules as plain inputs, and drag to reorder. No
+JSON required. See [command sources](docs/command-sources.md) for details.
+
 > ⚠️ **Security:** the database driver moves the allow-list out of version control.
 > Anyone who can create or edit those rows decides what the tool will run — that is
 > remote code execution by design. Protect the resource with a policy
