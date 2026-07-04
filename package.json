@@ -17,12 +17,12 @@
         "laravel-nova": "^1.5",
         "postcss": "^8.4.0",
         "vue-loader": "^17.0.0",
-        "webpack": "5.89.0"
+        "webpack": "5.108.3"
     },
     "dependencies": {
         "vue": "^3.4.0"
     },
     "overrides": {
-        "webpack": "5.89.0"
+        "webpack": "5.108.3"
     }
 }
