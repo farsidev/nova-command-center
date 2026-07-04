@@ -5,11 +5,16 @@ declare(strict_types=1);
 namespace Farsi\NovaCommandCenter\Nova;
 
 use Farsi\NovaCommandCenter\Models\Command as CommandModel;
+use Farsi\NovaCommandCenter\Nova\Repeatables\Flag;
+use Farsi\NovaCommandCenter\Nova\Repeatables\Variable;
+use Farsi\NovaCommandCenter\Nova\Support\NormalizingJsonPreset;
+use Farsi\NovaCommandCenter\Support\RepeaterBlocks;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Code;
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Number;
+use Laravel\Nova\Fields\Repeater;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
@@ -114,9 +119,39 @@ class Command extends Resource
             Text::make('Authorize ability', 'can')->nullable()->hideFromIndex()
                 ->help('Optional gate ability required to run this command.'),
 
-            Code::make('Variables')->json()->nullable()->hideFromIndex(),
+            ...$this->variableAndFlagFields(),
+        ];
+    }
 
-            Code::make('Flags')->json()->nullable()->hideFromIndex(),
+    /**
+     * Structured, repeatable editors for variables and flags on Nova 4.24+
+     * (where the Repeater field exists), with a raw-JSON fallback on older
+     * Nova 4 releases. Read-only JSON is still shown on the detail view for
+     * transparency about what is actually stored.
+     *
+     * @return array<int, Field>
+     */
+    protected function variableAndFlagFields(): array
+    {
+        if (!class_exists(Repeater::class)) {
+            return [
+                Code::make('Variables')->json()->nullable()->hideFromIndex(),
+                Code::make('Flags')->json()->nullable()->hideFromIndex(),
+            ];
+        }
+
+        return [
+            Repeater::make('Variables', 'variables')
+                ->repeatables([Variable::make()])
+                ->preset(new NormalizingJsonPreset(RepeaterBlocks::variables())),
+
+            Repeater::make('Flags', 'flags')
+                ->repeatables([Flag::make()])
+                ->preset(new NormalizingJsonPreset(RepeaterBlocks::flags())),
+
+            Code::make('Variables', 'variables')->json()->exceptOnForms(),
+
+            Code::make('Flags', 'flags')->json()->exceptOnForms(),
         ];
     }
 }

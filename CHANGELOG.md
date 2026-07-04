@@ -4,6 +4,25 @@ All notable changes to `farsi/nova-command-center` will be documented in this
 file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-07-04
+
+### Added
+
+- The bundled `Command` Nova resource now edits variables and flags through
+  structured, repeatable sub-forms (Nova's `Repeater` field) instead of raw
+  JSON code editors — add/reorder variable blocks, pick the type, fill in
+  options (`value:Label` per line), rules (`a|b`) and model-search columns
+  (`name,slug`) as plain inputs. Older Nova 4 releases (before 4.24, where
+  Repeater was introduced) automatically fall back to the previous JSON
+  editors, and the definition parser now accepts list-shaped variables (the
+  Repeater's stored shape, or any list of objects carrying a `name`)
+  alongside the classic name-keyed map from every command source. Rows
+  written in the classic map shape — e.g. seeded from a config file when
+  migrating to the database source — open cleanly in the structured editor
+  (Nova's stock Repeater preset would crash on them), with a variable's
+  implicit defaults (`required`, `type`) made explicit so saving never
+  silently flips them.
+
 ## [1.0.0] - 2026-07-02
 
 ### Added
