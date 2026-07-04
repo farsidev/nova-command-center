@@ -152,6 +152,21 @@ final class CommandDefinition implements Arrayable
                 $definition = [];
             }
 
+            // Support list-of-objects shapes, where the variable name lives
+            // inside the definition instead of being the array key: a plain
+            // [{name: 'club', ...}] list, or the shape Nova's Repeater field
+            // stores ([{type: 'variable', fields: {name: 'club', ...}}]) when
+            // variables are edited through the bundled Command resource.
+            if (is_int($name) && is_array($definition)) {
+                $definition = self::unwrapRepeaterBlock($definition);
+
+                if (!is_string($definition['name'] ?? null) || $definition['name'] === '') {
+                    continue;
+                }
+
+                $name = $definition['name'];
+            }
+
             if (!is_string($name)) {
                 continue;
             }
@@ -175,10 +190,31 @@ final class CommandDefinition implements Arrayable
         $normalized = [];
 
         foreach ($flags as $key => $definition) {
+            if (is_array($definition)) {
+                $definition = self::unwrapRepeaterBlock($definition);
+            }
+
             $normalized[] = CommandFlag::fromConfig($key, $definition);
         }
 
         return $normalized;
+    }
+
+    /**
+     * Unwrap one block of the JSON shape Nova's Repeater field stores
+     * ({type: ..., fields: {...}}) down to the plain definition array the
+     * DTOs expect. Non-repeater arrays pass through untouched.
+     *
+     * @param  array<array-key, mixed>  $definition
+     * @return array<array-key, mixed>
+     */
+    private static function unwrapRepeaterBlock(array $definition): array
+    {
+        if (is_array($definition['fields'] ?? null) && array_key_exists('type', $definition)) {
+            return $definition['fields'];
+        }
+
+        return $definition;
     }
 
     /**

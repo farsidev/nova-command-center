@@ -111,6 +111,19 @@ final class CommandVariable implements Arrayable
      */
     private static function normalizeOptions($options): array
     {
+        // One option per line, as "value:Label" or just "value" — the shape
+        // produced by the bundled Command resource's structured editor.
+        if (is_string($options)) {
+            $options = array_values(array_filter(array_map(
+                static function (string $line): array {
+                    [$value, $label] = array_pad(explode(':', trim($line), 2), 2, null);
+
+                    return ['value' => trim((string) $value), 'label' => trim($label ?? (string) $value)];
+                },
+                preg_split('/\r\n|\r|\n/', $options) ?: [],
+            ), static fn (array $option): bool => $option['value'] !== ''));
+        }
+
         if (!is_array($options)) {
             return [];
         }
@@ -162,8 +175,10 @@ final class CommandVariable implements Arrayable
      */
     private static function normalizeSearchColumns($columns, string $labelColumn): array
     {
+        // A comma-separated string ("name,slug") is accepted alongside a real
+        // list — it's what the bundled Command resource's editor produces.
         if (is_string($columns)) {
-            $columns = [$columns];
+            $columns = explode(',', $columns);
         }
 
         if (!is_array($columns)) {
@@ -171,7 +186,7 @@ final class CommandVariable implements Arrayable
         }
 
         $normalized = array_values(array_filter(
-            array_map(static fn ($column): string => is_string($column) ? $column : '', $columns),
+            array_map(static fn ($column): string => is_string($column) ? trim($column) : '', $columns),
             static fn (string $column): bool => $column !== '',
         ));
 

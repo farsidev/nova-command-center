@@ -6,10 +6,11 @@ parameters:
     paths:
         - src
     excludePaths:
-        # Optional Nova resource for the database source. It extends Nova's
-        # Resource and Field classes (a private, paid dependency) and is only
-        # loaded in a host app where Nova is installed, so it is not analysed.
-        - src/Nova/Command.php
+        # Optional Nova resource (and its Repeater blocks) for the database
+        # source. They extend Nova's Resource and Field classes (a private,
+        # paid dependency) and are only loaded in a host app where Nova is
+        # installed, so they are not analysed.
+        - src/Nova/*
     tmpDir: build/phpstan
     scanFiles:
         # Nova is a private, paid dependency. This file declares the small Nova

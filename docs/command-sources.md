@@ -69,6 +69,29 @@ Each row maps one-to-one onto the config keys (`run`, `command_type`, `group`,
 plus `enabled` (bool) and `position` (int) to toggle and order commands. The
 model is closed to mass assignment with an explicit `$fillable` list.
 
+### Editing variables and flags
+
+On Nova 4.24+ the resource edits variables and flags through structured,
+repeatable sub-forms (Nova's `Repeater` field) — add a variable block, pick
+its type (`text`, `select` or `model`), fill in labels, options, validation
+rules and the model-search columns, and reorder blocks by dragging. No JSON
+required. On older Nova 4 releases the resource falls back to raw JSON code
+editors automatically.
+
+Inside a variable block:
+
+- **Options** (for `select`) take one option per line, as `value:Label` or
+  just `value` — e.g. `DK:Denmark`.
+- **Rules** are pipe-separated, e.g. `string|max:255`.
+- **Search columns** (for `model`) are comma-separated, e.g. `name,slug`.
+- A `model` variable's class must still be allow-listed in the config file's
+  `searchable_models` — that boundary is deliberately not editable from the UI.
+
+All of these string shorthands are also accepted in the config file and in
+hand-written JSON, so definitions can be copied freely between sources. The
+parser accepts variables as a name-keyed map (the config-file idiom), a plain
+list of objects carrying a `name`, or the Repeater's own stored shape.
+
 ### Using your own model
 
 Point the driver at any Eloquent model. If it exposes a `toDefinition(): array`
