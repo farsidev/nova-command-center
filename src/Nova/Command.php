@@ -7,6 +7,8 @@ namespace Farsi\NovaCommandCenter\Nova;
 use Farsi\NovaCommandCenter\Models\Command as CommandModel;
 use Farsi\NovaCommandCenter\Nova\Repeatables\Flag;
 use Farsi\NovaCommandCenter\Nova\Repeatables\Variable;
+use Farsi\NovaCommandCenter\Nova\Support\NormalizingJsonPreset;
+use Farsi\NovaCommandCenter\Support\RepeaterBlocks;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Code;
 use Laravel\Nova\Fields\Field;
@@ -141,11 +143,11 @@ class Command extends Resource
         return [
             Repeater::make('Variables', 'variables')
                 ->repeatables([Variable::make()])
-                ->asJson(),
+                ->preset(new NormalizingJsonPreset(RepeaterBlocks::variables())),
 
             Repeater::make('Flags', 'flags')
                 ->repeatables([Flag::make()])
-                ->asJson(),
+                ->preset(new NormalizingJsonPreset(RepeaterBlocks::flags())),
 
             Code::make('Variables', 'variables')->json()->exceptOnForms(),
 
