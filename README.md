@@ -13,6 +13,19 @@ idea. It fixes the long-standing problems of earlier tools: shell injection,
 Nova 5 incompatibility (`__ is not defined`), null-value crashes, missing
 optional variables and the absence of authorization hooks.
 
+![Command Center](docs/screenshots/command-center.png)
+
+<details>
+<summary><strong>▶ See it in action</strong> — searching, model-backed variables, confirmation and live output</summary>
+
+![Demo](docs/screenshots/demo.gif)
+
+</details>
+
+| Searchable model variables | Structured command editor |
+| --- | --- |
+| ![Model search](docs/screenshots/model-search.png) | ![Command editor](docs/screenshots/command-editor.png) |
+
 ---
 
 ## Highlights

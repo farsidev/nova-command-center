@@ -4,6 +4,19 @@ All notable changes to `farsi/nova-command-center` will be documented in this
 file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- History rows' status accent stripe always rendered in the row's text colour
+  instead of the status colour (green/red/amber per success/failed/running) —
+  the CSS ignored the custom property the row sets.
+- The operator attribution ("ran by") on history entries, and the per-user
+  rate-limit key, resolved the user through the default auth guard. A panel
+  authenticated on a non-default guard (e.g. an "admin" guard set via
+  `nova.guard`) recorded no operator at all and rate-limited by IP. Both now
+  resolve through Nova's configured guard.
+
 ## [1.1.0] - 2026-07-04
 
 ### Added

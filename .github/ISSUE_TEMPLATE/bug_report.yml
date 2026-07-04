@@ -1,0 +1,56 @@
+name: Bug report
+description: Something in Nova Command Center is broken or behaving unexpectedly.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. For **security vulnerabilities**, please do NOT open an issue — follow [SECURITY.md](../blob/main/SECURITY.md) instead.
+  - type: input
+    id: package-version
+    attributes:
+      label: Package version
+      placeholder: e.g. 1.1.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: PHP, Laravel and Nova versions, and the database driver if relevant.
+      placeholder: PHP 8.3 · Laravel 11 · Nova 5.1 · PostgreSQL 16
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Command source
+      options:
+        - config (default)
+        - database
+        - custom CommandSource
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead? Include the relevant command definition (redact anything sensitive).
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Define this command: …
+        2. Open the tool and …
+        3. See error …
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / console output
+      description: Laravel log entries or browser console errors, if any.
+      render: text
