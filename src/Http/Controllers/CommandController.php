@@ -14,6 +14,7 @@ use Farsi\NovaCommandCenter\Support\CommandRepository;
 use Farsi\NovaCommandCenter\Support\ExecutionStore;
 use Farsi\NovaCommandCenter\Support\History;
 use Illuminate\Config\Repository as Config;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
@@ -218,7 +219,7 @@ final class CommandController extends Controller
             return null;
         }
 
-        $identifier = $request->user()?->getAuthIdentifier() ?? $request->ip();
+        $identifier = $this->user($request)?->getAuthIdentifier() ?? $request->ip();
         $key = 'nova-command-center:'.Cast::string($identifier, 'guest');
 
         if (RateLimiter::tooManyAttempts($key, $limit)) {
@@ -234,7 +235,7 @@ final class CommandController extends Controller
 
     private function ranBy(Request $request): ?string
     {
-        $user = $request->user();
+        $user = $this->user($request);
 
         if ($user === null) {
             return null;
@@ -247,5 +248,18 @@ final class CommandController extends Controller
         }
 
         return Cast::nullableString($user->getAuthIdentifier());
+    }
+
+    /**
+     * The acting operator. Resolved through Nova's configured guard when the
+     * host app sets one — a panel authenticated on a non-default guard (e.g.
+     * "admin") otherwise reports no user here, so history rows lose their
+     * "ran by" attribution and rate limiting falls back to keying on IP.
+     */
+    private function user(Request $request): ?Authenticatable
+    {
+        $guard = $this->config->get('nova.guard');
+
+        return $request->user(is_string($guard) ? $guard : null);
     }
 }

@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest an improvement or new capability.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the workflow or limitation that motivates the request, not just the solution you have in mind.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How would you like it to work? Config examples or UI sketches welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Security considerations
+      description: This package runs commands on servers. If the feature widens what can run or who can run it, how should that stay safe (allow-lists, gates, defaults-off)?
