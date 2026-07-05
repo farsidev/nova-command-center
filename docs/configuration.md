@@ -16,7 +16,7 @@ php artisan vendor:publish --tag=nova-command-center-config
 | `history` | int | `15` | Number of recent executions to keep (cache-backed). `0` disables history. |
 | `cache_store` | string\|null | `null` | Cache store for history, live output and locks. `null` uses the app default. A lock-capable store (redis, memcached, database) is required for `without_overlapping`. |
 | `authorize` | string\|null | `'runCommand'` | Gate ability checked on every request. `null` relies solely on the tool's `canSee()`. See [authorization](authorization.md). |
-| `rate_limit` | int\|null | `30` | Max executions per authenticated user per minute. `null` disables it. |
+| `rate_limit` | int\|null | `30` | Max executions per authenticated user per minute. `null` disables it. The user — for the limit key and for History's "ran by" attribution — is resolved through Nova's configured guard (`nova.guard`), so panels on a non-default guard attribute correctly. |
 | `bash` | array | disabled | Shell command settings — see below. |
 | `custom_commands` | list | `[]` | Command types operators may type ad-hoc. Empty = off. |
 | `searchable_models` | list | `[]` | Eloquent model classes allowed to back a `model` variable. Empty = no model variable can be searched. See [Searchable model variables](#searchable-model-variables). |
@@ -106,6 +106,11 @@ the command is tokenised, so a value is always a single argument.
 
 Shorthand forms are accepted: `'variables' => ['key', 'value']` (a list of
 names) or `'key' => 'Label'` (name → label).
+
+A required `select` with no `default` renders with a disabled *"Choose an
+option…"* placeholder, and the Run button stays disabled until every required
+variable has a value. An optional `select` gets an explicit empty ("—")
+choice instead.
 
 ### Searchable model variables
 

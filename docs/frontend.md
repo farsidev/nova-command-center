@@ -32,21 +32,27 @@ whenever you change anything under `resources/`.
 ## Dark mode
 
 The tool follows Nova's light/dark switch automatically. Nova toggles a `.dark`
-class on the `<html>` element; the templates use Tailwind `dark:` variants for
-layout colours, and `resources/css/tool.css` mirrors every custom component
-(buttons, console, cards, badges, progress, modal) with `.dark` rules. There is
-nothing to configure — switch the Nova theme and the tool follows.
+class on the `<html>` element, and every colour in
+`resources/css/tool.css` — components, text, borders, hover states — carries a
+matching `.dark` rule. There is nothing to configure — switch the Nova theme
+and the tool follows.
 
 ## Theming
 
-Colours come from two places:
+All colours, icon sizes and other visual styling live in the package's own
+stylesheet, `resources/css/tool.css`, under `.ncr-*` classes. The templates
+deliberately use **no Tailwind colour or sizing utilities**: the host app
+ships a purged Tailwind build, and which utility classes survive the purge
+(especially `dark:` variants and fractional sizes like `w-3.5`) depends
+entirely on what that app and its other packages happen to use. Relying on
+them would make the tool's contrast a per-host lottery — invisible dark-mode
+labels in one app, missing icons in another. Only structural utilities that
+Nova's own UI guarantees (flex, spacing, font sizes) appear in templates.
 
-- **Nova's Tailwind utilities** in the templates keep the tool visually
-  consistent with the host panel.
-- **`resources/css/tool.css`** holds the self-contained pieces. Button and
-  progress accents use the `--primary` CSS variable Nova exposes, so they adopt
-  your panel's primary colour. Override any `.ncr-*` class in your own Nova
-  stylesheet to restyle.
+Button and progress accents use the `--primary` CSS variable Nova exposes, so
+they adopt your panel's primary colour. Override any `.ncr-*` class in your
+own Nova stylesheet to restyle — e.g. the text scale (`.ncr-text-muted`,
+`.ncr-label`, …), card chrome (`.ncr-card`), or the console.
 
 Button styles map to the command `type` (`primary`, `success`, `warning`,
 `danger`, `info`, `secondary`, `link`) via `.ncr-btn-{type}` classes.
