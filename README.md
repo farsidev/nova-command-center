@@ -10,8 +10,9 @@ dashboard — safely. Built for and tested against **Nova v4 and v5**.
 
 This package is a security-first, clean-room reimagining of the command-center
 idea. It fixes the long-standing problems of earlier tools: shell injection,
-Nova 5 incompatibility (`__ is not defined`), null-value crashes, missing
-optional variables and the absence of authorization hooks.
+Nova 5 incompatibility (the [`__ is not defined`](docs/frontend.md#nova-5-and-__-is-not-defined)
+crash from Nova 5 removing the global JS translation helper), null-value
+crashes, missing optional variables and the absence of authorization hooks.
 
 ![Command Center](docs/screenshots/command-center.png)
 

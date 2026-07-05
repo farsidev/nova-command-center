@@ -15,6 +15,12 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    # laravel-mix 6 (the build system Nova tools must use) requires webpack
+    # internals that newer webpack 5.x releases removed (e.g.
+    # webpack/lib/SizeFormatHelpers, gone by 5.108) — bumps break `npm run
+    # prod`. webpack tracks whatever laravel-mix supports, manually.
+    ignore:
+      - dependency-name: webpack
 
   - package-ecosystem: github-actions
     directory: /

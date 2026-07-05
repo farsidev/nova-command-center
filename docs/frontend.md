@@ -70,3 +70,24 @@ file to translate them:
 ```bash
 php artisan vendor:publish --tag=nova-command-center-lang
 ```
+
+### Nova 5 and "`__ is not defined`"
+
+Nova 4 exposed a **global** JavaScript translation helper named `__()`, and
+many older tool packages (including earlier command runners) called it
+directly from their Vue components. Nova 5 removed that global, so those
+packages crash with
+
+```
+Uncaught ReferenceError: __ is not defined
+```
+
+and render a blank tool page. This package never touches the global: every
+string goes through its own shim, `resources/js/util/translate.js`, which
+delegates to `Nova.__()` when the host exposes it and otherwise returns the
+string unchanged. That is what makes the same compiled bundle work on both
+Nova 4 and Nova 5.
+
+If you still see this error in the browser console on a Nova 5 dashboard, it
+is coming from another package that hasn't been updated — check the file
+name in the stack trace.
