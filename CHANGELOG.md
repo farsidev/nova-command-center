@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Text, border and hover colours no longer rely on the host app's Tailwind
+  utility classes. Nova apps ship a purged Tailwind build, and which colour
+  classes survive the purge (especially `dark:` variants) depends entirely on
+  what the host and its other packages happen to use — in a real app this left
+  the run modal's field labels invisible in dark mode, history rows without
+  separators or a hover highlight, and help text with the wrong contrast. All
+  colours now come from the package's own stylesheet, so the tool renders
+  identically in every host app and both themes.
+- A required `select` variable with no default rendered as an empty box with
+  the Run button silently disabled. It now shows a disabled "Choose an
+  option…" placeholder until a value is picked. Selects also draw a proper
+  dropdown chevron — Nova's form classes strip the native arrow without
+  drawing a replacement, leaving a select indistinguishable from a text input.
+
 - History rows' status accent stripe always rendered in the row's text colour
   instead of the status colour (green/red/amber per success/failed/running) —
   the CSS ignored the custom property the row sets.

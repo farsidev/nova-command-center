@@ -295,6 +295,14 @@
   transition: width 0.3s ease;
 }
 
+/* The strip between the console header and body that hosts the progress bar. */
+.ncr-progress-strip {
+  padding: 0.75rem 1rem 0;
+  background-color: #fff;
+}
+
+.dark .ncr-progress-strip { background-color: #1e293b; }
+
 /* ---------------------------------------------------------------- Console -- */
 .ncr-console-shell {
   border-radius: 0.75rem;
@@ -369,6 +377,19 @@
   position: relative;
   overflow: hidden;
   padding-left: 1rem;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.ncr-history-row:hover { background-color: #f8fafc; }
+.dark .ncr-history-row:hover { background-color: rgba(148, 163, 184, 0.08); }
+
+/* Per-row action (rerun) revealed on row hover or keyboard focus. */
+.ncr-history-act { opacity: 0; transition: opacity 0.12s ease; }
+
+.ncr-history-row:hover .ncr-history-act,
+.ncr-history-act:focus-visible {
+  opacity: 1;
 }
 
 .ncr-history-row::before {
@@ -825,6 +846,84 @@
 .ncr-model-search-option:hover,
 .ncr-model-search-option-active {
   background-color: rgba(64, 153, 222, 0.1);
+}
+
+/* ------------------------------------------------- Theme-safe typography -- */
+/* Text, border and hover colours live here — never in Nova's Tailwind
+   utilities. Host apps ship a purged Tailwind build, and which colour classes
+   survive the purge (especially `dark:` variants) depends entirely on what
+   the host and its other packages happen to use. Relying on them makes the
+   tool's contrast a per-host lottery. */
+.ncr-heading { color: #0f172a; }
+.dark .ncr-heading { color: #fff; }
+
+.ncr-text-strong { color: #1e293b; }
+.dark .ncr-text-strong { color: #e2e8f0; }
+
+.ncr-text-body { color: #334155; }
+.dark .ncr-text-body { color: #cbd5e1; }
+
+.ncr-text-muted { color: #64748b; }
+.dark .ncr-text-muted { color: #94a3b8; }
+
+.ncr-text-faint { color: #94a3b8; }
+.dark .ncr-text-faint { color: #64748b; }
+
+.ncr-text-fainter { color: #cbd5e1; }
+.dark .ncr-text-fainter { color: #475569; }
+
+.ncr-text-error { color: #ef4444; }
+.dark .ncr-text-error { color: #f87171; }
+
+/* Form label (variable fields, the Flags heading in the run modal). */
+.ncr-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.dark .ncr-label { color: #cbd5e1; }
+
+/* Panel header/footer separators. */
+.ncr-hr-b { border-bottom: 1px solid #eef2f6; }
+.ncr-hr-t { border-top: 1px solid #eef2f6; }
+.dark .ncr-hr-b { border-bottom-color: #313d4f; }
+.dark .ncr-hr-t { border-top-color: #313d4f; }
+
+/* Row separators (history list). */
+.ncr-rows > * + * { border-top: 1px solid #eef2f6; }
+.dark .ncr-rows > * + * { border-top-color: #313d4f; }
+
+/* Muted danger link (the History "Clear" button). */
+.ncr-link-danger {
+  color: #ef4444;
+  transition: color 0.12s ease;
+}
+
+.ncr-link-danger:hover { color: #dc2626; text-decoration: underline; }
+.ncr-link-danger.is-armed { color: #dc2626; }
+.dark .ncr-link-danger { color: #f87171; }
+.dark .ncr-link-danger:hover { color: #fca5a5; }
+.dark .ncr-link-danger.is-armed { color: #fca5a5; }
+
+/* --------------------------------------------------------- Native selects -- */
+/* Nova's form-input classes strip the native arrow (appearance: none) without
+   drawing a replacement, which leaves a select indistinguishable from a text
+   input. Draw our own chevron. */
+select.ncr-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.25rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  background-size: 1rem 1rem;
+}
+
+.dark select.ncr-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
 }
 
 /* ------------------------------------------------------------- Skeletons -- */

@@ -1,16 +1,16 @@
 <template>
   <div class="ncr-modal-backdrop" @click.self="onBackdropClick">
     <div class="ncr-modal ncr-card shadow-lg" role="dialog" aria-modal="true">
-      <div class="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+      <div class="flex items-start justify-between gap-4 px-6 py-4 ncr-hr-b">
         <div class="min-w-0">
           <div class="flex items-center gap-2">
             <span class="ncr-badge" :class="command.command_type === 'bash' ? 'ncr-badge-bash' : 'ncr-badge-artisan'">
               {{ command.command_type === 'bash' ? 'bash' : 'artisan' }}
             </span>
-            <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 truncate" :title="command.name">{{ command.name }}</h3>
+            <h3 class="text-lg font-bold ncr-text-strong ncr-truncate" :title="command.name">{{ command.name }}</h3>
           </div>
-          <p v-if="command.help" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ command.help }}</p>
-          <code class="block mt-2 text-xs text-gray-400 dark:text-gray-500 break-all">{{ command.run }}</code>
+          <p v-if="command.help" class="mt-1 text-sm ncr-text-muted">{{ command.help }}</p>
+          <code class="block mt-2 text-xs ncr-text-faint break-all">{{ command.run }}</code>
         </div>
         <button
           type="button"
@@ -55,20 +55,20 @@
         />
 
         <div v-if="command.flags.length">
-          <p class="mb-2 text-sm font-bold text-gray-700 dark:text-gray-300">{{ __('Flags') }}</p>
+          <p class="mb-2 text-sm font-bold ncr-text-body">{{ __('Flags') }}</p>
           <label v-for="flag in command.flags" :key="flag.key" class="ncr-flag">
             <input type="checkbox" v-model="flags[flag.key]" class="checkbox" />
             <span class="flex-1">{{ flag.label }}</span>
-            <code class="text-xs text-gray-400">{{ flag.flag }}</code>
+            <code class="text-xs ncr-text-faint">{{ flag.flag }}</code>
           </label>
         </div>
 
-        <div v-if="command.variables.length === 0 && command.flags.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
+        <div v-if="command.variables.length === 0 && command.flags.length === 0" class="text-sm ncr-text-muted">
           {{ __('This command takes no input. Run it to continue.') }}
         </div>
       </div>
 
-      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+      <div class="flex items-center justify-end gap-3 px-6 py-4 ncr-hr-t">
         <button type="button" class="ncr-btn ncr-btn-link" :disabled="submitting" @click="$emit('close')">
           {{ __('Cancel') }}
         </button>

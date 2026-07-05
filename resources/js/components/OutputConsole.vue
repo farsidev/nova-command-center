@@ -4,11 +4,11 @@
       <div class="flex items-center gap-2 min-w-0">
         <span class="ncr-traffic"><span class="r" /><span class="y" /><span class="g" /></span>
         <span class="ncr-dot" :class="`ncr-dot-${execution.status}`"></span>
-        <span class="text-sm font-bold text-gray-700 dark:text-gray-200 truncate">{{ execution.name }}</span>
+        <span class="text-sm font-bold ncr-text-body ncr-truncate">{{ execution.name }}</span>
         <span class="text-xs" :class="`ncr-status-${execution.status}`">{{ statusLabel }}</span>
       </div>
       <div class="flex items-center gap-3 shrink-0">
-        <span class="ncr-timer text-xs text-gray-400">{{ elapsedLabel }}</span>
+        <span class="ncr-timer text-xs ncr-text-faint">{{ elapsedLabel }}</span>
         <button v-if="execution.output" type="button" class="ncr-copy" @click="copy">
           <svg v-if="!copied" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
             <rect x="9" y="9" width="13" height="13" rx="2" />
@@ -30,10 +30,10 @@
       <span>{{ __('Still queued after :seconds. If no queue worker is processing jobs, this may never start — check your queue configuration.', { seconds: pendingSecondsLabel }) }}</span>
     </div>
 
-    <div v-if="progress && progress.total > 0" class="px-4 pt-3 bg-white dark:bg-gray-800">
+    <div v-if="progress && progress.total > 0" class="ncr-progress-strip">
       <div class="flex items-center justify-between mb-1">
-        <p v-if="progress.message" class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ progress.message }}</p>
-        <span class="text-xs font-medium text-gray-400 shrink-0 ml-2">{{ Math.round(progress.percentage || 0) }}%</span>
+        <p v-if="progress.message" class="text-xs ncr-text-muted ncr-truncate">{{ progress.message }}</p>
+        <span class="text-xs font-medium ncr-text-faint shrink-0 ml-2">{{ Math.round(progress.percentage || 0) }}%</span>
       </div>
       <div class="ncr-progress">
         <div class="ncr-progress-bar" :style="{ width: (progress.percentage || 0) + '%' }"></div>

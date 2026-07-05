@@ -1,20 +1,21 @@
 <template>
   <div class="mb-4">
-    <label :for="fieldId" class="block mb-1 text-sm font-bold text-gray-700 dark:text-gray-300">
+    <label :for="fieldId" class="ncr-label">
       {{ variable.label }}
-      <span v-if="!variable.required" class="font-normal text-gray-400">({{ __('optional') }})</span>
+      <span v-if="!variable.required" class="font-normal ncr-text-faint">({{ __('optional') }})</span>
     </label>
 
     <select
       v-if="variable.type === 'select'"
       :id="fieldId"
       :value="modelValue"
-      class="w-full form-control form-input form-input-bordered"
+      class="w-full form-control form-input form-input-bordered ncr-select"
       :class="{ 'ncr-field-invalid': error }"
       :aria-invalid="!!error"
       @change="onInput($event.target.value)"
     >
       <option v-if="!variable.required" value="">—</option>
+      <option v-else-if="!modelValue" value="" disabled>{{ __('Choose an option…') }}</option>
       <option v-for="option in variable.options" :key="option.value" :value="option.value">
         {{ option.label }}
       </option>
@@ -43,10 +44,10 @@
       @input="onInput($event.target.value)"
     />
 
-    <p v-if="error" class="mt-1 text-xs text-red-500 dark:text-red-400">
+    <p v-if="error" class="mt-1 text-xs ncr-text-error">
       {{ error }}
     </p>
-    <p v-else-if="variable.help" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+    <p v-else-if="variable.help" class="mt-1 text-xs ncr-text-muted">
       {{ variable.help }}
     </p>
   </div>

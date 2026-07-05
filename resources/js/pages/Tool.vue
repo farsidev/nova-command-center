@@ -8,8 +8,8 @@
         </svg>
       </span>
       <div class="flex-1 min-w-0">
-        <h1 class="text-2xl font-normal text-gray-900 dark:text-white leading-tight">{{ heading }}</h1>
-        <p v-if="config.help" class="text-sm text-gray-500 dark:text-gray-400">{{ config.help }}</p>
+        <h1 class="text-2xl font-normal leading-tight ncr-heading">{{ heading }}</h1>
+        <p v-if="config.help" class="text-sm ncr-text-muted">{{ config.help }}</p>
         <div v-if="!loading && commands.length" class="flex items-center mt-1">
           <span class="ncr-stat">{{ commands.length }} {{ commands.length === 1 ? __('command') : __('commands') }}</span>
           <span v-if="categories.length" class="ncr-stat">{{ categories.length }} {{ categories.length === 1 ? __('category') : __('categories') }}</span>
@@ -61,7 +61,7 @@
         </div>
 
         <div v-if="customTypes.length" class="ncr-card ncr-custombar">
-          <select v-model="customType">
+          <select v-model="customType" class="ncr-select">
             <option v-for="type in customTypes" :key="type" :value="type">{{ type }}</option>
           </select>
           <input
