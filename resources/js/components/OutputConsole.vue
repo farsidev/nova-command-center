@@ -10,11 +10,11 @@
       <div class="flex items-center gap-3 shrink-0">
         <span class="ncr-timer text-xs ncr-text-faint">{{ elapsedLabel }}</span>
         <button v-if="execution.output" type="button" class="ncr-copy" @click="copy">
-          <svg v-if="!copied" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+          <svg v-if="!copied" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="9" y="9" width="13" height="13" rx="2" />
             <path d="M5 15V5a2 2 0 0 1 2-2h10" />
           </svg>
-          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12" />
           </svg>
           {{ copied ? __('Copied') : __('Copy') }}
@@ -23,7 +23,7 @@
     </div>
 
     <div v-if="isStalePending" class="ncr-notice ncr-notice-warning" style="margin: 0.75rem 1rem 0;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0 mt-0.5">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10" />
         <polyline points="12 6 12 12 16 14" />
       </svg>

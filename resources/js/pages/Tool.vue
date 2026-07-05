@@ -2,7 +2,7 @@
   <div>
     <div class="flex items-center gap-3 mb-6">
       <span class="ncr-icon-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="4 17 10 11 4 5" />
           <line x1="12" y1="19" x2="20" y2="19" />
         </svg>
@@ -20,27 +20,27 @@
     <!-- Loading skeleton, mirroring the real rail/commands/history layout to
          avoid a jarring reflow once the data arrives. -->
     <div v-if="loading" class="space-y-6">
-      <div class="ncr-skeleton h-10 w-full rounded-xl"></div>
+      <div class="ncr-skeleton ncr-skel-search"></div>
 
       <div class="ncr-columns">
         <div class="ncr-col-rail ncr-rail-desktop ncr-card p-3 space-y-2">
-          <div v-for="n in 5" :key="n" class="ncr-skeleton h-6 w-full rounded-lg"></div>
+          <div v-for="n in 5" :key="n" class="ncr-skeleton ncr-skel-row"></div>
         </div>
 
         <div class="ncr-col-main space-y-3">
           <div v-for="n in 4" :key="n" class="ncr-card flex items-center justify-between px-4 py-3">
             <div class="flex-1 space-y-2">
-              <div class="ncr-skeleton h-3.5 w-40"></div>
-              <div class="ncr-skeleton h-3 w-56"></div>
+              <div class="ncr-skeleton ncr-skel-title"></div>
+              <div class="ncr-skeleton ncr-skel-sub"></div>
             </div>
-            <div class="ncr-skeleton h-8 w-16 rounded-lg shrink-0"></div>
+            <div class="ncr-skeleton ncr-skel-btn shrink-0"></div>
           </div>
         </div>
 
         <div class="ncr-col-history ncr-card p-4 space-y-3">
-          <div class="ncr-skeleton h-4 w-24"></div>
-          <div class="ncr-skeleton h-3 w-full"></div>
-          <div class="ncr-skeleton h-3 w-2/3"></div>
+          <div class="ncr-skeleton ncr-skel-head"></div>
+          <div class="ncr-skeleton ncr-skel-line"></div>
+          <div class="ncr-skeleton ncr-skel-line-short"></div>
         </div>
       </div>
     </div>
@@ -71,7 +71,7 @@
             @keyup.enter="runCustom"
           />
           <button type="button" class="ncr-btn" :disabled="!customRun.trim() || runningId === 'custom'" @click="runCustom">
-            <svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M8 5v14l11-7z" /></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
             {{ __('Run') }}
           </button>
         </div>
@@ -92,7 +92,7 @@
 
         <div class="ncr-col-main space-y-6">
           <div v-if="visibleGroups.length === 0" class="ncr-card ncr-empty">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-10 h-10">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <rect x="3" y="4" width="18" height="16" rx="2" />
               <path d="M7 9l3 3-3 3M13 15h4" />
             </svg>

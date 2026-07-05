@@ -908,6 +908,45 @@
 .dark .ncr-link-danger:hover { color: #fca5a5; }
 .dark .ncr-link-danger.is-armed { color: #fca5a5; }
 
+/* ------------------------------------------------------------------ Icons -- */
+/* Icon sizing lives here for the same reason as the colours above: the host's
+   purged Tailwind build may not ship the width/height utilities (the
+   fractional sizes like w-3.5 especially), and an unsized inline SVG in a
+   flex row collapses to zero width — leaving buttons with a phantom gap
+   where the icon should be. */
+.ncr-btn svg,
+.ncr-copy svg,
+.ncr-iconbtn svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+}
+
+.ncr-icon-badge svg { width: 1.25rem; height: 1.25rem; }
+
+.ncr-rail-item > svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.ncr-notice svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.ncr-empty svg { width: 2rem; height: 2rem; }
+
+.ncr-model-search-clear svg { width: 1rem; height: 1rem; }
+
+/* Generic sizes for icons outside the containers above. Declared last so they
+   win ties against the contextual rules when both apply. */
+svg.ncr-icon-xs { width: 0.875rem; height: 0.875rem; flex-shrink: 0; }
+svg.ncr-icon-sm { width: 1rem; height: 1rem; flex-shrink: 0; }
+
 /* --------------------------------------------------------- Native selects -- */
 /* Nova's form-input classes strip the native arrow (appearance: none) without
    drawing a replacement, which leaves a select indistinguishable from a text
@@ -928,6 +967,7 @@ select.ncr-select {
 
 /* ------------------------------------------------------------- Skeletons -- */
 .ncr-skeleton {
+  max-width: 100%;
   border-radius: 0.35rem;
   background: linear-gradient(90deg, #e2e8f0 25%, #eef2f7 37%, #e2e8f0 63%);
   background-size: 400% 100%;
@@ -938,6 +978,17 @@ select.ncr-select {
   background: linear-gradient(90deg, #1e293b 25%, #263449 37%, #1e293b 63%);
   background-size: 400% 100%;
 }
+
+/* Placeholder shapes for the loading state — sized here, not with Tailwind
+   height/width utilities, for the same purge reason as the icons above. */
+.ncr-skel-search { height: 2.5rem; width: 100%; border-radius: 0.75rem; }
+.ncr-skel-row { height: 1.5rem; width: 100%; border-radius: 0.5rem; }
+.ncr-skel-title { height: 0.875rem; width: 10rem; }
+.ncr-skel-sub { height: 0.75rem; width: 14rem; }
+.ncr-skel-btn { height: 2rem; width: 4rem; border-radius: 0.5rem; }
+.ncr-skel-head { height: 1rem; width: 6rem; }
+.ncr-skel-line { height: 0.75rem; width: 100%; }
+.ncr-skel-line-short { height: 0.75rem; width: 66%; }
 
 @keyframes ncr-shimmer {
   0% { background-position: 100% 0; }

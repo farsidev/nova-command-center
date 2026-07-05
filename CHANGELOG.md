@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   separators or a hover highlight, and help text with the wrong contrast. All
   colours now come from the package's own stylesheet, so the tool renders
   identically in every host app and both themes.
+- Icon and skeleton sizing no longer relies on Tailwind width/height
+  utilities either. The fractional sizes (`w-3.5`, `h-3.5`) are purged from
+  most host builds, which collapsed every small inline SVG to zero width —
+  most visibly the Run buttons, whose play icon vanished and left the label
+  sitting off-centre next to a phantom gap.
 - A required `select` variable with no default rendered as an empty box with
   the Run button silently disabled. It now shows a disabled "Choose an
   option…" placeholder until a value is picked. Selects also draw a proper

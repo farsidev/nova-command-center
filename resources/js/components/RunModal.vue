@@ -18,7 +18,7 @@
           :aria-label="__('Close')"
           @click="$emit('close')"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ncr-icon-sm">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
@@ -27,7 +27,7 @@
 
       <div class="ncr-modal-body">
         <div v-if="submitError" class="ncr-notice ncr-notice-error">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0 mt-0.5">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="8" x2="12" y2="12" />
             <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -36,7 +36,7 @@
         </div>
 
         <div v-else-if="isRisky" class="ncr-notice" :class="command.type === 'danger' ? 'ncr-notice-danger' : 'ncr-notice-warning'">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0 mt-0.5">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
             <line x1="12" y1="9" x2="12" y2="13" />
             <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -73,10 +73,10 @@
           {{ __('Cancel') }}
         </button>
         <button type="button" class="ncr-btn" :class="`ncr-btn-${command.type}`" :disabled="!valid || submitting" @click="submit">
-          <svg v-if="submitting" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ncr-spin w-3.5 h-3.5">
+          <svg v-if="submitting" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ncr-spin">
             <path d="M21 12a9 9 0 1 1-6.219-8.56" />
           </svg>
-          <svg v-else viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+          <svg v-else viewBox="0 0 24 24" fill="currentColor">
             <path d="M8 5v14l11-7z" />
           </svg>
           {{ submitting ? __('Running…') : __('Run') }}

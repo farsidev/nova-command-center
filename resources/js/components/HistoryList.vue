@@ -33,7 +33,7 @@
           </p>
         </div>
         <div class="flex items-center gap-1 shrink-0">
-          <svg v-if="isActive(item.status)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ncr-spin w-3.5 h-3.5 ncr-text-faint">
+          <svg v-if="isActive(item.status)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ncr-spin ncr-icon-xs ncr-text-faint">
             <path d="M21 12a9 9 0 1 1-6.219-8.56" />
           </svg>
           <button
@@ -43,7 +43,7 @@
             :title="__('Run again')"
             @click.stop="$emit('rerun', item)"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M23 4v6h-6M1 20v-6h6" />
               <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
             </svg>
@@ -57,7 +57,7 @@
     </ul>
 
     <div v-else class="ncr-empty">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-8 h-8">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="12" cy="12" r="9" />
         <polyline points="12 7 12 12 15 14" />
       </svg>
