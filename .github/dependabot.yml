@@ -1,14 +1,10 @@
 version: 2
 updates:
-  - package-ecosystem: composer
-    directory: /
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
-    # laravel/nova is a private package resolved from a local stub in CI;
-    # Dependabot cannot resolve it and must leave it alone.
-    ignore:
-      - dependency-name: laravel/nova
+  # No composer ecosystem: laravel/nova is a private package, so Dependabot
+  # cannot resolve the dependency graph at all — every composer update job
+  # fails with "laravel/nova could not be found", even with the dependency
+  # ignored. Composer deps are exercised by the CI test matrix (fresh
+  # installs against Laravel 10/11/12 on every push) instead.
 
   - package-ecosystem: npm
     directory: /
