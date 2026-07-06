@@ -17,3 +17,7 @@ composer.testing.lock
 # Local agent-skills tooling (not part of the package)
 /.agents
 skills-lock.json
+
+# Local Claude Code tooling (not part of the package)
+/.claude
+/graphify-out
