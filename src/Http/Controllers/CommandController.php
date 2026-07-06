@@ -57,7 +57,7 @@ final class CommandController extends Controller
 
     public function run(RunCommandRequest $request, ExecuteCommand $runner): JsonResponse
     {
-        $command = $request->command();
+        $command = $request->command($this->commands);
 
         if ($command === null) {
             return new JsonResponse(['message' => 'The selected command does not exist.'], 422);

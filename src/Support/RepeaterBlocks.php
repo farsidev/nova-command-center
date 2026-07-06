@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Farsi\NovaCommandCenter\Support;
 
 use Closure;
+use Farsi\NovaCommandCenter\Data\CommandDefinition;
 
 /**
  * Converts every accepted variables/flags storage shape into the block list
@@ -17,6 +18,20 @@ use Closure;
  */
 final class RepeaterBlocks
 {
+    /**
+     * Whether a raw variables/flags entry is already in the Nova Repeater
+     * block shape ({type: ..., fields: {...}}) rather than a config-style
+     * shorthand. The single detector for this shape, shared with
+     * {@see CommandDefinition}, which parses
+     * the same three storage shapes in the opposite direction.
+     *
+     * @phpstan-assert-if-true array{fields: array<string, mixed>, type: mixed} $item
+     */
+    public static function isBlock(mixed $item): bool
+    {
+        return is_array($item) && is_array($item['fields'] ?? null) && array_key_exists('type', $item);
+    }
+
     /**
      * @return Closure(mixed): list<array{type: string, fields: array<string, mixed>}>
      */
@@ -31,7 +46,7 @@ final class RepeaterBlocks
 
             foreach ($raw as $key => $item) {
                 // Already the repeater shape — pass through untouched.
-                if (is_int($key) && is_array($item) && is_array($item['fields'] ?? null)) {
+                if (is_int($key) && self::isBlock($item)) {
                     $blocks[] = ['type' => 'variable', 'fields' => self::stringifyVariable($item['fields'])];
 
                     continue;
@@ -70,7 +85,7 @@ final class RepeaterBlocks
             $blocks = [];
 
             foreach ($raw as $key => $item) {
-                if (is_array($item) && is_array($item['fields'] ?? null)) {
+                if (self::isBlock($item)) {
                     $blocks[] = ['type' => 'flag', 'fields' => $item['fields']];
 
                     continue;
@@ -122,32 +137,15 @@ final class RepeaterBlocks
         $result['type'] ??= 'text';
 
         if (is_array($result['options'] ?? null)) {
-            $lines = [];
-
-            foreach ($result['options'] as $key => $option) {
-                if (is_array($option) && isset($option['value'])) {
-                    $value = Cast::string($option['value']);
-                    $label = Cast::string($option['label'] ?? $option['value']);
-                } elseif (is_string($key)) {
-                    $value = $key;
-                    $label = Cast::string($option);
-                } else {
-                    $value = Cast::string($option);
-                    $label = $value;
-                }
-
-                $lines[] = $value === $label ? $value : $value.':'.$label;
-            }
-
-            $result['options'] = implode("\n", $lines);
+            $result['options'] = DelimitedFormat::optionsToLines(DelimitedFormat::normalizeOptionPairs($result['options']));
         }
 
         if (is_array($result['rules'] ?? null)) {
-            $result['rules'] = implode('|', array_filter($result['rules'], 'is_string'));
+            $result['rules'] = DelimitedFormat::listToString($result['rules'], '|');
         }
 
         if (is_array($result['search_columns'] ?? null)) {
-            $result['search_columns'] = implode(',', array_filter($result['search_columns'], 'is_string'));
+            $result['search_columns'] = DelimitedFormat::listToString($result['search_columns'], ',');
         }
 
         return $result;

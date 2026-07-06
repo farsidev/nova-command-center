@@ -18,9 +18,15 @@ final class RunCommandRequest extends FormRequest
 {
     private ?CommandDefinition $resolved = null;
 
-    public function authorize(): bool
+    /**
+     * Method-injected, like a controller action — {@see FormRequest::passesAuthorization()}
+     * resolves this through the container, so a dependency here doesn't need
+     * the service-locator `app()` call the rest of the package's constructor-DI
+     * convention avoids.
+     */
+    public function authorize(CommandRepository $commands): bool
     {
-        $command = $this->command();
+        $command = $this->command($commands);
 
         if ($command === null) {
             return true; // A missing command surfaces as a 422, not a 403.
@@ -35,9 +41,12 @@ final class RunCommandRequest extends FormRequest
     }
 
     /**
+     * Method-injected — {@see FormRequest::getValidatorInstance()} resolves
+     * this through the container the same way it resolves `authorize()`.
+     *
      * @return array<string, mixed>
      */
-    public function rules(): array
+    public function rules(CommandRepository $commands): array
     {
         $rules = [
             'command' => ['required_without:custom', 'string'],
@@ -49,11 +58,11 @@ final class RunCommandRequest extends FormRequest
             'mode' => ['sometimes', 'in:sync,queue'],
         ];
 
-        $command = $this->command();
+        $command = $this->command($commands);
 
         if ($command !== null) {
             foreach ($command->variables as $variable) {
-                $rules['variables.'.$variable->name] = $this->variableRules($variable);
+                $rules['variables.'.$variable->name] = $this->variableRules($variable, $commands);
             }
         }
 
@@ -68,7 +77,7 @@ final class RunCommandRequest extends FormRequest
      *
      * @return list<string>
      */
-    private function variableRules(CommandVariable $variable): array
+    private function variableRules(CommandVariable $variable, CommandRepository $commands): array
     {
         $rules = $variable->validationRules();
 
@@ -76,9 +85,7 @@ final class RunCommandRequest extends FormRequest
             return $rules;
         }
 
-        $repository = app(CommandRepository::class);
-
-        if (!in_array($variable->model, $repository->searchableModels(), true)) {
+        if (!in_array($variable->model, $commands->searchableModels(), true)) {
             return $rules;
         }
 
@@ -123,15 +130,19 @@ final class RunCommandRequest extends FormRequest
     }
 
     /**
-     * Resolve the target command (allow-listed or ad-hoc) once.
+     * Resolve the target command (allow-listed or ad-hoc) once. Callers that
+     * already have a {@see CommandRepository} to hand (the container, via
+     * `authorize()`/`rules()`; the controller, via its own constructor
+     * injection) should pass it — it's only pulled from the container
+     * directly as a fallback for the memoized re-read after resolution.
      */
-    public function command(): ?CommandDefinition
+    public function command(?CommandRepository $commands = null): ?CommandDefinition
     {
         if ($this->resolved !== null) {
             return $this->resolved;
         }
 
-        $repository = app(CommandRepository::class);
+        $repository = $commands ?? app(CommandRepository::class);
 
         if ($this->filled('custom')) {
             $custom = $this->input('custom');

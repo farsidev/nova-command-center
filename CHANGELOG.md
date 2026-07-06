@@ -6,6 +6,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `History::push()` read-modify-write the recent-executions list with no
+  locking, so two commands finishing close together (routine with queued or
+  concurrent execution) could race and silently drop one entry. It now holds
+  an atomic cache lock while updating, the same guarantee
+  `ConcurrencyGuard` already provides for command execution itself, and
+  degrades to the previous best-effort write on cache stores that can't lock.
+- The optional database command source ran a live schema query
+  (`information_schema`/`DESCRIBE`) to feature-detect the `enabled` and
+  `position` columns on every request, instantiating the model twice per
+  check. Both checks are now memoized per instance.
+
+### Changed
+
+- The three independent places that parsed the "variables/flags can be a
+  Nova Repeater block, a plain list, or a classic config map" shape, and the
+  three places that converted options/rules/search-columns between array and
+  delimited-string form, are now backed by shared, single-source-of-truth
+  helpers (`RepeaterBlocks::isBlock()`, `DelimitedFormat`) instead of each
+  reimplementing the same detection independently.
+- `RunCommandRequest` now receives its `CommandRepository` dependency the
+  same way a controller action does (method injection on `authorize()`/
+  `rules()`), instead of reaching for the container directly — consistent
+  with the constructor-DI convention used everywhere else in the package.
+
 ## [1.1.1] - 2026-07-06
 
 ### Fixed

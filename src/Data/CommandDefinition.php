@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Farsi\NovaCommandCenter\Data;
 
 use Farsi\NovaCommandCenter\Support\Cast;
+use Farsi\NovaCommandCenter\Support\RepeaterBlocks;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Str;
 
@@ -210,11 +211,7 @@ final class CommandDefinition implements Arrayable
      */
     private static function unwrapRepeaterBlock(array $definition): array
     {
-        if (is_array($definition['fields'] ?? null) && array_key_exists('type', $definition)) {
-            return $definition['fields'];
-        }
-
-        return $definition;
+        return RepeaterBlocks::isBlock($definition) ? $definition['fields'] : $definition;
     }
 
     /**

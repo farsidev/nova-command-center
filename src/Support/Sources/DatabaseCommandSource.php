@@ -23,6 +23,11 @@ use Illuminate\Database\Eloquent\Model;
 final class DatabaseCommandSource implements CommandSource
 {
     /**
+     * @var array<string, bool>
+     */
+    private array $columnCache = [];
+
+    /**
      * @param  class-string<TModel>  $model
      */
     public function __construct(private readonly string $model = Command::class) {}
@@ -60,12 +65,28 @@ final class DatabaseCommandSource implements CommandSource
         return $definitions;
     }
 
+    /**
+     * Memoized per instance (the source is bound as a singleton, so this is
+     * effectively once per request): the schema builder call behind this is a
+     * real query (`information_schema`/`DESCRIBE`), and {@see self::definitions()}
+     * checks two columns, so an unmemoized version instantiates the model and
+     * queries the schema up to four times for something that never changes
+     * mid-request. Deliberately request-scoped rather than cached in the
+     * configured cache store — a store-level cache would need a TTL, and a
+     * migration adding "position"/"enabled" wouldn't take effect until that
+     * TTL expired.
+     */
     private function hasColumn(string $column): bool
     {
-        $model = $this->model;
+        if (array_key_exists($column, $this->columnCache)) {
+            return $this->columnCache[$column];
+        }
 
-        return (new $model)->getConnection()
+        $model = $this->model;
+        $instance = new $model;
+
+        return $this->columnCache[$column] = $instance->getConnection()
             ->getSchemaBuilder()
-            ->hasColumn((new $model)->getTable(), $column);
+            ->hasColumn($instance->getTable(), $column);
     }
 }

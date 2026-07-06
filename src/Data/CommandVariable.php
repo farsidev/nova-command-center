@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Farsi\NovaCommandCenter\Data;
 
 use Farsi\NovaCommandCenter\Support\Cast;
+use Farsi\NovaCommandCenter\Support\DelimitedFormat;
 use Illuminate\Contracts\Support\Arrayable;
 
 /**
@@ -114,39 +115,15 @@ final class CommandVariable implements Arrayable
         // One option per line, as "value:Label" or just "value" — the shape
         // produced by the bundled Command resource's structured editor.
         if (is_string($options)) {
-            $options = array_values(array_filter(array_map(
-                static function (string $line): array {
-                    [$value, $label] = array_pad(explode(':', trim($line), 2), 2, null);
-
-                    return ['value' => trim((string) $value), 'label' => trim($label ?? (string) $value)];
-                },
-                preg_split('/\r\n|\r|\n/', $options) ?: [],
-            ), static fn (array $option): bool => $option['value'] !== ''));
+            return DelimitedFormat::optionsFromLines($options);
         }
 
         if (!is_array($options)) {
             return [];
         }
 
-        $normalized = [];
-
-        foreach ($options as $key => $value) {
-            if (is_array($value) && isset($value['value'])) {
-                $normalized[] = [
-                    'value' => Cast::string($value['value']),
-                    'label' => Cast::string($value['label'] ?? $value['value']),
-                ];
-
-                continue;
-            }
-
-            // ['on' => 'Enabled'] or [0 => 'foo']
-            $normalized[] = is_string($key)
-                ? ['value' => $key, 'label' => Cast::string($value)]
-                : ['value' => Cast::string($value), 'label' => Cast::string($value)];
-        }
-
-        return $normalized;
+        // {value,label} arrays, ['on' => 'Enabled'], or [0 => 'foo'].
+        return DelimitedFormat::normalizeOptionPairs($options);
     }
 
     /**
@@ -163,10 +140,7 @@ final class CommandVariable implements Arrayable
             return [];
         }
 
-        return array_values(array_filter(
-            array_map(static fn ($rule): string => is_string($rule) ? $rule : '', $rules),
-            static fn (string $rule): bool => $rule !== '',
-        ));
+        return DelimitedFormat::normalizeStringList($rules);
     }
 
     /**
@@ -185,10 +159,7 @@ final class CommandVariable implements Arrayable
             return [$labelColumn];
         }
 
-        $normalized = array_values(array_filter(
-            array_map(static fn ($column): string => is_string($column) ? trim($column) : '', $columns),
-            static fn (string $column): bool => $column !== '',
-        ));
+        $normalized = DelimitedFormat::normalizeStringList($columns);
 
         return $normalized !== [] ? $normalized : [$labelColumn];
     }

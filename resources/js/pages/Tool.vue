@@ -143,6 +143,7 @@ import OutputConsole from '../components/OutputConsole'
 import RunModal from '../components/RunModal'
 import api from '../util/api'
 import { categoryColor } from '../util/colors'
+import { handleRunError } from '../util/errors'
 import { __ } from '../util/translate'
 
 // Collections and payloads are replaced wholesale from the API, so shallowRef
@@ -348,37 +349,6 @@ async function execute({ command, values, flags }) {
 
     return { success: false, ...result }
   }
-}
-
-/**
- * Translate an API error into a user-facing message, splitting out per-field
- * validation errors (`variables.foo`) so the caller can surface them inline.
- */
-function handleRunError(error) {
-  const status = error?.response?.status
-  const data = error?.response?.data
-
-  if (status === 422 && data?.errors) {
-    const fieldErrors = {}
-    Object.entries(data.errors).forEach(([key, messages]) => {
-      const match = key.match(/^variables\.(.+)$/)
-      if (match) fieldErrors[match[1]] = messages[0]
-    })
-
-    if (Object.keys(fieldErrors).length) {
-      return { fieldErrors, message: data.message || __('Please fix the highlighted fields.') }
-    }
-  }
-
-  if (status === 429) {
-    return { message: data?.message || __('Too many commands. Please wait a moment and try again.') }
-  }
-
-  if (status === 403) {
-    return { message: data?.message || __('You are not authorized to run this command.') }
-  }
-
-  return { message: data?.message || __('Command failed to start.') }
 }
 
 function scrollToConsole() {
