@@ -30,6 +30,8 @@ class Flag extends Repeatable
                 ->help('The literal token appended when checked, e.g. "--force".'),
 
             Boolean::make('Checked by default', 'default')->default(false),
+
+            Text::make('Help', 'help')->rules('nullable', 'string'),
         ];
     }
 }

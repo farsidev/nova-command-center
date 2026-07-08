@@ -172,35 +172,48 @@ final class CommandController extends Controller
 
         /** @var class-string<Model> $modelClass */
         $modelClass = $target->model;
-        $term = Cast::string($request->query('q'), '');
         $valueColumn = $target->valueColumn;
         $labelColumn = $target->labelColumn;
         $searchColumns = $target->searchColumns;
 
         $query = $modelClass::query();
+        $value = Cast::string($request->query('value'), '');
 
-        if ($term !== '') {
-            // LIKE is case-sensitive on some drivers (e.g. PostgreSQL) and not
-            // others (MySQL's default collation, SQLite), so both sides are
-            // explicitly lower-cased with the portable LOWER() SQL function
-            // instead of relying on driver-specific behaviour (or ILIKE,
-            // which isn't available everywhere). The column is cast to a
-            // character type first: LOWER() rejects non-text column types
-            // outright on strict drivers (e.g. Postgres jsonb, as used by
-            // some translatable-column packages), where a plain LIKE would
-            // otherwise still work via an implicit cast.
-            $escaped = mb_strtolower(addcslashes($term, '%_\\'));
-            $castType = (new $modelClass)->getConnection()->getDriverName() === 'mysql' ? 'CHAR' : 'TEXT';
+        if ($value !== '') {
+            // Resolve one already-known value to its label — used by the run
+            // modal to show a friendly label for a variable's pre-filled
+            // default instead of the raw stored value — rather than a
+            // free-text search.
+            $query->where($valueColumn, $value);
+            $limit = 1;
+        } else {
+            $term = Cast::string($request->query('q'), '');
 
-            $query->where(function (Builder $builder) use ($searchColumns, $escaped, $castType): void {
-                foreach ($searchColumns as $column) {
-                    $builder->orWhere(DB::raw('LOWER(CAST('.$column.' AS '.$castType.'))'), 'like', '%'.$escaped.'%');
-                }
-            });
+            if ($term !== '') {
+                // LIKE is case-sensitive on some drivers (e.g. PostgreSQL) and not
+                // others (MySQL's default collation, SQLite), so both sides are
+                // explicitly lower-cased with the portable LOWER() SQL function
+                // instead of relying on driver-specific behaviour (or ILIKE,
+                // which isn't available everywhere). The column is cast to a
+                // character type first: LOWER() rejects non-text column types
+                // outright on strict drivers (e.g. Postgres jsonb, as used by
+                // some translatable-column packages), where a plain LIKE would
+                // otherwise still work via an implicit cast.
+                $escaped = mb_strtolower(addcslashes($term, '%_\\'));
+                $castType = (new $modelClass)->getConnection()->getDriverName() === 'mysql' ? 'CHAR' : 'TEXT';
+
+                $query->where(function (Builder $builder) use ($searchColumns, $escaped, $castType): void {
+                    foreach ($searchColumns as $column) {
+                        $builder->orWhere(DB::raw('LOWER(CAST('.$column.' AS '.$castType.'))'), 'like', '%'.$escaped.'%');
+                    }
+                });
+            }
+
+            $limit = 20;
         }
 
         $results = $query
-            ->limit(20)
+            ->limit($limit)
             ->get([$valueColumn, $labelColumn])
             ->map(static fn (Model $record): array => [
                 'value' => Cast::string($record->getAttribute($valueColumn)),

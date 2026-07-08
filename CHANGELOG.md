@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Flags now support a `help` line, shown under the flag's label in the run
+  modal — bringing them in line with variables, which already had it. The
+  bundled Command resource's structured editor gained a matching "Help" field.
+- A `model` variable's `default` now resolves to a friendly label the moment
+  the run modal opens, instead of showing the raw stored value in the search
+  box. The search endpoint accepts a new `?value=` mode for this (resolve one
+  known value), alongside its existing free-text `?q=` search.
+
 ### Fixed
 
 - `History::push()` read-modify-write the recent-executions list with no

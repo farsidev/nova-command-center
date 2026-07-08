@@ -59,7 +59,12 @@ it('parses flags stored in the Nova Repeater JSON shape', function () {
         'flags' => [
             [
                 'type' => 'flag',
-                'fields' => ['label' => 'Force', 'flag' => '--force', 'default' => true],
+                'fields' => [
+                    'label' => 'Force',
+                    'flag' => '--force',
+                    'default' => true,
+                    'help' => 'Skip the confirmation prompt.',
+                ],
             ],
         ],
     ]);
@@ -67,7 +72,8 @@ it('parses flags stored in the Nova Repeater JSON shape', function () {
     expect($command->flags)->toHaveCount(1)
         ->and($command->flags[0]->flag)->toBe('--force')
         ->and($command->flags[0]->label)->toBe('Force')
-        ->and($command->flags[0]->default)->toBeTrue();
+        ->and($command->flags[0]->default)->toBeTrue()
+        ->and($command->flags[0]->help)->toBe('Skip the confirmation prompt.');
 });
 
 it('parses a plain list of variable objects carrying their own name', function () {

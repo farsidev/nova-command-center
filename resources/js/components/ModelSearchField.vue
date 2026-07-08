@@ -47,7 +47,7 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import api from '../util/api'
 import { __ } from '../util/translate'
 
@@ -78,6 +78,27 @@ watch(
     if (!value) query.value = ''
   },
 )
+
+// A pre-filled default (a stored value, not something the operator just
+// picked from the results list) has no label to show yet — resolve it once
+// on mount so the field shows a friendly name instead of the raw id.
+onMounted(() => {
+  if (props.modelValue) resolveLabel(props.modelValue)
+})
+
+async function resolveLabel(value) {
+  loading.value = true
+
+  try {
+    const response = await api.searchVariable(props.commandId, props.variableName, '', { value })
+    const results = Array.isArray(response.data.results) ? response.data.results : []
+    query.value = results.length ? results[0].label : value
+  } catch {
+    query.value = value
+  } finally {
+    loading.value = false
+  }
+}
 
 function onFocus() {
   open.value = true

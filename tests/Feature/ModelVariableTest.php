@@ -91,6 +91,37 @@ it('returns results for an empty search term, capped at the page size', function
     $response->assertOk()->assertJsonCount(3, 'results');
 });
 
+it('resolves a known value to its label instead of running a free-text search', function () {
+    $id = commandId('Add Flight Services');
+
+    $response = $this->getJson("_ncr/commands/{$id}/variables/club/search?value=2");
+
+    $response->assertOk()
+        ->assertJsonCount(1, 'results')
+        ->assertJsonPath('results.0.value', '2')
+        ->assertJsonPath('results.0.label', 'Arsenal FC');
+
+    expect($response->json('results.0'))->not->toHaveKey('secret');
+});
+
+it('returns no results when resolving a value that does not exist', function () {
+    $id = commandId('Add Flight Services');
+
+    $response = $this->getJson("_ncr/commands/{$id}/variables/club/search?value=999");
+
+    $response->assertOk()->assertJsonCount(0, 'results');
+});
+
+it('ignores q when value is present', function () {
+    $id = commandId('Add Flight Services');
+
+    $response = $this->getJson("_ncr/commands/{$id}/variables/club/search?value=1&q=arsenal");
+
+    $response->assertOk()
+        ->assertJsonCount(1, 'results')
+        ->assertJsonPath('results.0.label', 'Chelsea FC');
+});
+
 it('refuses to search a model that is not allow-listed', function () {
     $id = commandId('Unlisted Model');
 

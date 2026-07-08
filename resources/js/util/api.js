@@ -22,9 +22,9 @@ export default {
     return client().get(`${BASE}/executions/${id}`)
   },
 
-  searchVariable(commandId, variableName, query) {
+  searchVariable(commandId, variableName, query, extra = {}) {
     return client().get(`${BASE}/commands/${commandId}/variables/${encodeURIComponent(variableName)}/search`, {
-      params: { q: query },
+      params: { q: query, ...extra },
     })
   },
 

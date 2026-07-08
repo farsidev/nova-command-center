@@ -58,7 +58,10 @@
           <p class="mb-2 text-sm font-bold ncr-text-body">{{ __('Flags') }}</p>
           <label v-for="flag in command.flags" :key="flag.key" class="ncr-flag">
             <input type="checkbox" v-model="flags[flag.key]" class="checkbox" />
-            <span class="flex-1">{{ flag.label }}</span>
+            <span class="flex-1 min-w-0">
+              <span class="block">{{ flag.label }}</span>
+              <span v-if="flag.help" class="block mt-1 text-xs ncr-text-muted">{{ flag.help }}</span>
+            </span>
             <code class="text-xs ncr-text-faint">{{ flag.flag }}</code>
           </label>
         </div>

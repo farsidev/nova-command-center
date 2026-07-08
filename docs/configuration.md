@@ -138,6 +138,12 @@ real Eloquent model, and submits the matched record's id.
 ],
 ```
 
+A `default` on a `model` variable is stored as the raw value (e.g. an id) —
+the field resolves it to a label from the same search endpoint the moment the
+run modal opens, so the operator sees a name instead of a bare id. If the
+value no longer matches any row (e.g. the referenced record was deleted), the
+field falls back to showing the raw value.
+
 Matching against `search_columns` is always case-insensitive, regardless of
 database driver — including on drivers like PostgreSQL where `LIKE` is
 case-sensitive by default, and on JSON-typed columns (e.g. a translatable
@@ -146,7 +152,9 @@ column stored as `jsonb`, matched as its raw JSON text).
 **Security.** A `model` class is only searchable once it is explicitly listed
 in `searchable_models` — the same allow-list posture as `bash` and
 `custom_commands`. The search endpoint (`GET
-.../commands/{command}/variables/{variable}/search?q=`) only ever selects
+.../commands/{command}/variables/{variable}/search?q=`, or `?value=` to
+resolve one known value to its label instead of running a free-text search)
+only ever selects
 `value_column` and `label_column` from the table — never the full row — so it
 cannot be used to read unrelated columns, and it is gated behind the same
 authorization as running the command itself (the tool's gate, plus the
@@ -164,9 +172,17 @@ argument.
 
 ```php
 'flags' => [
-    ['label' => 'Force', 'flag' => '--force', 'default' => true],
+    [
+        'label' => 'Force',
+        'flag' => '--force',
+        'default' => true,
+        'help' => 'Skip the confirmation prompt the underlying command would otherwise show.',
+    ],
 ],
 ```
+
+Shorthand forms are accepted too: `'--force' => 'Force'` or `'Force' =>
+'--force'` (`help` isn't available in shorthand — use the array form to set it).
 
 ## Migrating from other command-runner packages
 
