@@ -17,13 +17,19 @@
     </div>
 
     <ul v-if="history.length" class="ncr-history-list ncr-rows">
+      <!-- role/tabindex instead of a real <button>: the row contains its own
+           rerun button, and buttons cannot nest. -->
       <li
         v-for="item in history"
         :key="item.id"
-        class="ncr-history-row flex items-center justify-between gap-2 px-4 py-2.5"
+        class="ncr-history-row flex items-center justify-between gap-2"
+        role="button"
+        tabindex="0"
         :style="{ '--ncr-row-accent': statusColor(item.status) }"
         :title="isActive(item.status) ? __('Still in progress — click to follow it live') : ''"
         @click="$emit('select', item)"
+        @keydown.enter.prevent="$emit('select', item)"
+        @keydown.space.prevent="$emit('select', item)"
       >
         <div class="ncr-history-body">
           <p class="text-sm font-medium ncr-text-body ncr-truncate" :title="item.name">{{ item.name }}</p>
@@ -48,7 +54,7 @@
               <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
             </svg>
           </button>
-          <span class="flex items-center gap-1.5 text-xs font-medium" :class="`ncr-status-${item.status}`">
+          <span class="ncr-status text-xs font-medium" :class="`ncr-status-${item.status}`">
             <span class="ncr-dot" :class="`ncr-dot-${item.status}`"></span>
             {{ item.status.replace('_', ' ') }}
           </span>

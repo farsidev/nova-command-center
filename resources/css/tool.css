@@ -64,14 +64,19 @@
 
 .ncr-cmd:hover::before { width: 5px; }
 
-.ncr-accent-primary { --ncr-accent: var(--primary, #4099de); }
+/* Only danger/warning carry real meaning (they're the two types that force a
+   confirmation prompt) — every other "type" is a cosmetic leftover from
+   Nova's own button styles, so it shares one calm, host-themed colour rather
+   than getting its own arbitrary hue. A card list where six "safe" types all
+   look different but mean the same thing reads as noise, not information. */
 .ncr-accent-danger { --ncr-accent: #e74c3c; }
 .ncr-accent-warning { --ncr-accent: #d99a00; }
-.ncr-accent-success { --ncr-accent: #21b978; }
-.ncr-accent-info { --ncr-accent: #03a9f4; }
+.ncr-accent-primary,
+.ncr-accent-success,
+.ncr-accent-info,
 .ncr-accent-secondary,
 .ncr-accent-light,
-.ncr-accent-dark { --ncr-accent: #94a3b8; }
+.ncr-accent-dark { --ncr-accent: var(--primary, #4099de); }
 
 /* -------------------------------------------------------- Command card ---- */
 /* Robust flex layout independent of Nova's purged Tailwind (min-w-0/truncate). */
@@ -102,6 +107,11 @@
   min-width: 0;
 }
 
+/* Package-owned min-width:0 for flex items that must shrink so children can
+   truncate. Tailwind's min-w-0 has already been caught missing from a real
+   host build once (see CHANGELOG 1.0.0), so templates use this instead. */
+.ncr-shrink { min-width: 0; }
+
 /* -------------------------------------------------------------- Icon badge -- */
 .ncr-icon-badge {
   display: inline-flex;
@@ -111,8 +121,7 @@
   height: 2.75rem;
   border-radius: 0.7rem;
   color: var(--primary, #4099de);
-  background-image: linear-gradient(135deg, rgba(64, 153, 222, 0.2), rgba(64, 153, 222, 0.07));
-  box-shadow: inset 0 0 0 1px rgba(64, 153, 222, 0.16);
+  background-color: rgba(64, 153, 222, 0.12);
   flex-shrink: 0;
 }
 
@@ -208,15 +217,18 @@
   box-shadow: none;
 }
 
-.ncr-btn-primary { background-color: var(--primary, #4099de); }
-.ncr-btn-success { background-color: #21b978; }
+/* Same reasoning as .ncr-accent-* above: only danger/warning are visually
+   distinct. Run buttons for every other type share Nova's own primary colour
+   instead of each command getting an unrelated, decorative accent. */
 .ncr-btn-warning { background-color: #d99a00; }
 .ncr-btn-danger { background-color: #e74c3c; }
-.ncr-btn-info { background-color: #03a9f4; }
 
+.ncr-btn-primary,
+.ncr-btn-success,
+.ncr-btn-info,
 .ncr-btn-secondary,
 .ncr-btn-light,
-.ncr-btn-dark { background-color: #64748b; }
+.ncr-btn-dark { background-color: var(--primary, #4099de); }
 
 .ncr-btn-link {
   background-color: transparent;
@@ -295,9 +307,11 @@
   transition: width 0.3s ease;
 }
 
-/* The strip between the console header and body that hosts the progress bar. */
+/* The strip between the console header and body that hosts the progress bar.
+   Bottom padding is real padding, not an h-3 spacer div — the h-* utilities
+   are part of the host-purge lottery. */
 .ncr-progress-strip {
-  padding: 0.75rem 1rem 0;
+  padding: 0.75rem 1rem;
   background-color: #fff;
 }
 
@@ -367,6 +381,13 @@
 .dark .ncr-copy { color: #94a3b8; }
 .dark .ncr-copy:hover { background-color: rgba(148, 163, 184, 0.16); color: #e2e8f0; }
 
+.ncr-copy:focus-visible,
+.ncr-iconbtn:focus-visible,
+.ncr-link-danger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(64, 153, 222, 0.55);
+}
+
 /* ---------------------------------------------------------------- History -- */
 .ncr-history-list {
   max-height: 32rem;
@@ -376,7 +397,10 @@
 .ncr-history-row {
   position: relative;
   overflow: hidden;
-  padding-left: 1rem;
+  /* Full padding lives here, not in template utilities — py-2.5 is one of the
+     fractional Tailwind sizes host builds routinely purge (same lottery that
+     once collapsed the w-3.5 icons). */
+  padding: 0.625rem 1rem;
   cursor: pointer;
   transition: background-color 0.12s ease;
 }
@@ -384,10 +408,25 @@
 .ncr-history-row:hover { background-color: #f8fafc; }
 .dark .ncr-history-row:hover { background-color: rgba(148, 163, 184, 0.08); }
 
+/* Rows are keyboard-operable (role="button"): give keyboard focus the same
+   affordance hover gets, plus a visible ring. Inset so the ring isn't clipped
+   by the row's own overflow:hidden (needed for the accent stripe). */
+.ncr-history-row:focus-visible {
+  outline: none;
+  background-color: #f8fafc;
+  box-shadow: inset 0 0 0 2px rgba(64, 153, 222, 0.55);
+}
+
+.dark .ncr-history-row:focus-visible {
+  background-color: rgba(148, 163, 184, 0.08);
+  box-shadow: inset 0 0 0 2px rgba(96, 165, 250, 0.6);
+}
+
 /* Per-row action (rerun) revealed on row hover or keyboard focus. */
 .ncr-history-act { opacity: 0; transition: opacity 0.12s ease; }
 
 .ncr-history-row:hover .ncr-history-act,
+.ncr-history-row:focus-visible .ncr-history-act,
 .ncr-history-act:focus-visible {
   opacity: 1;
 }
@@ -412,6 +451,16 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  /* Durations tick every run; tabular figures stop the row from wobbling. */
+  font-variant-numeric: tabular-nums;
+}
+
+/* Status dot + label pair (history rows). Gap lives here because gap-1.5 is
+   another purge-prone fractional utility. */
+.ncr-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
 }
 
 /* ------------------------------------------------------------- Empty state -- */
@@ -455,10 +504,12 @@
   overflow: auto;
 }
 
-/* Checkbox row / flag toggle in the run modal. */
+/* Checkbox row / flag toggle in the run modal. Top-aligned (not centered) so
+   the checkbox and flag token stay on the label line when a help line wraps
+   the row to two lines. */
 .ncr-flag {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.6rem;
   padding: 0.55rem 0.65rem;
   margin-bottom: 0.4rem;
@@ -469,6 +520,9 @@
   cursor: pointer;
   transition: border-color 0.12s ease, background-color 0.12s ease;
 }
+
+.ncr-flag input[type='checkbox'] { margin-top: 0.15rem; }
+.ncr-flag code { margin-top: 0.15rem; }
 
 .ncr-flag:hover { border-color: #cbd5e1; background-color: #f8fafc; }
 .dark .ncr-flag { border-color: #334155; color: #cbd5e1; }
@@ -600,6 +654,11 @@
 .ncr-rail-item:hover { background-color: rgba(100, 116, 139, 0.1); }
 .dark .ncr-rail-item { color: #cbd5e1; }
 .dark .ncr-rail-item:hover { background-color: rgba(148, 163, 184, 0.12); }
+
+.ncr-rail-item:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(64, 153, 222, 0.55);
+}
 
 .ncr-rail-item.is-active {
   color: var(--primary, #4099de);
@@ -807,12 +866,13 @@
 .ncr-model-search-clear:hover { color: #334155; }
 .dark .ncr-model-search-clear:hover { color: #e2e8f0; }
 
+/* Positioned `fixed` (left/top/width set inline from the input's measured
+   rect) instead of absolute-within-the-field: the run modal's body scrolls
+   (overflow: auto), and an absolutely-positioned list gets clipped at the
+   modal body's edge. Fixed positioning escapes every scroll container. */
 .ncr-model-search-results {
-  position: absolute;
+  position: fixed;
   z-index: 70;
-  left: 0;
-  right: 0;
-  margin-top: 0.3rem;
   max-height: 14rem;
   overflow: auto;
   background-color: #fff;
@@ -899,6 +959,8 @@
 /* Muted danger link (the History "Clear" button). */
 .ncr-link-danger {
   color: #ef4444;
+  cursor: pointer;
+  border-radius: 0.25rem;
   transition: color 0.12s ease;
 }
 

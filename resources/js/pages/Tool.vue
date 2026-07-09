@@ -7,7 +7,7 @@
           <line x1="12" y1="19" x2="20" y2="19" />
         </svg>
       </span>
-      <div class="flex-1 min-w-0">
+      <div class="flex-1 ncr-shrink">
         <h1 class="text-2xl font-normal leading-tight ncr-heading">{{ heading }}</h1>
         <p v-if="config.help" class="text-sm ncr-text-muted">{{ config.help }}</p>
         <div v-if="!loading && commands.length" class="flex items-center mt-1">
@@ -57,7 +57,7 @@
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
-          <input v-model="search" type="text" :placeholder="__('Search commands…')" />
+          <input v-model="search" type="text" :placeholder="__('Search commands…')" :aria-label="__('Search commands')" />
         </div>
 
         <div v-if="customTypes.length" class="ncr-card ncr-custombar">

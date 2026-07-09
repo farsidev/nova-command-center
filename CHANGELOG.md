@@ -6,6 +6,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The visual language is calmer and more deliberate. Category dots/section
+  markers now draw from a small curated palette instead of hashing the name
+  to an arbitrary point on the entire colour wheel, and Run buttons/accent
+  stripes only differ in colour when the difference means something: danger
+  and warning commands (the two types that force a confirmation) keep their
+  red/amber, while every other type shares Nova's own primary colour instead
+  of each getting its own decorative hue. The header icon badge dropped its
+  gradient for a flat tint.
+- Full keyboard support: history rows are now reachable and activatable with
+  the keyboard (they were click-only), every interactive element has a
+  visible focus ring, the run modal traps Tab within itself, labels the
+  dialog for screen readers, and focuses the first field on open — or the
+  Cancel button (never Run) for confirm-only commands, so a stray Enter
+  can't fire the command the confirmation exists to guard.
+- The model-search results list is no longer clipped by the run modal's
+  scrolling body; it now escapes any scroll container and flips above the
+  input when there's no room below.
+
+### Fixed
+
+- The last few purge-lottery utilities left in templates (`py-2.5`,
+  `gap-1.5`, an `h-3` spacer, `min-w-0`) moved into the package stylesheet —
+  the same fractional-size family that host builds have already been caught
+  purging (the invisible Run-button icons in 1.1.1).
+
 ### Added
 
 - Flags now support a `help` line, shown under the flag's label in the run

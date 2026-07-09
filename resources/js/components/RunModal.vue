@@ -1,13 +1,13 @@
 <template>
   <div class="ncr-modal-backdrop" @click.self="onBackdropClick">
-    <div class="ncr-modal ncr-card shadow-lg" role="dialog" aria-modal="true">
+    <div ref="modalRef" class="ncr-modal ncr-card shadow-lg" role="dialog" aria-modal="true" aria-labelledby="ncr-modal-title">
       <div class="flex items-start justify-between gap-4 px-6 py-4 ncr-hr-b">
-        <div class="min-w-0">
+        <div class="ncr-shrink">
           <div class="flex items-center gap-2">
             <span class="ncr-badge" :class="command.command_type === 'bash' ? 'ncr-badge-bash' : 'ncr-badge-artisan'">
               {{ command.command_type === 'bash' ? 'bash' : 'artisan' }}
             </span>
-            <h3 class="text-lg font-bold ncr-text-strong ncr-truncate" :title="command.name">{{ command.name }}</h3>
+            <h3 id="ncr-modal-title" class="text-lg font-bold ncr-text-strong ncr-truncate" :title="command.name">{{ command.name }}</h3>
           </div>
           <p v-if="command.help" class="mt-1 text-sm ncr-text-muted">{{ command.help }}</p>
           <code class="block mt-2 text-xs ncr-text-faint break-all">{{ command.run }}</code>
@@ -58,7 +58,7 @@
           <p class="mb-2 text-sm font-bold ncr-text-body">{{ __('Flags') }}</p>
           <label v-for="flag in command.flags" :key="flag.key" class="ncr-flag">
             <input type="checkbox" v-model="flags[flag.key]" class="checkbox" />
-            <span class="flex-1 min-w-0">
+            <span class="flex-1 ncr-shrink">
               <span class="block">{{ flag.label }}</span>
               <span v-if="flag.help" class="block mt-1 text-xs ncr-text-muted">{{ flag.help }}</span>
             </span>
@@ -102,6 +102,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'run'])
+
+const modalRef = ref(null)
 
 const values = reactive({})
 const flags = reactive({})
@@ -153,11 +155,45 @@ function onBackdropClick() {
   if (!props.submitting) emit('close')
 }
 
+const FOCUSABLE = 'button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+
+function focusables() {
+  if (!modalRef.value) return []
+  return [...modalRef.value.querySelectorAll(FOCUSABLE)].filter((el) => !el.disabled)
+}
+
 function onKey(event) {
   if (event.key === 'Escape' && !props.submitting) emit('close')
   if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) submit()
+
+  // Keep Tab cycling inside the dialog — without this, tabbing walks out into
+  // the (visually inert) page behind the backdrop.
+  if (event.key === 'Tab') {
+    const items = focusables()
+    if (!items.length) return
+
+    const first = items[0]
+    const last = items[items.length - 1]
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault()
+      first.focus()
+    }
+  }
 }
 
-onMounted(() => document.addEventListener('keydown', onKey))
+onMounted(() => {
+  document.addEventListener('keydown', onKey)
+  // Put focus on the first field so the operator can type immediately. For
+  // input-less (confirm-only) commands, focus Cancel, not Run — these modals
+  // exist to interrupt risky actions, and focusing Run would let a stray
+  // Enter fire the very command the confirmation is guarding.
+  const body = modalRef.value?.querySelector('.ncr-modal-body')
+  const target = body?.querySelector('input, select') || modalRef.value?.querySelector('.ncr-btn-link')
+  target?.focus()
+})
 onBeforeUnmount(() => document.removeEventListener('keydown', onKey))
 </script>

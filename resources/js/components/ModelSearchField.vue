@@ -29,7 +29,7 @@
       </svg>
     </button>
 
-    <ul v-if="open" class="ncr-model-search-results">
+    <ul v-if="open" class="ncr-model-search-results" :style="listStyle">
       <li v-if="loading" class="ncr-model-search-empty">{{ __('Searching…') }}</li>
       <li v-else-if="results.length === 0" class="ncr-model-search-empty">{{ __('No matches') }}</li>
       <li
@@ -68,9 +68,45 @@ const results = ref([])
 const loading = ref(false)
 const open = ref(false)
 const activeIndex = ref(-1)
+const listStyle = ref({})
 
 let debounceTimer = null
 let requestToken = 0
+
+// The results list is position:fixed (see tool.css) so the modal body's
+// overflow can't clip it — measure the input and anchor the list to it,
+// re-measuring on any scroll (capture phase catches the modal body's own
+// scrolling) and on resize. Flips above the input when the viewport space
+// below is too tight for the list's max-height.
+const LIST_MAX_HEIGHT = 224 // must track max-height in .ncr-model-search-results
+const LIST_GAP = 4
+
+function positionList() {
+  const rect = inputRef.value?.getBoundingClientRect()
+  if (!rect) return
+
+  const spaceBelow = window.innerHeight - rect.bottom
+  const style = { left: `${rect.left}px`, width: `${rect.width}px` }
+
+  if (spaceBelow < LIST_MAX_HEIGHT + LIST_GAP && rect.top > spaceBelow) {
+    style.bottom = `${window.innerHeight - rect.top + LIST_GAP}px`
+  } else {
+    style.top = `${rect.bottom + LIST_GAP}px`
+  }
+
+  listStyle.value = style
+}
+
+watch(open, (isOpen) => {
+  if (isOpen) {
+    positionList()
+    window.addEventListener('scroll', positionList, true)
+    window.addEventListener('resize', positionList)
+  } else {
+    window.removeEventListener('scroll', positionList, true)
+    window.removeEventListener('resize', positionList)
+  }
+})
 
 watch(
   () => props.modelValue,
@@ -165,5 +201,9 @@ function onBlur() {
   setTimeout(() => (open.value = false), 150)
 }
 
-onBeforeUnmount(() => clearTimeout(debounceTimer))
+onBeforeUnmount(() => {
+  clearTimeout(debounceTimer)
+  window.removeEventListener('scroll', positionList, true)
+  window.removeEventListener('resize', positionList)
+})
 </script>

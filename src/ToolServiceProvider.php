@@ -33,13 +33,9 @@ final class ToolServiceProvider extends ServiceProvider
     {
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'nova-command-center');
 
-        // Guard every Nova touch-point so the package can also boot in a plain
+        // Guard the Nova touch-points so the package can also boot in a plain
         // Laravel context (e.g. the test suite) where Nova is not installed.
         if (class_exists(Nova::class)) {
-            Nova::serving(function (): void {
-                //
-            });
-
             $this->app->booted(function (): void {
                 $this->routes();
             });

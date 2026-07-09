@@ -1,7 +1,7 @@
 <template>
   <div class="ncr-console-shell">
     <div class="ncr-console-head">
-      <div class="flex items-center gap-2 min-w-0">
+      <div class="flex items-center gap-2 ncr-shrink">
         <span class="ncr-traffic"><span class="r" /><span class="y" /><span class="g" /></span>
         <span class="ncr-dot" :class="`ncr-dot-${execution.status}`"></span>
         <span class="text-sm font-bold ncr-text-body ncr-truncate">{{ execution.name }}</span>
@@ -38,7 +38,6 @@
       <div class="ncr-progress">
         <div class="ncr-progress-bar" :style="{ width: (progress.percentage || 0) + '%' }"></div>
       </div>
-      <div class="h-3"></div>
     </div>
 
     <pre ref="body" class="ncr-console"><code>{{ execution.output || placeholder }}</code><span v-if="isRunning" class="ncr-cursor" /></pre>
