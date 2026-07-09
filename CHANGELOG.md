@@ -6,6 +6,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `php artisan nova-command-center:check` — a doctor command that statically
+  validates the allow-list and configuration and reports everything that
+  otherwise fails silently at runtime: commands dropped for a missing `run`
+  string, `{placeholders}` with no matching variable (passed literally to the
+  process), required selects that can never be satisfied, model variables
+  whose class is missing or not allow-listed, bash commands while bash is
+  disabled, `can` abilities no gate defines, overlap locks on a cache store
+  that can't lock, and a database source whose migration hasn't run. Exits
+  non-zero on errors (CI-friendly); `--strict` fails on warnings too.
+- Flags now support a `help` line, shown under the flag's label in the run
+  modal — bringing them in line with variables, which already had it. The
+  bundled Command resource's structured editor gained a matching "Help" field.
+- A `model` variable's `default` now resolves to a friendly label the moment
+  the run modal opens, instead of showing the raw stored value in the search
+  box. The search endpoint accepts a new `?value=` mode for this (resolve one
+  known value), alongside its existing free-text `?q=` search.
+
 ### Changed
 
 - The visual language is calmer and more deliberate. Category dots/section
@@ -25,23 +44,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The model-search results list is no longer clipped by the run modal's
   scrolling body; it now escapes any scroll container and flips above the
   input when there's no room below.
-
-### Fixed
-
-- The last few purge-lottery utilities left in templates (`py-2.5`,
-  `gap-1.5`, an `h-3` spacer, `min-w-0`) moved into the package stylesheet —
-  the same fractional-size family that host builds have already been caught
-  purging (the invisible Run-button icons in 1.1.1).
-
-### Added
-
-- Flags now support a `help` line, shown under the flag's label in the run
-  modal — bringing them in line with variables, which already had it. The
-  bundled Command resource's structured editor gained a matching "Help" field.
-- A `model` variable's `default` now resolves to a friendly label the moment
-  the run modal opens, instead of showing the raw stored value in the search
-  box. The search endpoint accepts a new `?value=` mode for this (resolve one
-  known value), alongside its existing free-text `?q=` search.
+- The three independent places that parsed the "variables/flags can be a
+  Nova Repeater block, a plain list, or a classic config map" shape, and the
+  three places that converted options/rules/search-columns between array and
+  delimited-string form, are now backed by shared, single-source-of-truth
+  helpers (`RepeaterBlocks::isBlock()`, `DelimitedFormat`) instead of each
+  reimplementing the same detection independently.
+- `RunCommandRequest` now receives its `CommandRepository` dependency the
+  same way a controller action does (method injection on `authorize()`/
+  `rules()`), instead of reaching for the container directly — consistent
+  with the constructor-DI convention used everywhere else in the package.
 
 ### Fixed
 
@@ -55,19 +67,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`information_schema`/`DESCRIBE`) to feature-detect the `enabled` and
   `position` columns on every request, instantiating the model twice per
   check. Both checks are now memoized per instance.
-
-### Changed
-
-- The three independent places that parsed the "variables/flags can be a
-  Nova Repeater block, a plain list, or a classic config map" shape, and the
-  three places that converted options/rules/search-columns between array and
-  delimited-string form, are now backed by shared, single-source-of-truth
-  helpers (`RepeaterBlocks::isBlock()`, `DelimitedFormat`) instead of each
-  reimplementing the same detection independently.
-- `RunCommandRequest` now receives its `CommandRepository` dependency the
-  same way a controller action does (method injection on `authorize()`/
-  `rules()`), instead of reaching for the container directly — consistent
-  with the constructor-DI convention used everywhere else in the package.
+- The last few purge-lottery utilities left in templates (`py-2.5`,
+  `gap-1.5`, an `h-3` spacer, `min-w-0`) moved into the package stylesheet —
+  the same fractional-size family that host builds have already been caught
+  purging (the invisible Run-button icons in 1.1.1).
 
 ## [1.1.1] - 2026-07-06
 

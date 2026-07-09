@@ -172,13 +172,25 @@ final class CommandBuilder
     }
 
     /**
+     * The {placeholder} names referenced by a run string. Public and static so
+     * diagnostics (the check command) match execution exactly — same pattern,
+     * one definition.
+     *
      * @return list<string>
      */
-    private function usedPlaceholders(string $run): array
+    public static function placeholders(string $run): array
     {
         preg_match_all('/\{([A-Za-z0-9_.-]+)\}/', $run, $matches);
 
         return array_values(array_unique($matches[1]));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function usedPlaceholders(string $run): array
+    {
+        return self::placeholders($run);
     }
 
     /**

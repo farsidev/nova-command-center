@@ -42,6 +42,8 @@ final class ToolServiceProvider extends ServiceProvider
         }
 
         if ($this->app->runningInConsole()) {
+            $this->commands([Console\CheckCommand::class]);
+
             $this->publishes([
                 __DIR__.'/../config/nova-command-center.php' => config_path('nova-command-center.php'),
             ], 'nova-command-center-config');

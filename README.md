@@ -312,6 +312,29 @@ class RebuildSearchIndex extends Command
 }
 ```
 
+## Validate your configuration
+
+The allow-list is code — lint it like code:
+
+```bash
+php artisan nova-command-center:check
+```
+
+The check reports everything that would otherwise fail silently at runtime: a
+command dropped for having no `run` string, a `{placeholder}` with no matching
+variable (it would be passed to the process literally), a required select that
+can never be satisfied, a `model` variable whose class is missing or not
+allow-listed in `searchable_models`, bash commands while bash is disabled, a
+per-command `can` ability no gate defines, `without_overlapping` on a cache
+store that can't lock, and a database source whose migration hasn't run.
+
+It exits non-zero when it finds errors, so it can gate CI. Add `--strict` to
+fail on warnings too:
+
+```bash
+php artisan nova-command-center:check --strict
+```
+
 ## Events
 
 Every execution dispatches `Farsi\NovaCommandCenter\Events\CommandStarted` and

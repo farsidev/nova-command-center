@@ -184,6 +184,28 @@ argument.
 Shorthand forms are accepted too: `'--force' => 'Force'` or `'Force' =>
 '--force'` (`help` isn't available in shorthand — use the array form to set it).
 
+## Validating the configuration
+
+`php artisan nova-command-center:check` statically validates the whole
+allow-list plus the surrounding configuration and prints a per-command report.
+It catches the misconfigurations that otherwise fail silently:
+
+| Finding | Severity | Runtime behaviour it prevents |
+| --- | --- | --- |
+| Command without a `run` string | error | Silently dropped from the UI. |
+| `{placeholder}` with no matching variable | error | Passed to the process literally, braces and all. |
+| Required `select` with no options and no default | error | The Run button can never be enabled. |
+| `model` variable class missing / not Eloquent / not in `searchable_models` | error | The search box never returns results, or the endpoint refuses with 403. |
+| Database source without its migration | error | The tool page errors on load. |
+| Bash command while `bash.enabled` is false | warning | Running it is refused. |
+| `can` ability no gate defines | warning | The command is always denied (unless a policy covers it). |
+| `without_overlapping` on a store without lock support | warning | Overlap protection silently does nothing. |
+| Variable not referenced by any placeholder | note | Appended as its own trailing argument (by design — flagged in case it's a typo). |
+
+Errors exit non-zero, so the command can gate CI; `--strict` makes warnings
+fail too. Run it after every change to the command definitions — especially
+with the database source, where definitions bypass code review.
+
 ## Migrating from other command-runner packages
 
 The `run` string is executed exactly as written — every token in it must be a
