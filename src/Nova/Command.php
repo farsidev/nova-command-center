@@ -119,6 +119,29 @@ class Command extends Resource
             Text::make('Authorize ability', 'can')->nullable()->hideFromIndex()
                 ->help('Optional gate ability required to run this command.'),
 
+            Select::make('Confirm before run', 'confirm')
+                ->options([
+                    'default' => 'Default (danger / warning types)',
+                    'always' => 'Always ask',
+                    'never' => 'Never ask',
+                ])
+                ->displayUsingLabels()
+                ->resolveUsing(static fn ($value): string => match (true) {
+                    $value === true => 'always',
+                    $value === false => 'never',
+                    default => 'default',
+                })
+                ->fillUsing(function ($request, $model, $attribute, $requestAttribute): void {
+                    $model->{$attribute} = match ($request[$requestAttribute] ?? 'default') {
+                        'always' => true,
+                        'never' => false,
+                        default => null,
+                    };
+                })
+                ->nullable()
+                ->hideFromIndex()
+                ->help('Overrides the type-based default. Danger and warning buttons confirm unless Never is chosen.'),
+
             ...$this->variableAndFlagFields(),
         ];
     }

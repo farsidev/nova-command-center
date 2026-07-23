@@ -32,3 +32,42 @@ it('caps history at the configured size', function () {
 
     expect(app(History::class)->all())->toHaveCount(2);
 });
+
+it('persists the resolved inputs used for a run', function () {
+    $result = app(ExecuteCommand::class)->handle(
+        command('Forget Key'),
+        ['key' => 'users:42'],
+        [],
+    );
+
+    expect($result->variables)->toBe(['key' => 'users:42'])
+        ->and($result->flags)->toBe([]);
+
+    $this->getJson('_ncr/history')
+        ->assertOk()
+        ->assertJsonPath('history.0.variables.key', 'users:42')
+        ->assertJsonPath('history.0.flags', []);
+});
+
+it('persists enabled flag strings for a run', function () {
+    $result = app(ExecuteCommand::class)->handle(
+        command('Migrate'),
+        [],
+        ['--force'],
+    );
+
+    expect($result->flags)->toBe(['--force']);
+
+    $this->getJson('_ncr/history')
+        ->assertOk()
+        ->assertJsonPath('history.0.flags', ['--force']);
+});
+
+it('returns stored inputs when a command is run over the API', function () {
+    $this->postJson('_ncr/commands/run', [
+        'command' => commandId('Forget Key'),
+        'variables' => ['key' => 'sessions'],
+    ])
+        ->assertOk()
+        ->assertJsonPath('execution.variables.key', 'sessions');
+});

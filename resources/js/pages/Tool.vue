@@ -125,10 +125,12 @@
     <run-modal
       v-if="modalCommand"
       :command="modalCommand"
+      :initial-values="modalPresets.values"
+      :initial-flags="modalPresets.flags"
       :errors="modalErrors"
       :submit-error="modalSubmitError"
       :submitting="modalSubmitting"
-      @close="modalCommand = null"
+      @close="closeModal"
       @run="onModalRun"
     />
   </div>
@@ -156,6 +158,7 @@ const current = shallowRef(null)
 const progress = shallowRef(null)
 const runningId = ref(null)
 const modalCommand = shallowRef(null)
+const modalPresets = shallowRef({ values: null, flags: null })
 const modalErrors = shallowRef({})
 const modalSubmitError = ref(null)
 const modalSubmitting = ref(false)
@@ -241,18 +244,27 @@ async function load() {
 // confirmation (needs_confirm — explicit `confirm` config, or danger/warning
 // type by default); the modal doubles as the confirmation step. Safe commands
 // run immediately.
-function trigger(command) {
+function trigger(command, presets = null) {
   const needsInput = command.variables.length > 0 || command.flags.length > 0
   const needsConfirm = command.needs_confirm ?? ['danger', 'warning'].includes(command.type)
 
   if (needsInput || needsConfirm) {
     modalErrors.value = {}
     modalSubmitError.value = null
+    modalPresets.value = {
+      values: presets?.values ?? null,
+      flags: presets?.flags ?? null,
+    }
     modalCommand.value = command
     return
   }
 
-  execute({ command, values: {}, flags: {} })
+  execute({ command, values: presets?.values || {}, flags: presets?.flags || {} })
+}
+
+function closeModal() {
+  modalCommand.value = null
+  modalPresets.value = { values: null, flags: null }
 }
 
 async function onModalRun(payload) {
@@ -265,7 +277,7 @@ async function onModalRun(payload) {
   modalSubmitting.value = false
 
   if (result.success) {
-    modalCommand.value = null
+    closeModal()
     return
   }
 
@@ -276,15 +288,25 @@ async function onModalRun(payload) {
   }
 }
 
-// Re-run a past execution by finding its source command; if that command needs
-// input it opens the modal, otherwise it runs straight away.
+// Re-run a past execution with the same inputs. History stores the resolved
+// variable map and the enabled flag strings; flag strings are mapped back to
+// checkbox keys so the modal (or a direct execute) can reuse them.
 function rerun(item) {
   const command = commands.value.find((c) => c.id === item.command_id)
   if (!command) {
     Nova.error(__('That command is no longer available.'))
     return
   }
-  trigger(command)
+
+  const values = { ...(item.variables || {}) }
+  const enabledFlags = item.flags || []
+  const flags = {}
+
+  command.flags.forEach((flag) => {
+    flags[flag.key] = enabledFlags.includes(flag.flag)
+  })
+
+  trigger(command, { values, flags })
 }
 
 async function runCustom() {

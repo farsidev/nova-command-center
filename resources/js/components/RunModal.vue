@@ -96,6 +96,8 @@ import { __ } from '../util/translate'
 
 const props = defineProps({
   command: { type: Object, required: true },
+  initialValues: { type: Object, default: null },
+  initialFlags: { type: Object, default: null },
   errors: { type: Object, default: () => ({}) },
   submitError: { type: String, default: null },
   submitting: { type: Boolean, default: false },
@@ -109,11 +111,13 @@ const values = reactive({})
 const flags = reactive({})
 
 props.command.variables.forEach((variable) => {
-  values[variable.name] = variable.default || ''
+  const preset = props.initialValues?.[variable.name]
+  values[variable.name] = preset !== undefined && preset !== null ? preset : variable.default || ''
 })
 
 props.command.flags.forEach((flag) => {
-  flags[flag.key] = flag.default
+  const preset = props.initialFlags?.[flag.key]
+  flags[flag.key] = preset !== undefined && preset !== null ? preset : flag.default
 })
 
 // Fields the operator has edited since the last failed submission — their

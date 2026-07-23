@@ -39,8 +39,10 @@ crashes, missing optional variables and the absence of authorization hooks.
 - 🧩 **Nova 4 & 5 compatible.** One code path, Laravel Mix build, and a
   translation shim that survives Nova 5 removing the global `__` helper.
 - 🧵 **Sync & queued execution** with live, polled output and progress bars.
-- 🛡️ **Authorization** via a gate and optional per-command policies.
-- 🕓 **History** without a database migration.
+- 🛡️ **Authorization** via a gate and optional per-command policies — gated
+  commands are hidden from the catalogue, not just blocked on run.
+- 🕓 **History** without a database migration, with re-run that restores the
+  previous inputs.
 - 🔧 **Variables & flags**, including optional variables and `select` inputs.
 - 🚦 **Concurrency control** (`without_overlapping`) and **rate limiting**.
 - 🎨 **Polished, responsive UI** that follows Nova's light/dark theme, with live

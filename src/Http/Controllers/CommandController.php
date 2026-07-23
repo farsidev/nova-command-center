@@ -10,6 +10,7 @@ use Farsi\NovaCommandCenter\Exceptions\CommandNotAllowedException;
 use Farsi\NovaCommandCenter\Http\Requests\RunCommandRequest;
 use Farsi\NovaCommandCenter\Jobs\RunCommandJob;
 use Farsi\NovaCommandCenter\Support\Cast;
+use Farsi\NovaCommandCenter\Support\CommandBuilder;
 use Farsi\NovaCommandCenter\Support\CommandRepository;
 use Farsi\NovaCommandCenter\Support\ExecutionStore;
 use Farsi\NovaCommandCenter\Support\History;
@@ -31,6 +32,7 @@ final class CommandController extends Controller
         private readonly CommandRepository $commands,
         private readonly History $history,
         private readonly ExecutionStore $store,
+        private readonly CommandBuilder $builder,
         private readonly Config $config,
     ) {}
 
@@ -74,17 +76,20 @@ final class CommandController extends Controller
         try {
             if ($request->queued()) {
                 $executionId = (string) Str::uuid();
+                $built = $this->builder->build($command, $values, $flags);
 
                 $pending = new ExecutionResult(
                     id: $executionId,
                     commandId: $command->id,
                     name: $command->name,
-                    display: $command->run,
+                    display: $built->display,
                     status: ExecutionResult::STATUS_PENDING,
                     exitCode: null,
                     output: '',
                     startedAt: now()->toIso8601String(),
                     ranBy: $ranBy,
+                    variables: $values,
+                    flags: $flags,
                 );
 
                 $this->store->put($pending);

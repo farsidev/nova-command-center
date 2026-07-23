@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-07-23
+
 ### Added
 
 - `php artisan nova-command-center:check` — a doctor command that statically
@@ -24,9 +26,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the run modal opens, instead of showing the raw stored value in the search
   box. The search endpoint accepts a new `?value=` mode for this (resolve one
   known value), alongside its existing free-text `?q=` search.
+- History now stores the resolved variables and enabled flags for each run.
+  Re-run opens the modal prefilled with those inputs (or re-executes
+  immediately for input-less commands).
+- Database command source parity for `confirm` — nullable column, model field,
+  and a three-option select on the Nova resource (default / always / never),
+  matching the config key. An additive migration is published for existing
+  installs.
 
 ### Changed
 
+- The command catalogue is filtered by per-command `can` abilities. Operators
+  no longer see buttons that would only 403 on execute — the same Gate check
+  used at run time.
 - The visual language is calmer and more deliberate. Category dots/section
   markers now draw from a small curated palette instead of hashing the name
   to an arbitrary point on the entire colour wheel, and Run buttons/accent
@@ -54,6 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   same way a controller action does (method injection on `authorize()`/
   `rules()`), instead of reaching for the container directly — consistent
   with the constructor-DI convention used everywhere else in the package.
+- Queued pending history entries now record the built display line and the
+  inputs that will be used, so a reload mid-queue still shows what was asked.
 
 ### Fixed
 

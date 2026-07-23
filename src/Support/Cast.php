@@ -66,4 +66,44 @@ final class Cast
 
         return $result;
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function stringStringMap(mixed $value): array
+    {
+        if (!is_array($value)) {
+            return [];
+        }
+
+        $result = [];
+
+        foreach ($value as $key => $item) {
+            if (is_string($key) && is_scalar($item)) {
+                $result[$key] = (string) $item;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function stringList(mixed $value): array
+    {
+        if (!is_array($value)) {
+            return [];
+        }
+
+        $result = [];
+
+        foreach ($value as $item) {
+            if (is_string($item)) {
+                $result[] = $item;
+            }
+        }
+
+        return $result;
+    }
 }

@@ -65,9 +65,17 @@ a bundled Nova resource.
    ```
 
 Each row maps one-to-one onto the config keys (`run`, `command_type`, `group`,
-`type`, `help`, `timeout`, `output_size`, `queue`, `can`, `variables`, `flags`)
-plus `enabled` (bool) and `position` (int) to toggle and order commands. The
-model is closed to mass assignment with an explicit `$fillable` list.
+`type`, `help`, `timeout`, `output_size`, `queue`, `can`, `confirm`, `variables`,
+`flags`) plus `enabled` (bool) and `position` (int) to toggle and order commands.
+The model is closed to mass assignment with an explicit `$fillable` list.
+
+`confirm` is a nullable boolean that mirrors the config key: `null` keeps the
+type-based default (danger/warning ask, others don't), `true` always asks, and
+`false` never asks. The Nova resource exposes it as a three-option select.
+
+If you already published an older create migration without `confirm`, publish
+again and run migrations — an additive `add_confirm_…` migration is included
+for existing installs.
 
 ### Editing variables and flags
 

@@ -94,6 +94,8 @@ final class RunCommandJob implements ShouldQueue
                 exitCode: null,
                 output: '',
                 startedAt: Carbon::now()->toIso8601String(),
+                variables: $this->values,
+                flags: $this->flags,
             );
         } elseif (!in_array($current->status, [ExecutionResult::STATUS_PENDING, ExecutionResult::STATUS_RUNNING], true)) {
             // A finished result must keep its outcome.
@@ -111,6 +113,8 @@ final class RunCommandJob implements ShouldQueue
             startedAt: $current->startedAt,
             finishedAt: Carbon::now()->toIso8601String(),
             ranBy: $this->ranBy,
+            variables: $current->variables,
+            flags: $current->flags !== [] ? $current->flags : $this->flags,
         );
 
         $store->put($failed);

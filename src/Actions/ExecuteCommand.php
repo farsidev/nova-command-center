@@ -68,6 +68,8 @@ final class ExecuteCommand
             output: '',
             startedAt: $startedAt->toIso8601String(),
             ranBy: $ranBy,
+            variables: $values,
+            flags: $flags,
         );
 
         $this->store->put($running);
@@ -98,6 +100,8 @@ final class ExecuteCommand
             finishedAt: Carbon::now()->toIso8601String(),
             duration: round(microtime(true) - $start, 3),
             ranBy: $ranBy,
+            variables: $values,
+            flags: $flags,
         );
 
         $this->store->put($result);

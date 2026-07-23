@@ -22,6 +22,7 @@ return new class extends Migration
             $table->unsignedInteger('output_size')->nullable();
             $table->json('queue')->nullable();
             $table->string('can')->nullable();
+            $table->boolean('confirm')->nullable();
             $table->json('variables')->nullable();
             $table->json('flags')->nullable();
             $table->boolean('enabled')->default(true);

@@ -14,6 +14,10 @@ use Illuminate\Contracts\Support\Arrayable;
  */
 final class ExecutionResult implements Arrayable
 {
+    /**
+     * @param  array<string, string>  $variables  Resolved variable values used for this run.
+     * @param  list<string>  $flags  Enabled flag strings (e.g. `--force`) used for this run.
+     */
     public function __construct(
         public readonly string $id,
         public readonly string $commandId,
@@ -26,6 +30,8 @@ final class ExecutionResult implements Arrayable
         public readonly ?string $finishedAt = null,
         public readonly ?float $duration = null,
         public readonly ?string $ranBy = null,
+        public readonly array $variables = [],
+        public readonly array $flags = [],
     ) {}
 
     public const STATUS_PENDING = 'pending';
@@ -57,6 +63,8 @@ final class ExecutionResult implements Arrayable
             finishedAt: $this->finishedAt,
             duration: $this->duration,
             ranBy: $this->ranBy,
+            variables: $this->variables,
+            flags: $this->flags,
         );
     }
 
@@ -77,6 +85,8 @@ final class ExecutionResult implements Arrayable
             finishedAt: isset($data['finished_at']) ? Cast::nullableString($data['finished_at']) : null,
             duration: isset($data['duration']) ? Cast::nullableFloat($data['duration']) : null,
             ranBy: isset($data['ran_by']) ? Cast::nullableString($data['ran_by']) : null,
+            variables: Cast::stringStringMap($data['variables'] ?? null),
+            flags: Cast::stringList($data['flags'] ?? null),
         );
     }
 
@@ -97,6 +107,8 @@ final class ExecutionResult implements Arrayable
             'finished_at' => $this->finishedAt,
             'duration' => $this->duration,
             'ran_by' => $this->ranBy,
+            'variables' => $this->variables,
+            'flags' => $this->flags,
         ];
     }
 }

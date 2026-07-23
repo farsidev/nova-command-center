@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $output_size
  * @property array<string, mixed>|bool|null $queue
  * @property string|null $can
+ * @property bool|null $confirm
  * @property array<int|string, mixed>|null $variables
  * @property array<int|string, mixed>|null $flags
  * @property bool $enabled
@@ -57,6 +58,7 @@ class Command extends Model
         'output_size',
         'queue',
         'can',
+        'confirm',
         'variables',
         'flags',
         'enabled',
@@ -73,6 +75,7 @@ class Command extends Model
         'timeout' => 'integer',
         'output_size' => 'integer',
         'queue' => 'array',
+        'confirm' => 'boolean',
         'variables' => 'array',
         'flags' => 'array',
         'enabled' => 'boolean',
@@ -96,6 +99,7 @@ class Command extends Model
             'output_size' => $this->output_size,
             'queue' => $this->queue,
             'can' => $this->can,
+            'confirm' => $this->confirm,
             'variables' => $this->variables,
             'flags' => $this->flags,
         ], static fn ($value): bool => $value !== null);

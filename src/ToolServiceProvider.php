@@ -55,6 +55,7 @@ final class ToolServiceProvider extends ServiceProvider
             // Only needed when opting into the "database" command source.
             $this->publishes([
                 __DIR__.'/../database/migrations/create_nova_command_center_commands_table.php.stub' => $this->migrationPath('create_nova_command_center_commands_table.php'),
+                __DIR__.'/../database/migrations/add_confirm_to_nova_command_center_commands_table.php.stub' => $this->migrationPath('add_confirm_to_nova_command_center_commands_table.php'),
             ], 'nova-command-center-migrations');
         }
     }

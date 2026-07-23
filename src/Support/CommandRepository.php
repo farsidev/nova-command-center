@@ -8,8 +8,10 @@ use Farsi\NovaCommandCenter\Contracts\CommandSource;
 use Farsi\NovaCommandCenter\Data\CommandDefinition;
 use Farsi\NovaCommandCenter\Exceptions\CommandNotAllowedException;
 use Farsi\NovaCommandCenter\Exceptions\CommandNotFoundException;
+use Farsi\NovaCommandCenter\Http\Requests\RunCommandRequest;
 use Farsi\NovaCommandCenter\Support\Sources\ConfigCommandSource;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Loads the allow-list — from whatever {@see CommandSource} is bound — into typed
@@ -67,11 +69,21 @@ final class CommandRepository
     }
 
     /**
+     * Commands the current operator is allowed to see (and therefore run).
+     * Per-command `can` abilities are applied here so the catalogue never
+     * lists buttons that would only 403 on execute — the same Gate check
+     * {@see RunCommandRequest::authorize()}
+     * enforces at run time.
+     *
      * @return list<CommandDefinition>
      */
     public function visible(): array
     {
-        return array_values($this->all());
+        return array_values(array_filter(
+            $this->all(),
+            static fn (CommandDefinition $command): bool => $command->can === null
+                || Gate::allows($command->can, $command),
+        ));
     }
 
     public function find(string $id): ?CommandDefinition

@@ -21,6 +21,7 @@ beforeEach(function () {
         $table->unsignedInteger('output_size')->nullable();
         $table->json('queue')->nullable();
         $table->string('can')->nullable();
+        $table->boolean('confirm')->nullable();
         $table->json('variables')->nullable();
         $table->json('flags')->nullable();
         $table->boolean('enabled')->default(true);
@@ -95,4 +96,28 @@ it('runs a database-defined command safely through the API', function () {
         ->assertJsonPath('execution.status', 'success');
 
     expect(array_slice($this->executor->arguments, 2))->toBe(['migrate']);
+});
+
+it('honours an explicit confirm override from the database', function () {
+    Command::create([
+        'name' => 'Forced Confirm',
+        'run' => 'cache:clear',
+        'type' => 'primary',
+        'confirm' => true,
+    ]);
+
+    Command::create([
+        'name' => 'Forced Quiet',
+        'run' => 'cache:clear',
+        'type' => 'danger',
+        'confirm' => false,
+    ]);
+
+    $byName = fn (string $name) => collect($this->app->make(CommandRepository::class)->visible())
+        ->firstWhere('name', $name);
+
+    expect($byName('Forced Confirm')->requiresConfirmation())->toBeTrue()
+        ->and($byName('Forced Quiet')->requiresConfirmation())->toBeFalse()
+        ->and($byName('Forced Confirm')->toArray()['needs_confirm'])->toBeTrue()
+        ->and($byName('Forced Quiet')->toArray()['needs_confirm'])->toBeFalse();
 });

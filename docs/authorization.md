@@ -56,7 +56,8 @@ Gate::define('runMigrations', function ($user) {
 
 The command receives the `CommandDefinition` as the gate argument, so you can
 authorize based on its group, type or name. A denied per-command ability returns
-`403`; an unknown command returns `422`.
+`403` on run; the same check also filters the catalogue — operators never see
+commands they cannot run. An unknown command returns `422`.
 
 ## Database source
 

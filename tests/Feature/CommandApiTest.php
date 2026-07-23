@@ -6,7 +6,9 @@ use Farsi\NovaCommandCenter\Support\CommandRepository;
 
 function commandId(string $name): string
 {
-    foreach (app(CommandRepository::class)->visible() as $command) {
+    // Look up via all(), not visible() — gated commands are hidden from the
+    // catalogue when the ability denies, but run tests still need their id.
+    foreach (app(CommandRepository::class)->all() as $command) {
         if ($command->name === $name) {
             return $command->id;
         }
