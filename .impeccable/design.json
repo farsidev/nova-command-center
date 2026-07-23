@@ -1,0 +1,250 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-23T16:27:19.355Z",
+  "title": "Design System: Nova Command Center",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Nova Primary",
+        "tonalRamp": [
+          "#0c4a6e",
+          "#0369a1",
+          "#0284c7",
+          "#0ea5e9",
+          "#38bdf8",
+          "#7dd3fc",
+          "#bae6fd",
+          "#e0f2fe"
+        ]
+      },
+      "danger": {
+        "role": "semantic",
+        "displayName": "Risk Red",
+        "tonalRamp": [
+          "#7f1d1d",
+          "#991b1b",
+          "#b91c1c",
+          "#dc2626",
+          "#ef4444",
+          "#f87171",
+          "#fca5a5",
+          "#fecaca"
+        ]
+      },
+      "warning": {
+        "role": "semantic",
+        "displayName": "Caution Amber",
+        "tonalRamp": [
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#d97706",
+          "#d99a00",
+          "#fbbf24",
+          "#fcd34d",
+          "#fde68a"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Card Surface",
+        "tonalRamp": [
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0",
+          "#f1f5f9",
+          "#ffffff"
+        ]
+      },
+      "text-muted": {
+        "role": "neutral",
+        "displayName": "Muted Text",
+        "tonalRamp": [
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#475569",
+          "#64748b",
+          "#94a3b8",
+          "#cbd5e1",
+          "#e2e8f0"
+        ]
+      },
+      "canvas-console": {
+        "role": "neutral",
+        "displayName": "Console Canvas",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#475569",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "title": {
+        "displayName": "Title",
+        "purpose": "Page heading inheriting Nova UI type."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Command names and secondary copy."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Form labels in the run modal."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Console output, run strings, timers."
+      },
+      "section": {
+        "displayName": "Section",
+        "purpose": "Uppercase group headers."
+      }
+    },
+    "shadows": [
+      {
+        "name": "card-rest",
+        "value": "0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.03)",
+        "purpose": "Default card elevation."
+      },
+      {
+        "name": "card-hover",
+        "value": "0 10px 24px -8px rgba(15, 23, 42, 0.14), 0 2px 6px rgba(15, 23, 42, 0.05)",
+        "purpose": "Interactive command card hover."
+      },
+      {
+        "name": "focus-ring",
+        "value": "0 0 0 3px rgba(64, 153, 222, 0.45)",
+        "purpose": "Focus-visible ring on buttons and inputs."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-quick",
+        "value": "0.16s cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Modal enter."
+      },
+      {
+        "name": "ease-state",
+        "value": "0.12s ease",
+        "purpose": "Hover and color state changes."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "custom-stack",
+        "value": "25rem",
+        "purpose": "Custom command bar full stack."
+      },
+      {
+        "name": "desktop-columns",
+        "value": "1024px",
+        "purpose": "Rail + main + history row layout."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Run Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Safe-type Run control using Nova primary.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\"><svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M8 5v14l11-7z\"/></svg> Run</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:0.375rem;min-height:2.75rem;padding:0.55rem 1rem;border:none;border-radius:0.5rem;font-size:0.8rem;font-weight:700;color:#fff;background:#4099de;cursor:pointer;box-shadow:0 1px 2px rgba(15,23,42,0.12);transition:transform 0.12s ease,box-shadow 0.12s ease,opacity 0.12s ease}.ds-btn-primary:hover{opacity:0.92}.ds-btn-primary:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(64,153,222,0.45)}.ds-btn-primary:active{transform:translateY(1px)}"
+    },
+    {
+      "name": "Danger Run Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Risk command Run control.",
+      "html": "<button class=\"ds-btn-danger\" type=\"button\">Run</button>",
+      "css": ".ds-btn-danger{display:inline-flex;align-items:center;justify-content:center;min-height:2.75rem;padding:0.55rem 1rem;border:none;border-radius:0.5rem;font-size:0.8rem;font-weight:700;color:#fff;background:#e74c3c;cursor:pointer}.ds-btn-danger:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(64,153,222,0.45)}"
+    },
+    {
+      "name": "Command Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Allow-listed command row with accent stripe and Run.",
+      "html": "<div class=\"ds-cmd\"><div class=\"ds-cmd-body\"><span class=\"ds-badge\">artisan</span><strong>Clear Cache</strong><code>cache:clear</code></div><button class=\"ds-btn-primary\" type=\"button\">Run</button></div>",
+      "css": ".ds-cmd{position:relative;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0.8rem 1rem 0.8rem 1.15rem;background:#fff;border:1px solid #e9edf2;border-radius:0.75rem;overflow:hidden}.ds-cmd::before{content:\"\";position:absolute;left:0;top:0;bottom:0;width:5px;background:#4099de;transform:scaleX(0.6);transform-origin:left center}.ds-cmd:hover::before{transform:scaleX(1)}.ds-cmd-body{min-width:0;display:flex;flex-direction:column;gap:0.25rem}.ds-badge{align-self:flex-start;font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#2563eb;background:rgba(37,99,235,0.12);padding:0.1rem 0.45rem;border-radius:9999px}.ds-cmd code{font-size:0.75rem;color:#64748b}.ds-btn-primary{display:inline-flex;align-items:center;min-height:2.75rem;padding:0.55rem 1rem;border:none;border-radius:0.5rem;font-size:0.8rem;font-weight:700;color:#fff;background:#4099de}"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": null,
+      "description": "Command catalogue search.",
+      "html": "<label class=\"ds-search\"><span class=\"ds-sr\">Search commands</span><input type=\"search\" placeholder=\"Search commands…\"/></label>",
+      "css": ".ds-search{display:block;position:relative}.ds-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}.ds-search input{width:100%;padding:0.5rem 0.75rem 0.5rem 2.1rem;border:1px solid #e5e7eb;border-radius:0.6rem;font-size:0.875rem;color:#1e293b;background:#fff}.ds-search input:focus{outline:none;border-color:#4099de;box-shadow:0 0 0 3px rgba(64,153,222,0.18)}"
+    },
+    {
+      "name": "Category Rail Item",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "Active and idle category filters.",
+      "html": "<nav class=\"ds-rail\" aria-label=\"Categories\"><button class=\"ds-rail-item is-active\" type=\"button\" aria-current=\"true\"><span class=\"ds-dot\"></span><span>Cache</span><span class=\"ds-count\">3</span></button><button class=\"ds-rail-item\" type=\"button\"><span class=\"ds-dot\" style=\"background:#14b8a6\"></span><span>Database</span><span class=\"ds-count\">2</span></button></nav>",
+      "css": ".ds-rail{display:flex;flex-direction:column;gap:0.15rem}.ds-rail-item{display:flex;align-items:center;gap:0.55rem;min-height:2.75rem;width:100%;padding:0.5rem 0.65rem;border:none;border-radius:0.55rem;background:transparent;color:#475569;font-size:0.875rem;font-weight:500;cursor:pointer;text-align:left}.ds-rail-item:hover{background:rgba(100,116,139,0.1)}.ds-rail-item.is-active{color:#4099de;background:rgba(64,153,222,0.12);font-weight:700}.ds-rail-item:focus-visible{outline:none;box-shadow:0 0 0 2px rgba(64,153,222,0.55)}.ds-dot{width:0.55rem;height:0.55rem;border-radius:9999px;background:#3b82f6;flex-shrink:0}.ds-count{margin-left:auto;min-width:1.4rem;padding:0.05rem 0.4rem;border-radius:9999px;font-size:0.7rem;font-weight:700;text-align:center;color:#64748b;background:rgba(100,116,139,0.14)}"
+    },
+    {
+      "name": "Type Badge",
+      "kind": "chip",
+      "refersTo": null,
+      "description": "Artisan vs bash command type chip.",
+      "html": "<span class=\"ds-badge ds-badge-artisan\">artisan</span> <span class=\"ds-badge ds-badge-bash\">bash</span>",
+      "css": ".ds-badge{display:inline-flex;align-items:center;padding:0.1rem 0.45rem;border-radius:9999px;font-size:0.65rem;font-weight:700;letter-spacing:0.03em;text-transform:uppercase}.ds-badge-artisan{color:#2563eb;background:rgba(37,99,235,0.12)}.ds-badge-bash{color:#b45309;background:rgba(217,119,6,0.15)}"
+    },
+    {
+      "name": "Output Console",
+      "kind": "custom",
+      "refersTo": "console",
+      "description": "Always-dark terminal output shell.",
+      "html": "<div class=\"ds-console-shell\"><div class=\"ds-console-head\"><span class=\"ds-traffic\" aria-hidden=\"true\"></span><strong>Clear Cache</strong><span>Success</span></div><pre class=\"ds-console\">Application cache cleared successfully.</pre></div>",
+      "css": ".ds-console-shell{border:1px solid #e5e7eb;border-radius:0.75rem;overflow:hidden}.ds-console-head{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.9rem;background:#f1f5f9;border-bottom:1px solid #e5e7eb;font-size:0.875rem}.ds-traffic{width:2.4rem;height:0.68rem;border-radius:9999px;background:linear-gradient(90deg,#ff5f57 0 30%,#febc2e 35% 65%,#28c840 70% 100%)}.ds-console{margin:0;padding:0.85rem 0.95rem;max-height:12rem;overflow:auto;background:#0f172a;color:#e2e8f0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:0.75rem;line-height:1.6;white-space:pre-wrap}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Host-Native Console",
+    "overview": "Nova Command Center is an Operate-mode tool that lives inside Laravel Nova. Visual authority comes from matching the host admin — Nova’s light/dark switch, primary accent, density — while package-owned CSS keeps every surface readable when the host’s purged Tailwind build omits utilities. Craft shows up in precise details (focus rings, confirm-safe modal focus, status accents that mean something) rather than a separate product brand shell.",
+    "keyCharacteristics": [
+      "Host-native: inherit Nova --primary; follow .dark on <html>",
+      "Meaning-first color: only danger/warning diverge from primary on Run controls",
+      "Purge-safe: colors, icons, fractional sizes live in package CSS, not host utilities",
+      "Dense admin layout with 44px minimum touch targets on interactive chrome"
+    ],
+    "rules": [
+      {
+        "name": "The Meaning Accent Rule",
+        "body": "Only danger and warning command types get non-primary Run/stripe colors. Other types share Nova primary — decorative rainbow accents are noise.",
+        "section": "colors"
+      },
+      {
+        "name": "The Purge-Safe Rule",
+        "body": "Never rely on host Tailwind color utilities for tool chrome. Put colors in tool.css (with .dark twins).",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "Follow Nova .dark and --primary",
+      "Keep danger/warning as the only semantic Run accents",
+      "Prefer package CSS for colors, icons, and fractional sizes",
+      "Preserve keyboard paths (modal trap, history keys, combobox arrows)",
+      "Respect prefers-reduced-motion"
+    ],
+    "donts": [
+      "Invent a marketing brand UI that fights Nova chrome",
+      "Rainbow-color every command type",
+      "Hide critical actions behind hover-only on touch",
+      "Depend on host Tailwind purge for contrast or icon size",
+      "Soft-pedal risk copy in confirmations or notices"
+    ]
+  }
+}

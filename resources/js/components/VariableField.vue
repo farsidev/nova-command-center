@@ -11,7 +11,9 @@
       :value="modelValue"
       class="w-full form-control form-input form-input-bordered ncr-select"
       :class="{ 'ncr-field-invalid': error }"
-      :aria-invalid="!!error"
+      :aria-invalid="error ? 'true' : 'false'"
+      :aria-required="variable.required ? 'true' : 'false'"
+      :aria-describedby="describedBy"
       @change="onInput($event.target.value)"
     >
       <option v-if="!variable.required" value="">—</option>
@@ -29,6 +31,8 @@
       :model-value="modelValue"
       :placeholder="variable.placeholder || ''"
       :error="error"
+      :described-by="describedBy"
+      :required="variable.required"
       @update:model-value="onInput"
     />
 
@@ -39,15 +43,17 @@
       type="text"
       class="w-full form-control form-input form-input-bordered"
       :class="{ 'ncr-field-invalid': error }"
-      :aria-invalid="!!error"
+      :aria-invalid="error ? 'true' : 'false'"
+      :aria-required="variable.required ? 'true' : 'false'"
+      :aria-describedby="describedBy"
       :placeholder="variable.placeholder || ''"
       @input="onInput($event.target.value)"
     />
 
-    <p v-if="error" class="mt-1 text-xs ncr-text-error">
+    <p v-if="error" :id="errorId" class="mt-1 text-xs ncr-text-error" role="alert">
       {{ error }}
     </p>
-    <p v-else-if="variable.help" class="mt-1 text-xs ncr-text-muted">
+    <p v-else-if="variable.help" :id="helpId" class="mt-1 text-xs ncr-text-muted">
       {{ variable.help }}
     </p>
   </div>
@@ -68,6 +74,13 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const fieldId = computed(() => `ncr-var-${props.variable.name}`)
+const errorId = computed(() => `${fieldId.value}-error`)
+const helpId = computed(() => `${fieldId.value}-help`)
+const describedBy = computed(() => {
+  if (props.error) return errorId.value
+  if (props.variable.help) return helpId.value
+  return null
+})
 
 function onInput(value) {
   emit('update:modelValue', value)

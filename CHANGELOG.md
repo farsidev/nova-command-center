@@ -6,6 +6,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-07-23
+
+### Added
+
+- Design system capture: root `DESIGN.md` and `.impeccable/design.json` documenting
+  the host-native Command Center visual language for future UI work.
+
+### Changed
+
+- Accessibility: model-search combobox now exposes listbox/option semantics
+  (`aria-controls`, `aria-activedescendant`); variable fields wire
+  `aria-describedby` / `aria-required` / `role="alert"`; custom-command inputs
+  are labelled; category rail uses `aria-current`; progress uses
+  `role="progressbar"`; decorative chrome is `aria-hidden`.
+- Touch / pointer: history “Run again” stays visible on coarse pointers (no
+  longer hover-gated); icon buttons, copy, clear, rail items, and Run controls
+  meet a 44px minimum hit area.
+- Contrast: light-mode muted/faint/meta text steps raised to meet WCAG AA on
+  white surfaces.
+- Motion: `prefers-reduced-motion` now also disables card lift, accent scale,
+  progress width easing, and history-act fades; command-card accent uses
+  `transform: scaleX` instead of animating layout width.
+
 ## [1.2.0] - 2026-07-23
 
 ### Added

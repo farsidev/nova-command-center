@@ -10,8 +10,9 @@
           v-if="command.queued"
           class="ncr-text-faint"
           :title="__('Runs on the queue')"
+          :aria-label="__('Runs on the queue')"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ncr-icon-xs">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ncr-icon-xs" aria-hidden="true">
             <circle cx="12" cy="12" r="9" />
             <polyline points="12 7 12 12 15 14" />
           </svg>
@@ -28,10 +29,10 @@
       :disabled="running"
       @click="$emit('trigger', command)"
     >
-      <svg v-if="running" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ncr-spin">
+      <svg v-if="running" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ncr-spin" aria-hidden="true">
         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
       </svg>
-      <svg v-else viewBox="0 0 24 24" fill="currentColor">
+      <svg v-else viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path d="M8 5v14l11-7z" />
       </svg>
       {{ running ? __('Running…') : __('Run') }}

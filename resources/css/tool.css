@@ -56,13 +56,15 @@
   left: 0;
   top: 0;
   bottom: 0;
-  width: 3px;
+  width: 5px;
   background: var(--ncr-accent, #cbd5e1);
   opacity: 0.85;
-  transition: width 0.16s ease;
+  transform: scaleX(0.6);
+  transform-origin: left center;
+  transition: transform 0.16s ease;
 }
 
-.ncr-cmd:hover::before { width: 5px; }
+.ncr-cmd:hover::before { transform: scaleX(1); }
 
 /* Only danger/warning carry real meaning (they're the two types that force a
    confirmation prompt) — every other "type" is a cosmetic leftover from
@@ -132,16 +134,17 @@
   gap: 0.35rem;
   font-size: 0.75rem;
   font-weight: 500;
-  color: #94a3b8;
+  color: #64748b;
 }
 
 .ncr-stat + .ncr-stat::before {
   content: '·';
   margin-right: 0.35rem;
-  color: #cbd5e1;
+  color: #94a3b8;
 }
 
-.dark .ncr-stat + .ncr-stat::before { color: #475569; }
+.dark .ncr-stat { color: #94a3b8; }
+.dark .ncr-stat + .ncr-stat::before { color: #64748b; }
 
 /* Section header: a coloured dot ties a group to its rail entry. */
 .ncr-section {
@@ -163,16 +166,17 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: #64748b;
 }
 
 .ncr-section-count {
   font-size: 0.7rem;
   font-weight: 600;
-  color: #cbd5e1;
+  color: #64748b;
 }
 
-.dark .ncr-section-count { color: #475569; }
+.dark .ncr-section-title { color: #94a3b8; }
+.dark .ncr-section-count { color: #94a3b8; }
 
 /* ---------------------------------------------------------------- Buttons -- */
 .ncr-btn {
@@ -180,7 +184,8 @@
   align-items: center;
   justify-content: center;
   gap: 0.375rem;
-  padding: 0.45rem 0.95rem;
+  min-height: 2.75rem;
+  padding: 0.55rem 1rem;
   border-radius: 0.5rem;
   font-size: 0.8rem;
   font-weight: 700;
@@ -367,8 +372,11 @@
 .ncr-copy {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.25rem;
-  padding: 0.15rem 0.4rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.35rem 0.55rem;
   border-radius: 0.375rem;
   font-size: 0.7rem;
   color: #64748b;
@@ -422,13 +430,21 @@
   box-shadow: inset 0 0 0 2px rgba(96, 165, 250, 0.6);
 }
 
-/* Per-row action (rerun) revealed on row hover or keyboard focus. */
-.ncr-history-act { opacity: 0; transition: opacity 0.12s ease; }
-
-.ncr-history-row:hover .ncr-history-act,
-.ncr-history-row:focus-visible .ncr-history-act,
-.ncr-history-act:focus-visible {
+/* Per-row action (rerun): always visible on touch / coarse pointers so the
+   control isn't hover-gated away. Fine pointers keep the quieter reveal. */
+.ncr-history-act {
   opacity: 1;
+  transition: opacity 0.12s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ncr-history-act { opacity: 0.45; }
+
+  .ncr-history-row:hover .ncr-history-act,
+  .ncr-history-row:focus-within .ncr-history-act,
+  .ncr-history-act:focus-visible {
+    opacity: 1;
+  }
 }
 
 .ncr-history-row::before {
@@ -569,13 +585,13 @@
   color: #e2e8f0;
 }
 
-/* Small square icon button (rerun, clear a field, …). */
+/* Small square icon button (rerun, clear a field, …). Hit area meets 44px. */
 .ncr-iconbtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.9rem;
-  height: 1.9rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: 0.45rem;
   color: #64748b;
   background: transparent;
@@ -641,6 +657,7 @@
   align-items: center;
   gap: 0.55rem;
   width: 100%;
+  min-height: 2.75rem;
   padding: 0.5rem 0.65rem;
   border-radius: 0.55rem;
   font-size: 0.875rem;
@@ -857,6 +874,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  right: 0.15rem;
   background: transparent;
   border: none;
   padding: 0;
@@ -923,14 +943,14 @@
 .ncr-text-body { color: #334155; }
 .dark .ncr-text-body { color: #cbd5e1; }
 
-.ncr-text-muted { color: #64748b; }
+.ncr-text-muted { color: #475569; }
 .dark .ncr-text-muted { color: #94a3b8; }
 
-.ncr-text-faint { color: #94a3b8; }
-.dark .ncr-text-faint { color: #64748b; }
+.ncr-text-faint { color: #64748b; }
+.dark .ncr-text-faint { color: #94a3b8; }
 
-.ncr-text-fainter { color: #cbd5e1; }
-.dark .ncr-text-fainter { color: #475569; }
+.ncr-text-fainter { color: #64748b; }
+.dark .ncr-text-fainter { color: #94a3b8; }
 
 .ncr-text-error { color: #ef4444; }
 .dark .ncr-text-error { color: #f87171; }
@@ -958,14 +978,18 @@
 
 /* Muted danger link (the History "Clear" button). */
 .ncr-link-danger {
-  color: #ef4444;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.35rem 0.4rem;
+  color: #dc2626;
   cursor: pointer;
   border-radius: 0.25rem;
   transition: color 0.12s ease;
 }
 
-.ncr-link-danger:hover { color: #dc2626; text-decoration: underline; }
-.ncr-link-danger.is-armed { color: #dc2626; }
+.ncr-link-danger:hover { color: #b91c1c; text-decoration: underline; }
+.ncr-link-danger.is-armed { color: #b91c1c; }
 .dark .ncr-link-danger { color: #f87171; }
 .dark .ncr-link-danger:hover { color: #fca5a5; }
 .dark .ncr-link-danger.is-armed { color: #fca5a5; }
@@ -1095,13 +1119,31 @@ select.ncr-select {
   .ncr-modal,
   .ncr-modal-backdrop,
   .ncr-btn,
+  .ncr-card--interactive,
+  .ncr-cmd::before,
   .ncr-dot-running,
   .ncr-spin,
   .ncr-cursor,
   .ncr-skeleton,
+  .ncr-progress-bar,
+  .ncr-history-act,
   .ncr-slide-enter-active,
   .ncr-slide-leave-active {
-    animation: none;
-    transition: none;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .ncr-card--interactive:hover {
+    transform: none;
+  }
+
+  .ncr-cmd::before,
+  .ncr-cmd:hover::before {
+    transform: none;
+    width: 3px;
+  }
+
+  .ncr-history-act {
+    opacity: 1;
   }
 }

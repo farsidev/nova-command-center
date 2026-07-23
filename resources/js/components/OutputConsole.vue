@@ -2,8 +2,8 @@
   <div class="ncr-console-shell">
     <div class="ncr-console-head">
       <div class="flex items-center gap-2 ncr-shrink">
-        <span class="ncr-traffic"><span class="r" /><span class="y" /><span class="g" /></span>
-        <span class="ncr-dot" :class="`ncr-dot-${execution.status}`"></span>
+        <span class="ncr-traffic" aria-hidden="true"><span class="r" /><span class="y" /><span class="g" /></span>
+        <span class="ncr-dot" :class="`ncr-dot-${execution.status}`" aria-hidden="true"></span>
         <span class="text-sm font-bold ncr-text-body ncr-truncate">{{ execution.name }}</span>
         <span class="text-xs" :class="`ncr-status-${execution.status}`">{{ statusLabel }}</span>
       </div>
@@ -35,12 +35,19 @@
         <p v-if="progress.message" class="text-xs ncr-text-muted ncr-truncate">{{ progress.message }}</p>
         <span class="text-xs font-medium ncr-text-faint shrink-0 ml-2">{{ Math.round(progress.percentage || 0) }}%</span>
       </div>
-      <div class="ncr-progress">
+      <div
+        class="ncr-progress"
+        role="progressbar"
+        :aria-valuenow="Math.round(progress.percentage || 0)"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        :aria-label="progress.message || __('Progress')"
+      >
         <div class="ncr-progress-bar" :style="{ width: (progress.percentage || 0) + '%' }"></div>
       </div>
     </div>
 
-    <pre ref="body" class="ncr-console"><code>{{ execution.output || placeholder }}</code><span v-if="isRunning" class="ncr-cursor" /></pre>
+    <pre ref="body" class="ncr-console" tabindex="0"><code>{{ execution.output || placeholder }}</code><span v-if="isRunning" class="ncr-cursor" aria-hidden="true" /></pre>
   </div>
 </template>
 

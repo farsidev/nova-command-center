@@ -39,23 +39,24 @@
           </p>
         </div>
         <div class="flex items-center gap-1 shrink-0">
-          <svg v-if="isActive(item.status)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ncr-spin ncr-icon-xs ncr-text-faint">
+          <svg v-if="isActive(item.status)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ncr-spin ncr-icon-xs ncr-text-faint" aria-hidden="true">
             <path d="M21 12a9 9 0 1 1-6.219-8.56" />
           </svg>
           <button
             v-else
             type="button"
             class="ncr-iconbtn ncr-history-act"
+            :aria-label="__('Run again')"
             :title="__('Run again')"
             @click.stop="$emit('rerun', item)"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M23 4v6h-6M1 20v-6h6" />
               <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
             </svg>
           </button>
           <span class="ncr-status text-xs font-medium" :class="`ncr-status-${item.status}`">
-            <span class="ncr-dot" :class="`ncr-dot-${item.status}`"></span>
+            <span class="ncr-dot" :class="`ncr-dot-${item.status}`" aria-hidden="true"></span>
             {{ item.status.replace('_', ' ') }}
           </span>
         </div>

@@ -8,10 +8,14 @@
       autocomplete="off"
       class="w-full form-control form-input form-input-bordered"
       :class="{ 'ncr-field-invalid': error }"
-      :aria-invalid="!!error"
-      :aria-expanded="open"
+      :aria-invalid="error ? 'true' : 'false'"
+      :aria-required="required ? 'true' : 'false'"
+      :aria-expanded="open ? 'true' : 'false'"
+      :aria-controls="listboxId"
+      :aria-activedescendant="activeOptionId"
       role="combobox"
       aria-autocomplete="list"
+      :aria-describedby="describedBy"
       :placeholder="placeholder || __('Type to search…')"
       @focus="onFocus"
       @input="onType"
@@ -19,25 +23,34 @@
       @blur="onBlur"
     />
 
-    <svg v-if="loading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ncr-model-search-icon ncr-spin">
+    <svg v-if="loading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ncr-model-search-icon ncr-spin" aria-hidden="true">
       <path d="M21 12a9 9 0 1 1-6.219-8.56" />
     </svg>
     <button v-else-if="modelValue" type="button" class="ncr-model-search-icon ncr-model-search-clear" :aria-label="__('Clear')" @mousedown.prevent="clear">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <line x1="18" y1="6" x2="6" y2="18" />
         <line x1="6" y1="6" x2="18" y2="18" />
       </svg>
     </button>
 
-    <ul v-if="open" class="ncr-model-search-results" :style="listStyle">
-      <li v-if="loading" class="ncr-model-search-empty">{{ __('Searching…') }}</li>
-      <li v-else-if="results.length === 0" class="ncr-model-search-empty">{{ __('No matches') }}</li>
+    <ul
+      v-if="open"
+      :id="listboxId"
+      class="ncr-model-search-results"
+      role="listbox"
+      :style="listStyle"
+    >
+      <li v-if="loading" class="ncr-model-search-empty" role="presentation">{{ __('Searching…') }}</li>
+      <li v-else-if="results.length === 0" class="ncr-model-search-empty" role="presentation">{{ __('No matches') }}</li>
       <li
         v-for="(result, index) in results"
         v-else
+        :id="optionId(index)"
         :key="result.value"
+        role="option"
         class="ncr-model-search-option"
         :class="{ 'ncr-model-search-option-active': index === activeIndex }"
+        :aria-selected="index === activeIndex ? 'true' : 'false'"
         @mousedown.prevent="select(result)"
       >
         {{ result.label }}
@@ -47,7 +60,7 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import api from '../util/api'
 import { __ } from '../util/translate'
 
@@ -58,6 +71,8 @@ const props = defineProps({
   modelValue: { type: String, default: '' },
   placeholder: { type: String, default: '' },
   error: { type: String, default: null },
+  describedBy: { type: String, default: null },
+  required: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -69,6 +84,15 @@ const loading = ref(false)
 const open = ref(false)
 const activeIndex = ref(-1)
 const listStyle = ref({})
+
+const listboxId = computed(() => `${props.fieldId}-listbox`)
+const activeOptionId = computed(() =>
+  activeIndex.value >= 0 && results.value[activeIndex.value] ? optionId(activeIndex.value) : null,
+)
+
+function optionId(index) {
+  return `${props.fieldId}-option-${index}`
+}
 
 let debounceTimer = null
 let requestToken = 0
@@ -127,8 +151,8 @@ async function resolveLabel(value) {
 
   try {
     const response = await api.searchVariable(props.commandId, props.variableName, '', { value })
-    const results = Array.isArray(response.data.results) ? response.data.results : []
-    query.value = results.length ? results[0].label : value
+    const hits = Array.isArray(response.data.results) ? response.data.results : []
+    query.value = hits.length ? hits[0].label : value
   } catch {
     query.value = value
   } finally {
@@ -169,6 +193,7 @@ function select(result) {
   query.value = result.label
   results.value = []
   open.value = false
+  activeIndex.value = -1
   emit('update:modelValue', result.value)
 }
 
@@ -184,6 +209,7 @@ function onKeydown(event) {
 
   if (event.key === 'ArrowDown') {
     event.preventDefault()
+    if (results.value.length === 0) return
     activeIndex.value = Math.min(activeIndex.value + 1, results.value.length - 1)
   } else if (event.key === 'ArrowUp') {
     event.preventDefault()
@@ -193,12 +219,16 @@ function onKeydown(event) {
     select(results.value[activeIndex.value])
   } else if (event.key === 'Escape') {
     open.value = false
+    activeIndex.value = -1
   }
 }
 
 function onBlur() {
   // Delayed so a mousedown on an option registers before the list closes.
-  setTimeout(() => (open.value = false), 150)
+  setTimeout(() => {
+    open.value = false
+    activeIndex.value = -1
+  }, 150)
 }
 
 onBeforeUnmount(() => {

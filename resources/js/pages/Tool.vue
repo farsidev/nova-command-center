@@ -61,17 +61,18 @@
         </div>
 
         <div v-if="customTypes.length" class="ncr-card ncr-custombar">
-          <select v-model="customType" class="ncr-select">
+          <select v-model="customType" class="ncr-select" :aria-label="__('Command type')">
             <option v-for="type in customTypes" :key="type" :value="type">{{ type }}</option>
           </select>
           <input
             v-model="customRun"
             type="text"
+            :aria-label="__('Command to run')"
             :placeholder="customType === 'bash' ? 'ls -la' : 'queue:work --once'"
             @keyup.enter="runCustom"
           />
           <button type="button" class="ncr-btn" :disabled="!customRun.trim() || runningId === 'custom'" @click="runCustom">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
             {{ __('Run') }}
           </button>
         </div>
