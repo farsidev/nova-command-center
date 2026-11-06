@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-06
+
+### Added
+
+- Laravel 13 support: `illuminate/*` `^13.0`, `symfony/process` `^8.0`; the test matrix
+  gains a PHP 8.4 / Testbench 11 row, and the dev constraints accept Pest 4 and 5.
+
 ## [1.2.1] - 2026-07-23
 
 ### Added
